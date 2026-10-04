@@ -1,0 +1,79 @@
+<script>
+(function() {
+  const STORAGE_KEY = 'wise_payment_data';
+  const DEFAULT_DATA = {
+    senderName: 'Maya Chen',
+    senderEmail: 'maya.chen@example.com',
+    amount: 1250.00,
+    currency: 'USD',
+    reference: 'WISE-2025-4F2A',
+    note: 'Payment for design services'
+  };
+
+  // ---- Always read the freshest data from localStorage ----
+  function getPaymentData() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? { ...DEFAULT_DATA, ...JSON.parse(raw) } : { ...DEFAULT_DATA };
+    } catch(e) { return { ...DEFAULT_DATA }; }
+  }
+
+  const $ = id => document.getElementById(id);
+
+  function fmtAmount(n) {
+    return (parseFloat(n) || 0).toLocaleString('en-US', {
+      minimumFractionDigits: 2, maximumFractionDigits: 2
+    });
+  }
+
+  // ---- Render the card from current data ----
+  function render() {
+    const paymentData = getPaymentData();
+
+    $('senderName').textContent = paymentData.senderName || '—';
+    $('senderEmail').textContent = paymentData.senderEmail || '—';
+    $('amountValue').textContent = fmtAmount(paymentData.amount);
+    $('currencyCode').textContent = paymentData.currency || 'USD';
+    $('noteValue').textContent = paymentData.note || '—';
+    $('refNote').innerHTML = `
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
+        <line x1="4" y1="22" x2="4" y2="15"/>
+      </svg>
+      ${paymentData.reference || DEFAULT_DATA.reference}
+    `;
+  }
+
+  // ---- Initial render ----
+  render();
+
+  // ---- Listen for admin changes in real time ----
+  // 1) BroadcastChannel (same origin, same browser)
+  try {
+    const bc = new BroadcastChannel('wise_payment');
+    bc.onmessage = (ev) => {
+      if (ev.data && ev.data.type === 'update') render();
+    };
+  } catch(e) {}
+
+  // 2) storage event — fires when another tab changes localStorage
+  window.addEventListener('storage', (ev) => {
+    if (ev.key === STORAGE_KEY) render();
+  });
+
+  // 3) Re-render every time the page becomes visible again (back/forward, tab switch)
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) render();
+  });
+
+  // 4) Re-render on back/forward navigation (bfcache restore)
+  window.addEventListener('pageshow', (ev) => {
+    if (ev.persisted) render();
+  });
+
+  // ---- Navigate to mtn.html on Accept ----
+  $('acceptBtn').addEventListener('click', () => {
+    window.location.href = 'mtn.html';
+  });
+})();
+</script>
