@@ -70,9 +70,6 @@
     background: linear-gradient(90deg, var(--accent), #818CF8, var(--success));
   }
 
-  /* ============================================================
-     LOGO + HEADER
-     ============================================================ */
   .login-brand {
     display: flex;
     align-items: center;
@@ -120,9 +117,6 @@
     letter-spacing: 0.01em;
   }
 
-  /* ============================================================
-     HEADING + SUBTEXT
-     ============================================================ */
   .login-heading {
     text-align: center;
     margin-bottom: 1.75rem;
@@ -144,9 +138,6 @@
     margin: 0 auto;
   }
 
-  /* ============================================================
-     STATUS BANNER
-     ============================================================ */
   .login-banner {
     padding: 0.85rem 1.1rem;
     border-radius: 0.75rem;
@@ -185,9 +176,6 @@
     border: 1px solid rgba(56, 189, 248, 0.3);
   }
 
-  /* ============================================================
-     FORM
-     ============================================================ */
   .login-form {
     display: flex;
     flex-direction: column;
@@ -283,11 +271,7 @@
     fill: none; stroke-width: 2;
     stroke-linecap: round; stroke-linejoin: round;
   }
-  .toggle-password + .input-icon { left: 0.95rem; } /* keep icon fixed */
 
-  /* ============================================================
-     REMEMBER ME + FORGOT
-     ============================================================ */
   .login-row {
     display: flex;
     align-items: center;
@@ -333,9 +317,6 @@
   }
   .remember input:checked + .check svg { opacity: 1; }
 
-  /* ============================================================
-     SUBMIT BUTTON
-     ============================================================ */
   .login-submit {
     width: 100%;
     border: none;
@@ -389,9 +370,6 @@
     stroke-linecap: round; stroke-linejoin: round;
   }
 
-  /* ============================================================
-     FOOTER
-     ============================================================ */
   .login-footer {
     text-align: center;
     margin-top: 1.5rem;
@@ -426,9 +404,6 @@
     stroke-linecap: round; stroke-linejoin: round;
   }
 
-  /* ============================================================
-     SPINNER
-     ============================================================ */
   @keyframes spinRing { to { transform: rotate(360deg); } }
   .spin { animation: spinRing 0.8s linear infinite; }
 
@@ -478,7 +453,7 @@
         </label>
         <div class="input-wrap">
           <svg class="input-icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          <input type="text" id="username" placeholder="admin" autocomplete="username" required />
+          <input type="text" id="username" placeholder="wise" autocomplete="username" required />
         </div>
       </div>
 
@@ -544,7 +519,7 @@
   const MAX_ATTEMPTS = 5;
   const LOCKOUT_SECONDS = 60;
 
-  // ---- Check if already logged in ----
+  // ---- Check if already logged in → jump straight to admin ----
   const existingSession = sessionStorage.getItem(SESSION_KEY);
   const rememberUntil = parseInt(localStorage.getItem(REMEMBER_KEY) || '0', 10);
   if (existingSession === 'ok' || (rememberUntil && Date.now() < rememberUntil)) {
@@ -552,7 +527,7 @@
     return;
   }
 
-  // ---- Attempts / lockout ----
+  // ---- Attempts / lockout state ----
   let attempts = parseInt(sessionStorage.getItem('wise_admin_attempts') || '0', 10);
   let lockedUntil = parseInt(sessionStorage.getItem('wise_admin_locked') || '0', 10);
 
@@ -590,7 +565,7 @@
     });
   });
 
-  // ---- Check lockout ----
+  // ---- Lockout countdown ----
   function checkLockout() {
     if (lockedUntil && Date.now() < lockedUntil) {
       const remaining = Math.ceil((lockedUntil - Date.now()) / 1000);
@@ -611,7 +586,9 @@
   }
   checkLockout();
 
-  // ---- Submit ----
+  // ============================================================
+  // SUBMIT — verify + redirect to admin.html
+  // ============================================================
   loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -633,7 +610,7 @@
       return;
     }
 
-    // Show loading state
+    // Loading state
     loginSubmit.disabled = true;
     const originalHTML = loginSubmit.innerHTML;
     loginSubmit.innerHTML = '<svg class="spin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-dasharray="30 60"/></svg>Verifying...';
@@ -649,25 +626,27 @@
       const data = await res.json();
 
       if (data.ok) {
-        // Success
+        // ✅ SUCCESS — set session flags
         sessionStorage.setItem(SESSION_KEY, 'ok');
         sessionStorage.removeItem('wise_admin_attempts');
 
         if (rememberMe.checked) {
-          // 7 days
           localStorage.setItem(REMEMBER_KEY, (Date.now() + 7 * 24 * 60 * 60 * 1000).toString());
         }
 
+        // Show success state
         showBanner('Welcome back. Redirecting…', 'success');
         loginSubmit.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Success';
 
+        // ✅ Redirect to admin.html
+        // Use location.assign so it definitely navigates
         setTimeout(() => {
-          window.location.href = 'admin.html';
+          window.location.assign('admin.html');
         }, 500);
         return;
       }
 
-      // Failure
+      // ❌ Failure
       attempts += 1;
       sessionStorage.setItem('wise_admin_attempts', attempts.toString());
 
@@ -700,7 +679,7 @@
   });
 
   // ---- Prefill username ----
-  usernameInput.value = 'admin';
+  usernameInput.value = 'wise';
   setTimeout(() => passwordInput.focus(), 400);
 })();
 </script>
