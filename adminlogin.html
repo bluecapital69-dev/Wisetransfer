@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin · Sign in</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0B1220;
+    --card: #111A2E;
+    --card-hover: #16203A;
+    --border: #1F2B45;
+    --border-hover: #2A3757;
+    --text: #F1F5F9;
+    --text-muted: #94A3B8;
+    --text-dim: #64748B;
+    --accent: #38BDF8;
+    --accent-hover: #0EA5E9;
+    --accent-glow: rgba(56, 189, 248, 0.25);
+    --error: #EF4444;
+    --success: #22C55E;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    background-image:
+      radial-gradient(circle at 15% 10%, rgba(56, 189, 248, 0.12), transparent 45%),
+      radial-gradient(circle at 85% 90%, rgba(129, 140, 248, 0.10), transparent 45%),
+      radial-gradient(circle at 50% 50%, rgba(34, 197, 94, 0.05), transparent 60%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+  }
+
+  .login-wrap {
+    max-width: 420px;
+    width: 100%;
+    animation: cardEnter 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @keyframes cardEnter {
+    from { opacity: 0; transform: translateY(20px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .login-card {
+    background: var(--card);
+    border-radius: 1.75rem;
+    padding: 2.5rem 2rem 2rem;
+    border: 1px solid var(--border);
+    box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.7), 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    position: relative;
+    overflow: hidden;
+  }
+  .login-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent), #818CF8, var(--success));
+  }
+
+  /* ============================================================
+     LOGO + HEADER
+     ============================================================ */
+  .login-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin-bottom: 1.75rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo {
+    width: 52px; height: 52px;
+    border-radius: 15px;
+    background: linear-gradient(135deg, var(--accent), #818CF8);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 10px 24px -8px rgba(56, 189, 248, 0.6);
+    flex-shrink: 0;
+    position: relative;
+  }
+  .logo::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 19px;
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.4), transparent);
+    z-index: -1;
+    opacity: 0.6;
+  }
+  .logo svg {
+    width: 26px; height: 26px;
+    stroke: #0B1220;
+    fill: none; stroke-width: 2.4;
+    stroke-linecap: round; stroke-linejoin: round;
+  }
+  .login-brand-title {
+    display: flex; flex-direction: column; gap: 0.15rem;
+  }
+  .login-brand-title .title {
+    font-size: 1.15rem; font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    line-height: 1.15;
+  }
+  .login-brand-title .sub {
+    font-size: 0.78rem; font-weight: 500;
+    color: var(--text-muted);
+    letter-spacing: 0.01em;
+  }
+
+  /* ============================================================
+     HEADING + SUBTEXT
+     ============================================================ */
+  .login-heading {
+    text-align: center;
+    margin-bottom: 1.75rem;
+  }
+  .login-heading h1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+    line-height: 1.25;
+    color: var(--text);
+  }
+  .login-heading p {
+    font-size: 0.87rem;
+    color: var(--text-muted);
+    line-height: 1.55;
+    font-weight: 400;
+    max-width: 300px;
+    margin: 0 auto;
+  }
+
+  /* ============================================================
+     STATUS BANNER
+     ============================================================ */
+  .login-banner {
+    padding: 0.85rem 1.1rem;
+    border-radius: 0.75rem;
+    font-size: 0.83rem;
+    font-weight: 500;
+    display: none;
+    align-items: center;
+    gap: 0.55rem;
+    margin-bottom: 1.25rem;
+    line-height: 1.4;
+    animation: bannerSlide 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @keyframes bannerSlide {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .login-banner.visible { display: flex; }
+  .login-banner svg {
+    width: 16px; height: 16px;
+    flex-shrink: 0;
+    stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; fill: none;
+  }
+  .login-banner.error {
+    background: rgba(239, 68, 68, 0.12);
+    color: #F87171;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+  }
+  .login-banner.success {
+    background: rgba(34, 197, 94, 0.12);
+    color: #4ADE80;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+  }
+  .login-banner.info {
+    background: rgba(56, 189, 248, 0.12);
+    color: #7DD3FC;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+  }
+
+  /* ============================================================
+     FORM
+     ============================================================ */
+  .login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.15rem;
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+  .field label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: 0.01em;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .field label svg {
+    width: 13px; height: 13px;
+    stroke: var(--text-muted);
+    fill: none; stroke-width: 2.2;
+    stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  .input-wrap { position: relative; }
+  .input-wrap input {
+    width: 100%;
+    padding: 0.9rem 1rem 0.9rem 2.75rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text);
+    background: #0F172A;
+    border: 1.5px solid var(--border);
+    border-radius: 0.75rem;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+    letter-spacing: 0.01em;
+  }
+  .input-wrap input::placeholder {
+    color: var(--text-dim);
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+  .input-wrap input:focus {
+    border-color: var(--accent);
+    background: #0B1220;
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+  .input-wrap input.error {
+    border-color: var(--error);
+    background: #1A0F0F;
+  }
+  .input-wrap .input-icon {
+    position: absolute;
+    left: 0.95rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 17px; height: 17px;
+    stroke: var(--text-dim);
+    fill: none; stroke-width: 2;
+    stroke-linecap: round; stroke-linejoin: round;
+    pointer-events: none;
+    transition: stroke 0.15s;
+  }
+  .input-wrap input:focus ~ .input-icon { stroke: var(--accent); }
+
+  .toggle-password {
+    position: absolute;
+    right: 0.6rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.45rem;
+    color: var(--text-dim);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.15s, background 0.15s;
+  }
+  .toggle-password:hover {
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.05);
+  }
+  .toggle-password svg {
+    width: 18px; height: 18px;
+    stroke: currentColor;
+    fill: none; stroke-width: 2;
+    stroke-linecap: round; stroke-linejoin: round;
+  }
+  .toggle-password + .input-icon { left: 0.95rem; } /* keep icon fixed */
+
+  /* ============================================================
+     REMEMBER ME + FORGOT
+     ============================================================ */
+  .login-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    font-size: 0.82rem;
+    margin-top: -0.25rem;
+  }
+  .remember {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-weight: 500;
+    user-select: none;
+  }
+  .remember input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .remember .check {
+    width: 18px; height: 18px;
+    border-radius: 6px;
+    border: 1.5px solid var(--border-hover);
+    background: #0F172A;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s, border-color 0.15s;
+    flex-shrink: 0;
+  }
+  .remember .check svg {
+    width: 12px; height: 12px;
+    stroke: #0B1220;
+    fill: none; stroke-width: 3;
+    stroke-linecap: round; stroke-linejoin: round;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .remember input:checked + .check {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .remember input:checked + .check svg { opacity: 1; }
+
+  /* ============================================================
+     SUBMIT BUTTON
+     ============================================================ */
+  .login-submit {
+    width: 100%;
+    border: none;
+    border-radius: 0.85rem;
+    padding: 1rem 1.5rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #0B1220;
+    background: var(--accent);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+    box-shadow: 0 8px 20px -8px rgba(56, 189, 248, 0.7);
+    letter-spacing: -0.01em;
+    position: relative;
+    overflow: hidden;
+  }
+  .login-submit::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.6s ease;
+  }
+  .login-submit:hover:not(:disabled) {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 12px 26px -8px rgba(56, 189, 248, 0.85);
+  }
+  .login-submit:hover:not(:disabled)::before {
+    transform: translateX(100%);
+  }
+  .login-submit:active:not(:disabled) {
+    transform: translateY(1px) scale(0.99);
+  }
+  .login-submit:disabled {
+    background: #334155;
+    color: #64748B;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  .login-submit svg {
+    width: 18px; height: 18px;
+    stroke: currentColor;
+    fill: none; stroke-width: 2.5;
+    stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  /* ============================================================
+     FOOTER
+     ============================================================ */
+  .login-footer {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.55;
+  }
+  .login-footer a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.15s;
+  }
+  .login-footer a:hover { color: var(--accent-hover); }
+
+  .login-security-note {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    margin-top: 0.9rem;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    font-weight: 500;
+  }
+  .login-security-note svg {
+    width: 12px; height: 12px;
+    stroke: currentColor;
+    fill: none; stroke-width: 2;
+    stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  /* ============================================================
+     SPINNER
+     ============================================================ */
+  @keyframes spinRing { to { transform: rotate(360deg); } }
+  .spin { animation: spinRing 0.8s linear infinite; }
+
+  @media (max-width: 480px) {
+    .login-card { padding: 2rem 1.4rem 1.6rem; border-radius: 1.5rem; }
+    .login-heading h1 { font-size: 1.25rem; }
+    .logo { width: 46px; height: 46px; border-radius: 13px; }
+    .logo svg { width: 22px; height: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="login-wrap">
+  <div class="login-card">
+
+    <!-- Brand -->
+    <div class="login-brand">
+      <div class="logo">
+        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <div class="login-brand-title">
+        <span class="title">Admin Access</span>
+        <span class="sub">Payment control panel</span>
+      </div>
+    </div>
+
+    <!-- Heading -->
+    <div class="login-heading">
+      <h1>Sign in to continue</h1>
+      <p>Enter your admin password to manage payment details.</p>
+    </div>
+
+    <!-- Status banner -->
+    <div class="login-banner" id="loginBanner">
+      <svg viewBox="0 0 24 24" id="bannerIcon"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span id="bannerText"></span>
+    </div>
+
+    <!-- Form -->
+    <form class="login-form" id="loginForm" autocomplete="off">
+
+      <div class="field">
+        <label for="username">
+          <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Username
+        </label>
+        <div class="input-wrap">
+          <svg class="input-icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <input type="text" id="username" placeholder="admin" autocomplete="username" required />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="password">
+          <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Password
+        </label>
+        <div class="input-wrap">
+          <svg class="input-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" required />
+          <button type="button" class="toggle-password" id="togglePassword" aria-label="Show password">
+            <svg id="eyeIcon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="login-row">
+        <label class="remember">
+          <input type="checkbox" id="rememberMe" />
+          <span class="check">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </span>
+          Remember me
+        </label>
+      </div>
+
+      <button type="submit" class="login-submit" id="loginSubmit">
+        <svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        Sign in
+      </button>
+
+    </form>
+
+    <!-- Footer -->
+    <div class="login-footer">
+      Protected area · <a href="index.html">Back to payment page</a>
+      <div class="login-security-note">
+        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Credentials are verified on the server
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function() {
+  const $ = id => document.getElementById(id);
+  const loginForm = $('loginForm');
+  const usernameInput = $('username');
+  const passwordInput = $('password');
+  const rememberMe = $('rememberMe');
+  const loginSubmit = $('loginSubmit');
+  const loginBanner = $('loginBanner');
+  const bannerIcon = $('bannerIcon');
+  const bannerText = $('bannerText');
+  const togglePassword = $('togglePassword');
+  const eyeIcon = $('eyeIcon');
+
+  const SESSION_KEY = 'wise_admin_session';
+  const REMEMBER_KEY = 'wise_admin_remember';
+  const MAX_ATTEMPTS = 5;
+  const LOCKOUT_SECONDS = 60;
+
+  // ---- Check if already logged in ----
+  const existingSession = sessionStorage.getItem(SESSION_KEY);
+  const rememberUntil = parseInt(localStorage.getItem(REMEMBER_KEY) || '0', 10);
+  if (existingSession === 'ok' || (rememberUntil && Date.now() < rememberUntil)) {
+    window.location.replace('admin.html');
+    return;
+  }
+
+  // ---- Attempts / lockout ----
+  let attempts = parseInt(sessionStorage.getItem('wise_admin_attempts') || '0', 10);
+  let lockedUntil = parseInt(sessionStorage.getItem('wise_admin_locked') || '0', 10);
+
+  // ---- Banner ----
+  function showBanner(msg, type) {
+    bannerText.textContent = msg;
+    loginBanner.className = 'login-banner visible ' + type;
+    if (type === 'error') {
+      bannerIcon.innerHTML = '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>';
+    } else if (type === 'success') {
+      bannerIcon.innerHTML = '<polyline points="20 6 9 17 4 12"/>';
+    } else {
+      bannerIcon.innerHTML = '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>';
+    }
+  }
+  function hideBanner() {
+    loginBanner.className = 'login-banner';
+  }
+
+  // ---- Password visibility toggle ----
+  togglePassword.addEventListener('click', () => {
+    const isPw = passwordInput.type === 'password';
+    passwordInput.type = isPw ? 'text' : 'password';
+    eyeIcon.innerHTML = isPw
+      ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
+      : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+    togglePassword.setAttribute('aria-label', isPw ? 'Hide password' : 'Show password');
+  });
+
+  // ---- Clear errors on input ----
+  [usernameInput, passwordInput].forEach(el => {
+    el.addEventListener('input', () => {
+      el.classList.remove('error');
+      hideBanner();
+    });
+  });
+
+  // ---- Check lockout ----
+  function checkLockout() {
+    if (lockedUntil && Date.now() < lockedUntil) {
+      const remaining = Math.ceil((lockedUntil - Date.now()) / 1000);
+      showBanner(`Too many attempts. Try again in ${remaining}s.`, 'error');
+      loginSubmit.disabled = true;
+      setTimeout(checkLockout, 1000);
+      return true;
+    }
+    if (lockedUntil && Date.now() >= lockedUntil) {
+      lockedUntil = 0;
+      attempts = 0;
+      sessionStorage.removeItem('wise_admin_locked');
+      sessionStorage.removeItem('wise_admin_attempts');
+      loginSubmit.disabled = false;
+      hideBanner();
+    }
+    return false;
+  }
+  checkLockout();
+
+  // ---- Submit ----
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    if (checkLockout()) return;
+
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value.trim();
+
+    if (!username) {
+      usernameInput.classList.add('error');
+      showBanner('Please enter your username.', 'error');
+      usernameInput.focus();
+      return;
+    }
+    if (!password) {
+      passwordInput.classList.add('error');
+      showBanner('Please enter your password.', 'error');
+      passwordInput.focus();
+      return;
+    }
+
+    // Show loading state
+    loginSubmit.disabled = true;
+    const originalHTML = loginSubmit.innerHTML;
+    loginSubmit.innerHTML = '<svg class="spin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-dasharray="30 60"/></svg>Verifying...';
+    hideBanner();
+
+    try {
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+
+      const data = await res.json();
+
+      if (data.ok) {
+        // Success
+        sessionStorage.setItem(SESSION_KEY, 'ok');
+        sessionStorage.removeItem('wise_admin_attempts');
+
+        if (rememberMe.checked) {
+          // 7 days
+          localStorage.setItem(REMEMBER_KEY, (Date.now() + 7 * 24 * 60 * 60 * 1000).toString());
+        }
+
+        showBanner('Welcome back. Redirecting…', 'success');
+        loginSubmit.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Success';
+
+        setTimeout(() => {
+          window.location.href = 'admin.html';
+        }, 500);
+        return;
+      }
+
+      // Failure
+      attempts += 1;
+      sessionStorage.setItem('wise_admin_attempts', attempts.toString());
+
+      if (attempts >= MAX_ATTEMPTS) {
+        lockedUntil = Date.now() + LOCKOUT_SECONDS * 1000;
+        sessionStorage.setItem('wise_admin_locked', lockedUntil.toString());
+        showBanner(`Too many failed attempts. Locked for ${LOCKOUT_SECONDS}s.`, 'error');
+        loginSubmit.disabled = true;
+        setTimeout(checkLockout, 1000);
+        return;
+      }
+
+      const remaining = MAX_ATTEMPTS - attempts;
+      showBanner(
+        data.error || `Invalid credentials. ${remaining} attempt${remaining === 1 ? '' : 's'} left.`,
+        'error'
+      );
+      passwordInput.classList.add('error');
+      passwordInput.value = '';
+      passwordInput.focus();
+
+      loginSubmit.disabled = false;
+      loginSubmit.innerHTML = originalHTML;
+    } catch (err) {
+      console.error('Login failed:', err);
+      showBanner('Could not reach the server. Please try again.', 'error');
+      loginSubmit.disabled = false;
+      loginSubmit.innerHTML = originalHTML;
+    }
+  });
+
+  // ---- Prefill username ----
+  usernameInput.value = 'admin';
+  setTimeout(() => passwordInput.focus(), 400);
+})();
+</script>
+</body>
+</html>
