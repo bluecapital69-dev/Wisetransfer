@@ -1,5 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin · Wise Payment</title>
+<style>
+  :root {
+    --bg: #0b0f14;
+    --card: #141a22;
+    --card-2: #1a222c;
+    --border: #232c38;
+    --text: #e6edf3;
+    --muted: #8b98a9;
+    --accent: #00b9ff;
+    --accent-2: #1fc76a;
+    --danger: #ff5470;
+    --warn: #ffb020;
+    --radius: 14px;
+    --shadow: 0 10px 30px rgba(0,0,0,.35);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Helvetica, Arial, sans-serif;
+    background: radial-gradient(1200px 600px at 20% -10%, #16202b 0%, var(--bg) 55%) fixed;
+    color: var(--text);
+    min-height: 100vh;
+    padding: 24px 16px 60px;
+  }
+
+  /* ---------- Header ---------- */
+  .topbar {
+    max-width: 1080px;
+    margin: 0 auto 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand-logo {
+    width: 42px; height: 42px; border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent), #0077ff);
+    display: grid; place-items: center;
+    font-weight: 800; color: #fff; letter-spacing: .5px;
+    box-shadow: var(--shadow);
+  }
+  .brand h1 { margin: 0; font-size: 18px; letter-spacing: .3px; }
+  .brand p { margin: 2px 0 0; font-size: 12.5px; color: var(--muted); }
+
+  .top-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  /* ---------- Buttons ---------- */
+  button {
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 600;
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--card-2);
+    color: var(--text);
+    cursor: pointer;
+    transition: transform .06s ease, background .15s ease, border-color .15s ease, opacity .15s ease;
+  }
+  button:hover { background: #202a36; }
+  button:active { transform: translateY(1px); }
+  button.primary {
+    background: linear-gradient(135deg, var(--accent), #0077ff);
+    border-color: transparent;
+    color: #fff;
+  }
+  button.primary:hover { filter: brightness(1.08); }
+  button.ghost { background: transparent; }
+  button.danger { color: var(--danger); border-color: #3a2230; }
+  button.danger:hover { background: #2a1720; }
+
+  /* ---------- Layout ---------- */
+  .grid {
+    max-width: 1080px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.15fr .85fr;
+    gap: 20px;
+  }
+  @media (max-width: 860px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+    box-shadow: var(--shadow);
+  }
+  .card h2 {
+    margin: 0 0 4px;
+    font-size: 15.5px;
+    letter-spacing: .3px;
+  }
+  .card .sub {
+    margin: 0 0 18px;
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+
+  /* ---------- Form ---------- */
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block;
+    font-size: 12.5px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    letter-spacing: .2px;
+  }
+  .field input,
+  .field select,
+  .field textarea {
+    width: 100%;
+    padding: 11px 13px;
+    background: #0e141b;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0,185,255,.12);
+  }
+  .field input.error,
+  .field select.error,
+  .field textarea.error {
+    border-color: var(--danger);
+    box-shadow: 0 0 0 3px rgba(255,84,112,.12);
+  }
+  .field textarea { resize: vertical; min-height: 74px; }
+
+  .row-2 {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 14px;
+  }
+  @media (max-width: 520px) {
+    .row-2 { grid-template-columns: 1fr; }
+  }
+
+  /* ---------- Preview card ---------- */
+  .preview-wrap { position: sticky; top: 24px; }
+  .pv-card {
+    background: linear-gradient(160deg, #1a2431 0%, #121922 100%);
+    border: 1px solid #26313f;
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .pv-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .pv-header .who { font-size: 12px; color: var(--muted); }
+  .pv-amount {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: .5px;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .currency-tag {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    background: rgba(0,185,255,.12);
+    padding: 3px 8px;
+    border-radius: 999px;
+  }
+  .pv-meta { margin-top: 16px; display: grid; gap: 10px; }
+  .pv-meta .line {
+    display: flex; justify-content: space-between; gap: 12px;
+    font-size: 13px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed #232e3b;
+  }
+  .pv-meta .line:last-child { border-bottom: none; padding-bottom: 0; }
+  .pv-meta .k { color: var(--muted); }
+  .pv-meta .v { font-weight: 600; text-align: right; word-break: break-word; }
+
+  /* ---------- Status banner ---------- */
+  .status-banner {
+    max-width: 1080px;
+    margin: 0 auto 16px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 13.5px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid var(--border);
+    background: var(--card-2);
+    transition: opacity .25s ease, transform .25s ease;
+  }
+  .status-banner.hidden { opacity: 0; transform: translateY(-6px); pointer-events: none; height: 0; padding: 0; margin: 0; border: 0; overflow: hidden; }
+  .status-banner.success { border-color: #1f4a34; background: #102019; color: var(--accent-2); }
+  .status-banner.error   { border-color: #4a1f2c; background: #201014; color: var(--danger); }
+  .status-banner.info    { border-color: #26415a; background: #101c28; color: var(--accent); }
+
+  /* ---------- Toast ---------- */
+  .toast {
+    position: fixed;
+    bottom: 26px;
+    right: 26px;
+    background: #141c26;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 13px 16px;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13.5px;
+    font-weight: 600;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity .25s ease, transform .25s ease;
+    pointer-events: none;
+    z-index: 50;
+    max-width: 90vw;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .toast.success { border-color: #1f4a34; color: var(--accent-2); }
+  .toast.error   { border-color: #4a1f2c; color: var(--danger); }
+  .toast.info    { border-color: #26415a; color: var(--accent); }
+
+  .actions-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+  }
+  .hint {
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-top: 10px;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+  <!-- Status banner (hidden by default) -->
+  <div id="statusBanner" class="status-banner hidden">
+    <span id="statusIcon">✓</span>
+    <span id="statusText">Ready</span>
+  </div>
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-logo">W</div>
+      <div>
+        <h1>Wise Payment · Admin</h1>
+        <p>Edit the payment details shown on the landing page</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button id="exportBtn" class="ghost">Export JSON</button>
+      <button id="importBtn" class="ghost">Import JSON</button>
+      <button id="logoutBtn" class="danger">Log out</button>
+    </div>
+  </header>
+
+  <!-- Main grid -->
+  <main class="grid">
+
+    <!-- Editor -->
+    <section class="card">
+      <h2>Payment details</h2>
+      <p class="sub">These values drive <code>index.html</code> in real time.</p>
+
+      <div class="field">
+        <label for="senderName">Sender name</label>
+        <input id="senderName" type="text" placeholder="Maya Chen" autocomplete="off" />
+      </div>
+
+      <div class="field">
+        <label for="senderEmail">Sender email</label>
+        <input id="senderEmail" type="email" placeholder="maya.chen@example.com" autocomplete="off" />
+      </div>
+
+      <div class="row-2">
+        <div class="field">
+          <label for="amount">Amount</label>
+          <input id="amount" type="number" min="0" step="0.01" placeholder="1250.00" />
+        </div>
+        <div class="field">
+          <label for="currency">Currency</label>
+          <select id="currency">
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="GBP">GBP</option>
+            <option value="KES">KES</option>
+            <option value="NGN">NGN</option>
+            <option value="ZAR">ZAR</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="reference">Reference</label>
+        <input id="reference" type="text" placeholder="WISE-2025-4F2A" autocomplete="off" />
+      </div>
+
+      <div class="field">
+        <label for="note">Note</label>
+        <textarea id="note" placeholder="Payment for design services"></textarea>
+      </div>
+
+      <div class="actions-row">
+        <button id="saveBtn" class="primary">Save changes</button>
+        <button id="resetAllBtn" class="ghost">Reset to defaults</button>
+      </div>
+
+      <p class="hint">
+        Saved to <code>localStorage['wise_payment_data']</code> and broadcast to
+        <code>index.html</code> via <code>BroadcastChannel('wise_payment')</code>.
+      </p>
+    </section>
+
+    <!-- Live preview -->
+    <aside class="card preview-wrap">
+      <h2>Live preview</h2>
+      <p class="sub">What the landing page will show.</p>
+
+      <div class="pv-card">
+        <div class="pv-header">
+          <span class="who">You received</span>
+          <span class="currency-tag" id="pvCurrencyTag">USD</span>
+        </div>
+
+        <div class="pv-amount">
+          <span id="pvAmount">0.00</span>
+        </div>
+
+        <div class="pv-meta">
+          <div class="line">
+            <span class="k">From</span>
+            <span class="v" id="pvSender">—</span>
+          </div>
+          <div class="line">
+            <span class="k">Email</span>
+            <span class="v" id="pvEmail">—</span>
+          </div>
+          <div class="line">
+            <span class="k">Reference</span>
+            <span class="v" id="pvRef">—</span>
+          </div>
+          <div class="line">
+            <span class="k">Note</span>
+            <span class="v" id="pvNote">—</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- Toast -->
+  <div id="toast" class="toast">
+    <span id="toastIcon">✓</span>
+    <span id="toastText">Saved</span>
+  </div>
+
 <script>
 (function() {
+  // ---- Auth guard ----
+  const sessionOk = sessionStorage.getItem('wise_admin_session') === 'ok';
+  const rememberUntil = parseInt(localStorage.getItem('wise_admin_remember') || '0', 10);
+  const rememberOk = rememberUntil && Date.now() < rememberUntil;
+
+  if (!sessionOk && !rememberOk) {
+    window.location.replace('admin-login.html');
+    return;
+  }
+
   const STORAGE_KEY = 'wise_payment_data';
   const DEFAULT_DATA = {
     senderName: 'Maya Chen',
@@ -10,70 +402,222 @@
     note: 'Payment for design services'
   };
 
-  // ---- Always read the freshest data from localStorage ----
-  function getPaymentData() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? { ...DEFAULT_DATA, ...JSON.parse(raw) } : { ...DEFAULT_DATA };
-    } catch(e) { return { ...DEFAULT_DATA }; }
-  }
-
   const $ = id => document.getElementById(id);
 
+  const fields = {
+    senderName: $('senderName'),
+    senderEmail: $('senderEmail'),
+    amount: $('amount'),
+    currency: $('currency'),
+    reference: $('reference'),
+    note: $('note')
+  };
+
+  const preview = {
+    sender: $('pvSender'),
+    email: $('pvEmail'),
+    amount: $('pvAmount'),
+    currencyTag: $('pvCurrencyTag'),
+    ref: $('pvRef'),
+    note: $('pvNote')
+  };
+
+  const statusBanner = $('statusBanner');
+  const statusIcon = $('statusIcon');
+  const statusText = $('statusText');
+  const toast = $('toast');
+  const toastIcon = $('toastIcon');
+  const toastText = $('toastText');
+
   function fmtAmount(n) {
-    return (parseFloat(n) || 0).toLocaleString('en-US', {
-      minimumFractionDigits: 2, maximumFractionDigits: 2
-    });
+    const num = parseFloat(n) || 0;
+    return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
-  // ---- Render the card from current data ----
-  function render() {
-    const paymentData = getPaymentData();
-
-    $('senderName').textContent = paymentData.senderName || '—';
-    $('senderEmail').textContent = paymentData.senderEmail || '—';
-    $('amountValue').textContent = fmtAmount(paymentData.amount);
-    $('currencyCode').textContent = paymentData.currency || 'USD';
-    $('noteValue').textContent = paymentData.note || '—';
-    $('refNote').innerHTML = `
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
-        <line x1="4" y1="22" x2="4" y2="15"/>
-      </svg>
-      ${paymentData.reference || DEFAULT_DATA.reference}
-    `;
+  function loadData() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) return { ...DEFAULT_DATA, ...JSON.parse(raw) };
+    } catch(e) {}
+    return { ...DEFAULT_DATA };
   }
 
-  // ---- Initial render ----
-  render();
+  function saveData(data) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      try {
+        const bc = new BroadcastChannel('wise_payment');
+        bc.postMessage({ type: 'update', data });
+        bc.close();
+      } catch(e) {}
+      return true;
+    } catch(e) {
+      console.error('Save failed:', e);
+      return false;
+    }
+  }
 
-  // ---- Listen for admin changes in real time ----
-  // 1) BroadcastChannel (same origin, same browser)
-  try {
-    const bc = new BroadcastChannel('wise_payment');
-    bc.onmessage = (ev) => {
-      if (ev.data && ev.data.type === 'update') render();
+  function populate(data) {
+    if (fields.senderName) fields.senderName.value = data.senderName || '';
+    if (fields.senderEmail) fields.senderEmail.value = data.senderEmail || '';
+    if (fields.amount) fields.amount.value = data.amount || '';
+    if (fields.currency) fields.currency.value = data.currency || 'USD';
+    if (fields.reference) fields.reference.value = data.reference || '';
+    if (fields.note) fields.note.value = data.note || '';
+    updatePreview();
+  }
+
+  function updatePreview() {
+    const set = (el, val) => { if (el) el.textContent = val; };
+    set(preview.sender, fields.senderName?.value.trim() || '—');
+    set(preview.email, fields.senderEmail?.value.trim() || '—');
+    set(preview.amount, fmtAmount(fields.amount?.value));
+    set(preview.currencyTag, fields.currency?.value || 'USD');
+    set(preview.ref, fields.reference?.value.trim() || '—');
+    set(preview.note, fields.note?.value.trim() || '—');
+  }
+
+  function showBanner(msg, type) {
+    if (!statusBanner) return;
+    if (statusText) statusText.textContent = msg;
+    if (statusIcon) {
+      statusIcon.textContent = type === 'success' ? '✓' : type === 'error' ? '!' : 'i';
+    }
+    statusBanner.classList.remove('hidden', 'success', 'error', 'info');
+    statusBanner.classList.add(type);
+    clearTimeout(window.__bannerTimer);
+    window.__bannerTimer = setTimeout(() => statusBanner.classList.add('hidden'), 4000);
+  }
+
+  function showToast(msg, type = 'success') {
+    if (!toast) return;
+    if (toastText) toastText.textContent = msg;
+    if (toastIcon) {
+      toastIcon.textContent = type === 'success' ? '✓' : type === 'error' ? '!' : 'i';
+    }
+    toast.classList.remove('success', 'error', 'info');
+    toast.classList.add(type, 'show');
+    clearTimeout(window.__toastTimer);
+    window.__toastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
+  }
+
+  function validate() {
+    let valid = true;
+    if (!fields.senderName?.value.trim()) {
+      fields.senderName?.classList.add('error'); valid = false;
+    } else fields.senderName?.classList.remove('error');
+
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRe.test(fields.senderEmail?.value.trim() || '')) {
+      fields.senderEmail?.classList.add('error'); valid = false;
+    } else fields.senderEmail?.classList.remove('error');
+
+    const amt = parseFloat(fields.amount?.value);
+    if (isNaN(amt) || amt <= 0) {
+      fields.amount?.classList.add('error'); valid = false;
+    } else fields.amount?.classList.remove('error');
+
+    return valid;
+  }
+
+  function getFormData() {
+    return {
+      senderName: fields.senderName?.value.trim() || '',
+      senderEmail: fields.senderEmail?.value.trim() || '',
+      amount: parseFloat(fields.amount?.value) || 0,
+      currency: fields.currency?.value || 'USD',
+      reference: fields.reference?.value.trim() || '',
+      note: fields.note?.value.trim() || ''
     };
-  } catch(e) {}
+  }
 
-  // 2) storage event — fires when another tab changes localStorage
-  window.addEventListener('storage', (ev) => {
-    if (ev.key === STORAGE_KEY) render();
+  // ---- SAVE ----
+  $('saveBtn')?.addEventListener('click', () => {
+    if (!validate()) {
+      showToast('Please fix the highlighted fields.', 'error');
+      showBanner('Some fields are missing or invalid.', 'error');
+      return;
+    }
+    const data = getFormData();
+    if (saveData(data)) {
+      showToast('Saved. Payment page updated.', 'success');
+      showBanner('Saved successfully.', 'success');
+      updatePreview();
+    } else {
+      showToast('Could not save. Storage may be full.', 'error');
+      showBanner('Save failed.', 'error');
+    }
   });
 
-  // 3) Re-render every time the page becomes visible again (back/forward, tab switch)
-  document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) render();
+  // ---- RESET ----
+  $('resetAllBtn')?.addEventListener('click', () => {
+    if (!confirm('Reset all fields to default values?')) return;
+    populate(DEFAULT_DATA);
+    saveData(DEFAULT_DATA);
+    showToast('Reset to defaults.', 'info');
+    showBanner('Reset to defaults.', 'info');
   });
 
-  // 4) Re-render on back/forward navigation (bfcache restore)
-  window.addEventListener('pageshow', (ev) => {
-    if (ev.persisted) render();
+  // ---- EXPORT ----
+  $('exportBtn')?.addEventListener('click', () => {
+    const data = getFormData();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `wise-payment-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('Exported as JSON.', 'success');
   });
 
-  // ---- Navigate to mtn.html on Accept ----
-  $('acceptBtn').addEventListener('click', () => {
-    window.location.href = 'mtn.html';
+  // ---- IMPORT ----
+  $('importBtn')?.addEventListener('click', () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json,application/json';
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const imported = JSON.parse(ev.target.result);
+          const merged = { ...DEFAULT_DATA, ...imported };
+          populate(merged);
+          saveData(merged);
+          showToast('Imported successfully.', 'success');
+          showBanner('Imported data loaded and saved.', 'success');
+        } catch (err) {
+          showToast('Invalid JSON file.', 'error');
+          showBanner('Could not parse the file.', 'error');
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
   });
+
+  // ---- LOGOUT ----
+  $('logoutBtn')?.addEventListener('click', () => {
+    sessionStorage.removeItem('wise_admin_session');
+    sessionStorage.removeItem('wise_admin_attempts');
+    localStorage.removeItem('wise_admin_remember');
+    window.location.href = 'admin-login.html';
+  });
+
+  // ---- LIVE UPDATES ----
+  Object.values(fields).forEach(f => {
+    if (!f) return;
+    f.addEventListener('input', () => { f.classList.remove('error'); updatePreview(); });
+    f.addEventListener('change', updatePreview);
+  });
+
+  // ---- BOOT ----
+  populate(loadData());
 })();
 </script>
+</body>
+</html>
