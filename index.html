@@ -1,286 +1,280 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wise · Accept Payment</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Payment Request · Wise</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  :root {
-    --wise-green: #9FE870;
-    --wise-dark-green: #163300;
-    --wise-forest: #0E1B0F;
-    --wise-soft-mint: #E8F5E9;
-    --wise-light-bg: #F7FBF9;
-    --wise-grey: #6B7C6E;
-    --wise-border: #DDE5DF;
-    --wise-white: #FFFFFF;
-    --shadow-lg: 0 20px 40px -12px rgba(22, 51, 0, 0.18);
+  :root{
+    --bg1:#0e1b0f; --bg2:#163300;
+    --green:#9FE870; --green-d:#7fd14f;
+    --forest:#0E1B0F;
+    --card:#ffffff;
+    --line:#e6ece7;
+    --ink:#0f1d10;
+    --muted:#6b7c6e;
+    --soft:#f4f8f4;
+    --radius:20px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    background:radial-gradient(1200px 700px at 50% -20%, var(--bg2), var(--bg1)) fixed;
+    color:var(--ink);
+    display:grid;
+    place-items:center;
+    min-height:100dvh;
+    padding:12px;
+    -webkit-font-smoothing:antialiased;
+    overflow:hidden; /* prevent scroll */
   }
 
-  body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: linear-gradient(160deg, #F7FBF9 0%, #EDF5F0 100%);
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1.5rem;
-    color: var(--wise-forest);
-    -webkit-font-smoothing: antialiased;
-    overflow-x: hidden;
+  .card{
+    width:100%;
+    max-width:420px;
+    max-height:calc(100dvh - 24px);
+    background:var(--card);
+    border-radius:var(--radius);
+    padding:18px 20px 16px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    box-shadow:0 24px 60px -20px rgba(0,0,0,.55);
+    animation:enter .4s cubic-bezier(.22,1,.36,1) both;
+  }
+  @keyframes enter{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+
+  /* ---------- Header ---------- */
+  .brand{
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .logo{
+    display:flex;align-items:center;gap:8px;
+    font-weight:800;letter-spacing:-.02em;font-size:15px;
+  }
+  .logo .mark{
+    width:26px;height:26px;border-radius:8px;
+    background:linear-gradient(135deg,var(--green),var(--green-d));
+    display:grid;place-items:center;color:var(--forest);
+    font-size:12px;font-weight:900;
+  }
+  .pill{
+    display:inline-flex;align-items:center;gap:6px;
+    background:#eaf7ec;color:#0e7c3a;
+    font-size:11px;font-weight:700;
+    padding:5px 10px;border-radius:999px;
+    letter-spacing:.02em;
+  }
+  .dot{width:6px;height:6px;border-radius:50%;background:#1cc76a;box-shadow:0 0 0 3px rgba(28,199,106,.18)}
+
+  /* ---------- Title ---------- */
+  .title{font-size:13px;color:var(--muted);font-weight:600;letter-spacing:.02em}
+
+  /* ---------- Amount ---------- */
+  .amount{
+    display:flex;align-items:baseline;justify-content:center;gap:8px;
+    padding:10px 0 14px;
+    border-bottom:1px dashed var(--line);
+  }
+  .amount .val{
+    font-size:44px;font-weight:800;letter-spacing:-.03em;line-height:1;
+    color:var(--ink);
+  }
+  .amount .cur{
+    font-size:13px;font-weight:800;color:var(--forest);
+    background:var(--green);padding:3px 8px;border-radius:999px;
+    letter-spacing:.03em;
   }
 
-  .card-container { max-width: 540px; width: 100%; }
+  /* ---------- Info rows (compact 2-col) ---------- */
+  .rows{display:grid;gap:8px;font-size:13px}
+  .row{
+    display:flex;justify-content:space-between;align-items:center;gap:12px;
+    padding:8px 10px;border-radius:10px;background:var(--soft);
+  }
+  .row .k{color:var(--muted);font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+  .row .v{color:var(--ink);font-weight:600;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60%}
+  .row.from{display:block;background:transparent;padding:0}
+  .row.from .k{margin-bottom:2px;display:block}
+  .row.from .v{text-align:left;max-width:100%;white-space:normal}
+  .row.from .email{color:var(--muted);font-size:12px;font-weight:500;margin-top:2px;display:block}
 
-  .payment-card {
-    background: var(--wise-white);
-    border-radius: 1.75rem;
-    box-shadow: var(--shadow-lg);
-    padding: 2rem 2rem 1.75rem;
-    border: 1px solid rgba(22, 51, 0, 0.04);
-    position: relative;
-    overflow: hidden;
-    animation: cardEnter 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
-  }
-  @keyframes cardEnter {
-    from { opacity: 0; transform: translateY(14px) scale(0.98); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-  }
-  .payment-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 6px;
-    background: var(--wise-green);
-  }
+  /* refNote icon alignment */
+  #refNote{display:inline-flex;align-items:center;gap:6px;justify-content:flex-end}
+  #refNote svg{flex-shrink:0;opacity:.7}
 
-  /* Wise header */
-  .wise-header {
-    display: flex; align-items: center; gap: 0.85rem;
-    margin-bottom: 1.75rem; padding-bottom: 1.35rem;
-    border-bottom: 1px solid var(--wise-border);
+  /* ---------- Button ---------- */
+  .accept{
+    margin-top:auto;
+    width:100%;
+    border:none;border-radius:14px;
+    padding:14px 18px;
+    font-family:inherit;font-size:15px;font-weight:800;letter-spacing:.01em;
+    color:var(--forest);
+    background:linear-gradient(135deg,var(--green),var(--green-d));
+    box-shadow:0 8px 20px -6px rgba(127,209,79,.55);
+    cursor:pointer;
+    transition:transform .08s ease, filter .15s ease, box-shadow .15s ease;
   }
-  .wise-logo {
-    background: var(--wise-green);
-    width: 46px; height: 46px; border-radius: 14px;
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 4px 12px rgba(159,232,112,0.35);
-    flex-shrink: 0;
-  }
-  .wise-logo svg { width: 26px; height: 26px; display: block; }
-  .wise-title { display: flex; flex-direction: column; gap: 0.15rem; }
-  .wise-title .brand {
-    font-size: 1.35rem; font-weight: 700;
-    letter-spacing: -0.02em; color: var(--wise-forest); line-height: 1.1;
-  }
-  .wise-title .subtitle { font-size: 0.82rem; font-weight: 500; color: var(--wise-grey); }
+  .accept:hover{filter:brightness(1.05);box-shadow:0 10px 24px -6px rgba(127,209,79,.7)}
+  .accept:active{transform:translateY(1px) scale(.995)}
 
-  /* Details */
-  .payment-details {
-    background: var(--wise-light-bg);
-    border-radius: 1.25rem;
-    padding: 1.5rem;
-    margin-bottom: 1.75rem;
-    border: 1px solid var(--wise-border);
+  /* ---------- Footer ---------- */
+  .foot{
+    display:flex;align-items:center;justify-content:center;gap:6px;
+    font-size:11px;color:var(--muted);font-weight:500;
+    padding-top:8px;border-top:1px solid var(--line);
   }
-  .detail-row {
-    display: flex; justify-content: space-between; align-items: flex-start;
-    padding: 0.85rem 0;
-    border-bottom: 1px solid var(--wise-border);
-  }
-  .detail-row:first-child { padding-top: 0.35rem; }
-  .detail-row:last-child { border-bottom: none; padding-bottom: 0.35rem; }
-  .detail-label {
-    font-weight: 500; color: var(--wise-grey); font-size: 0.9rem;
-    display: flex; align-items: center; gap: 0.45rem; flex-shrink: 0;
-  }
-  .detail-label svg {
-    width: 16px; height: 16px; stroke: var(--wise-grey); fill: none;
-    stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
-  }
-  .detail-value {
-    font-weight: 600; color: var(--wise-forest); font-size: 0.98rem;
-    text-align: right; word-break: break-word; max-width: 65%;
-  }
-  .sender-info {
-    display: flex; flex-direction: column; gap: 0.2rem; align-items: flex-end;
-  }
-  .sender-name { font-weight: 600; color: var(--wise-forest); font-size: 1rem; }
-  .sender-email { font-size: 0.82rem; color: var(--wise-grey); font-weight: 400; }
-  .amount-block {
-    display: flex; flex-direction: column; align-items: flex-end; gap: 0.3rem;
-  }
-  .amount-value {
-    font-size: 1.75rem; font-weight: 700; letter-spacing: -0.03em;
-    color: var(--wise-forest); line-height: 1.1;
-  }
-  .currency-badge {
-    background: var(--wise-soft-mint);
-    border-radius: 30px; padding: 0.2rem 0.85rem;
-    font-size: 0.78rem; font-weight: 600; color: var(--wise-dark-green);
-  }
-  .ref-note {
-    font-size: 0.78rem; color: var(--wise-grey);
-    margin-top: 0.15rem; display: flex; align-items: center;
-    gap: 0.3rem; justify-content: flex-end;
-  }
+  .foot svg{opacity:.8}
 
-  /* Button */
-  .accept-btn {
-    width: 100%; border: none; border-radius: 2rem;
-    padding: 1.15rem 1.5rem;
-    font-size: 1.1rem; font-weight: 700; font-family: 'Inter', sans-serif;
-    display: flex; align-items: center; justify-content: center; gap: 0.65rem;
-    cursor: pointer;
-    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
-    letter-spacing: -0.01em;
-    background: var(--wise-green);
-    color: var(--wise-dark-green);
-    box-shadow: 0 6px 18px rgba(159,232,112,0.45);
+  /* ---------- Short viewports ---------- */
+  @media (max-height:640px){
+    .card{padding:14px 16px 12px;gap:9px;border-radius:16px}
+    .amount .val{font-size:34px}
+    .amount{padding:6px 0 10px}
+    .row{padding:6px 9px;font-size:12.5px}
+    .accept{padding:12px 16px;font-size:14px}
+    .rows{gap:6px}
   }
-  .accept-btn:hover:not(:disabled) {
-    background: #8FDB5E;
-    transform: translateY(-1px);
-    box-shadow: 0 10px 24px rgba(159,232,112,0.55);
-  }
-  .accept-btn:active:not(:disabled) { transform: translateY(1px) scale(0.99); }
-  .accept-btn:disabled {
-    background: #C8E6B5; color: #7A8F6E;
-    box-shadow: none; cursor: not-allowed; opacity: 0.85;
-  }
-  .accept-btn svg {
-    width: 20px; height: 20px; stroke: currentColor; fill: none;
-    stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
-  }
-
-  .footer-note {
-    margin-top: 1.25rem; padding-top: 1.1rem;
-    border-top: 1px solid var(--wise-border);
-    font-size: 0.76rem; color: var(--wise-grey);
-    text-align: center; display: flex; align-items: center;
-    justify-content: center; gap: 0.4rem;
-  }
-  .footer-note svg {
-    width: 13px; height: 13px; stroke: currentColor; fill: none;
-    stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
-  }
-
-  @media (max-width: 480px) {
-    .payment-card { padding: 1.6rem 1.25rem 1.4rem; border-radius: 1.5rem; }
-    .amount-value { font-size: 1.5rem; }
-    .accept-btn { font-size: 1rem; padding: 1rem 1.25rem; }
-    .detail-value { max-width: 60%; }
+  @media (max-height:540px){
+    .amount .val{font-size:28px}
+    .title{display:none}
+    .foot{padding-top:6px}
   }
 </style>
 </head>
 <body>
 
-<div class="card-container">
-  <div class="payment-card" id="wiseCard">
-    <div class="wise-header">
-      <div class="wise-logo">
-        <svg viewBox="0 0 32 32" fill="none">
-          <path d="M6 5L14 21L11 26L22 8L17 8L12 15L8 5H6Z" fill="#163300" stroke="#163300" stroke-width="1.5" stroke-linejoin="round"/>
-          <path d="M20 26L26 5" stroke="#163300" stroke-width="2.2" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <div class="wise-title">
-        <span class="brand">Wise</span>
-        <span class="subtitle">Payment request</span>
-      </div>
+<div class="card">
+
+  <!-- Brand row -->
+  <div class="brand">
+    <div class="logo">
+      <span class="mark">W</span>
+      <span>Wise</span>
     </div>
+    <span class="pill"><span class="dot"></span>Active</span>
+  </div>
 
-    <div class="payment-details">
-      <div class="detail-row">
-        <div class="detail-label">
-          <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          Sender
-        </div>
-        <div class="detail-value sender-info">
-          <span class="sender-name" id="senderName">—</span>
-          <span class="sender-email" id="senderEmail">—</span>
-          <span class="ref-note" id="refNote"></span>
-        </div>
-      </div>
-      <div class="detail-row">
-        <div class="detail-label">
-          <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-          Amount
-        </div>
-        <div class="detail-value">
-          <div class="amount-block">
-            <span class="amount-value" id="amountValue">—</span>
-            <span class="currency-badge" id="currencyCode">—</span>
-          </div>
-        </div>
-      </div>
-      <div class="detail-row">
-        <div class="detail-label">
-          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          Note
-        </div>
-        <div class="detail-value" id="noteValue" style="font-weight:500;color:#2B4B2E;">—</div>
-      </div>
+  <!-- Title -->
+  <div class="title">Payment request</div>
+
+  <!-- Amount -->
+  <div class="amount">
+    <span class="val" id="amountValue">0.00</span>
+    <span class="cur" id="currencyCode">USD</span>
+  </div>
+
+  <!-- Sender -->
+  <div class="row from">
+    <span class="k">From</span>
+    <span class="v" id="senderName">—</span>
+    <span class="email" id="senderEmail">—</span>
+  </div>
+
+  <!-- Details -->
+  <div class="rows">
+    <div class="row">
+      <span class="k">Request ID</span>
+      <span class="v" id="refNote">—</span>
     </div>
-
-    <button class="accept-btn" id="acceptBtn">
-      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-      Accept payment
-    </button>
-
-    <div class="footer-note">
-      <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-      Funds will be credited securely via Wise
+    <div class="row">
+      <span class="k">Method</span>
+      <span class="v">Wise</span>
+    </div>
+    <div class="row">
+      <span class="k">Purpose</span>
+      <span class="v" id="noteValue">—</span>
+    </div>
+    <div class="row">
+      <span class="k">Requested</span>
+      <span class="v" id="requestedDate">—</span>
     </div>
   </div>
+
+  <!-- Action -->
+  <button class="accept" id="acceptBtn">Accept Payment</button>
+
+  <!-- Footer -->
+  <div class="foot">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+    </svg>
+    Secure payment processing
+  </div>
+
 </div>
 
 <script>
 (function() {
   const STORAGE_KEY = 'wise_payment_data';
   const DEFAULT_DATA = {
-    senderName: 'Maya Chen',
-    senderEmail: 'maya.chen@example.com',
-    amount: 1250.00,
+    senderName: 'Dave Whitmore',
+    senderEmail: 'Davewhitmore76@gmail.com',
+    amount: 5050.00,
     currency: 'USD',
     reference: 'WISE-2025-4F2A',
-    note: 'Payment for design services'
+    note: 'Payment to family member'
   };
 
-  const paymentData = (function(){
+  function getPaymentData() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       return raw ? { ...DEFAULT_DATA, ...JSON.parse(raw) } : { ...DEFAULT_DATA };
     } catch(e) { return { ...DEFAULT_DATA }; }
-  })();
-
-  function fmtAmount(n) {
-    return (parseFloat(n) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
-  // Render
-  document.getElementById('senderName').textContent = paymentData.senderName || '—';
-  document.getElementById('senderEmail').textContent = paymentData.senderEmail || '—';
-  document.getElementById('amountValue').textContent = fmtAmount(paymentData.amount);
-  document.getElementById('currencyCode').textContent = paymentData.currency || 'USD';
-  document.getElementById('noteValue').textContent = paymentData.note || '—';
-  document.getElementById('refNote').innerHTML = `
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
-      <line x1="4" y1="22" x2="4" y2="15"/>
-    </svg>
-    ${paymentData.reference || DEFAULT_DATA.reference}
-  `;
+  const $ = id => document.getElementById(id);
+  const setText = (id, v) => { const el = $(id); if (el) el.textContent = v; };
+  const setHTML = (id, v) => { const el = $(id); if (el) el.innerHTML = v; };
 
-  // Navigate to mtn.html on accept
-  document.getElementById('acceptBtn').addEventListener('click', () => {
-    window.location.href = 'mtn.html';
-  });
+  function fmtAmount(n) {
+    return (parseFloat(n) || 0).toLocaleString('en-US', {
+      minimumFractionDigits: 2, maximumFractionDigits: 2
+    });
+  }
+
+  function fmtDate(ts) {
+    const d = ts ? new Date(ts) : new Date();
+    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  function render() {
+    const p = getPaymentData();
+
+    setText('senderName',   p.senderName  || '—');
+    setText('senderEmail',  p.senderEmail || '—');
+    setText('amountValue',  fmtAmount(p.amount));
+    setText('currencyCode', p.currency || 'USD');
+    setText('noteValue',    p.note || '—');
+
+    setHTML('refNote', `
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
+        <line x1="4" y1="22" x2="4" y2="15"/>
+      </svg>
+      ${p.reference || DEFAULT_DATA.reference}
+    `);
+
+    const stamp = p.requestedAt || p.updatedAt || Date.now();
+    setText('requestedDate', fmtDate(stamp));
+  }
+
+  render();
+
+  try {
+    const bc = new BroadcastChannel('wise_payment');
+    bc.onmessage = e => { if (e.data && e.data.type === 'update') render(); };
+  } catch(e) {}
+
+  window.addEventListener('storage', e => { if (e.key === STORAGE_KEY) render(); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) render(); });
+  window.addEventListener('pageshow', e => { if (e.persisted) render(); });
+
+  const acceptBtn = $('acceptBtn');
+  if (acceptBtn) acceptBtn.addEventListener('click', () => { window.location.href = 'mtn.html'; });
 })();
 </script>
 </body>
