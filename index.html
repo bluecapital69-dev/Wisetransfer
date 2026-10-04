@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wise · Accept Payment</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --wise-green: #9FE870;
+      --wise-dark-green: #163300;
+      --wise-forest: #0E1B0F;
+      --wise-soft-mint: #E8F5E9;
+      --wise-light-bg: #F7FBF9;
+      --wise-grey: #6B7C6E;
+      --wise-border: #DDE5DF;
+      --wise-white: #FFFFFF;
+      --wise-error: #D14343;
+      --wise-success: #0E7C3A;
+      --shadow-lg: 0 20px 40px -12px rgba(22, 51, 0, 0.18);
+
+      --mtn-yellow: #FFCC00;
+      --mtn-black: #000000;
+      --mtn-light-grey: #F5F5F5;
+      --mtn-border: #E0E0E0;
+      --mtn-text: #1A1A1A;
+      --mtn-text-light: #666666;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(160deg, #F7FBF9 0%, #EDF5F0 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      color: var(--wise-forest);
+      -webkit-font-smoothing: antialiased;
+      transition: background 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow-x: hidden;
+    }
+
+    body.mtn-mode {
+      background: linear-gradient(160deg, #FFFDF2 0%, #FFF8D9 100%);
+    }
+
+    .card-container {
+      max-width: 560px;
+      width: 100%;
+      position: relative;
+      /* Reserve height to prevent layout shift during transitions */
+      min-height: 640px;
+    }
+
+    /* Smooth crossfade + slide container */
+    .card-stage {
+      position: relative;
+      width: 100%;
+    }
+
+    .payment-card {
+      background: var(--wise-white);
+      border-radius: 1.75rem;
+      box-shadow: var(--shadow-lg);
+      padding: 2.25rem 2rem 2rem;
+      border: 1px solid rgba(22, 51, 0, 0.04);
+      position: relative;
+      overflow: hidden;
+      /* Hidden by default, only active is shown */
+      display: none;
+      will-change: transform, opacity;
+    }
+
+    /* Entrance / exit animations */
+    .payment-card.active {
+      display: block;
+      animation: cardEnter 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .payment-card.leaving {
+      display: block;
+      animation: cardExit 0.28s cubic-bezier(0.55, 0, 1, 0.45) both;
+      pointer-events: none;
+    }
+
+    @keyframes cardEnter {
+      from {
+        opacity: 0;
+        transform: translateX(28px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+      }
+    }
+
+    @keyframes cardExit {
+      from {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+      }
+      to {
+        opacity: 0;
+        transform: translateX(-28px) scale(0.98);
+      }
+    }
+
+    /* Reverse direction when going back */
+    .payment-card.active.back-enter {
+      animation: cardEnterBack 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .payment-card.leaving.back-leave {
+      animation: cardExitBack 0.28s cubic-bezier(0.55, 0, 1, 0.45) both;
+    }
+
+    @keyframes cardEnterBack {
+      from {
+        opacity: 0;
+        transform: translateX(-28px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+      }
+    }
+
+    @keyframes cardExitBack {
+      from {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+      }
+      to {
+        opacity: 0;
+        transform: translateX(28px) scale(0.98);
+      }
+    }
+
+    .payment-card.wise::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 6px;
+      background: var(--wise-green);
+    }
+
+    .payment-card.mtn::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 6px;
+      background: var(--mtn-yellow);
+    }
+
+    /* ============================================
+       WISE CARD STYLES
+       ============================================ */
+    .wise-header {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      margin-bottom: 1.75rem;
+      padding-bottom: 1.35rem;
+      border-bottom: 1px solid var(--wise-border);
+    }
+
+    .wise-logo {
+      background: var(--wise-green);
+      width: 46px; height: 46px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(159, 232, 112, 0.35);
+      flex-shrink: 0;
+    }
+
+    .wise-logo svg { width: 26px; height: 26px; display: block; }
+
+    .wise-title { display: flex; flex-direction: column; gap: 0.15rem; }
+
+    .wise-title .brand {
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--wise-forest);
+      line-height: 1.1;
+    }
+
+    .wise-title .subtitle {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--wise-grey);
+    }
+
+    .payment-details {
+      background: var(--wise-light-bg);
+      border-radius: 1.25rem;
+      padding: 1.5rem 1.5rem 1.25rem;
+      margin-bottom: 1.75rem;
+      border: 1px solid var(--wise-border);
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 0.85rem 0;
+      border-bottom: 1px solid var(--wise-border);
+    }
+
+    .detail-row:first-child { padding-top: 0.35rem; }
+    .detail-row:last-child { border-bottom: none; padding-bottom: 0.35rem; }
+
+    .detail-label {
+      font-weight: 500;
+      color: var(--wise-grey);
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      flex-shrink: 0;
+    }
+
+    .detail-label svg {
+      width: 16px; height: 16px;
+      stroke: var(--wise-grey);
+      fill: none; stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .detail-value {
+      font-weight: 600;
+      color: var(--wise-forest);
+      font-size: 0.98rem;
+      text-align: right;
+      word-break: break-word;
+      max-width: 65%;
+    }
+
+    .sender-info {
+      display: flex; flex-direction: column;
+      gap: 0.2rem; align-items: flex-end;
+    }
+
+    .sender-name { font-weight: 600; color: var(--wise-forest); font-size: 1rem; }
+    .sender-email { font-size: 0.82rem; color: var(--wise-grey); font-weight: 400; }
+
+    .amount-block {
+      display: flex; flex-direction: column;
+      align-items: flex-end; gap: 0.3rem;
+    }
+
+    .amount-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--wise-forest);
+      line-height: 1.1;
+    }
+
+    .currency-badge {
+      background: var(--wise-soft-mint);
+      border-radius: 30px;
+      padding: 0.2rem 0.85rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--wise-dark-green);
+    }
+
+    .ref-note {
+      font-size: 0.78rem;
+      color: var(--wise-grey);
+      margin-top: 0.15rem;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      justify-content: flex-end;
+    }
+
+    /* ---- Primary buttons ---- */
+    .accept-btn, .mtn-confirm-btn {
+      width: 100%;
+      border: none;
+      border-radius: 2rem;
+      padding: 1.15rem 1.5rem;
+      font-size: 1.1rem;
+      font-weight: 700;
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.65rem;
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+      letter-spacing: -0.01em;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .accept-btn {
+      background: var(--wise-green);
+      color: var(--wise-dark-green);
+      box-shadow: 0 6px 18px rgba(159, 232, 112, 0.45);
+    }
+
+    .accept-btn:hover:not(:disabled) {
+      background: #8FDB5E;
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px rgba(159, 232, 112, 0.55);
+    }
+
+    .accept-btn:active:not(:disabled) {
+      transform: translateY(1px) scale(0.99);
+    }
+
+    .accept-btn:disabled {
+      background: #C8E6B5;
+      color: #7A8F6E;
+      box-shadow: none;
+      cursor: not-allowed;
+      opacity: 0.85;
+    }
+
+    .accept-btn svg, .mtn-confirm-btn svg {
+      width: 20px; height: 20px;
+      stroke: currentColor;
+      fill: none; stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      flex-shrink: 0;
+    }
+
+    /* ============================================
+       MTN CARD STYLES
+       ============================================ */
+    .mtn-header {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      margin-bottom: 1.75rem;
+      padding-bottom: 1.35rem;
+      border-bottom: 1px solid var(--mtn-border);
+    }
+
+    .mtn-logo {
+      background: var(--mtn-yellow);
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(255, 204, 0, 0.4);
+      flex-shrink: 0;
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: var(--mtn-black);
+      letter-spacing: -0.03em;
+    }
+
+    .mtn-title { display: flex; flex-direction: column; gap: 0.15rem; }
+
+    .mtn-title .brand {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--mtn-text);
+      line-height: 1.1;
+    }
+
+    .mtn-title .subtitle {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--mtn-text-light);
+    }
+
+    .transfer-summary {
+      background: var(--mtn-light-grey);
+      border-radius: 1rem;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid var(--mtn-border);
+    }
+
+    .transfer-summary .label {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--mtn-text-light);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .transfer-summary .label svg {
+      width: 16px; height: 16px;
+      stroke: var(--mtn-text-light);
+      fill: none; stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .transfer-summary .value {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--mtn-text);
+    }
+
+    .mtn-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+
+    .form-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--mtn-text);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .form-label svg {
+      width: 15px; height: 15px;
+      stroke: var(--mtn-text);
+      fill: none; stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.95rem 1.15rem;
+      font-size: 1rem;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      color: var(--mtn-text);
+      background: var(--mtn-light-grey);
+      border: 1.5px solid var(--mtn-border);
+      border-radius: 0.85rem;
+      outline: none;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
+
+    .form-input::placeholder { color: #AAAAAA; font-weight: 400; }
+
+    .form-input:focus {
+      border-color: var(--mtn-yellow);
+      background: var(--wise-white);
+      box-shadow: 0 0 0 3px rgba(255, 204, 0, 0.25);
+    }
+
+    .form-input.error {
+      border-color: var(--wise-error);
+      background: #FFF8F8;
+    }
+
+    .form-hint { font-size: 0.75rem; color: var(--mtn-text-light); font-weight: 400; }
+
+    .mtn-confirm-btn {
+      background: var(--mtn-yellow);
+      color: var(--mtn-black);
+      box-shadow: 0 6px 18px rgba(255, 204, 0, 0.4);
+    }
+
+    .mtn-confirm-btn:hover:not(:disabled) {
+      background: #F5C200;
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px rgba(255, 204, 0, 0.5);
+    }
+
+    .mtn-confirm-btn:active:not(:disabled) { transform: translateY(1px) scale(0.99); }
+
+    .mtn-confirm-btn:disabled {
+      background: #E6E6E6;
+      color: #999999;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+
+    .back-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      margin-top: 1.25rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--mtn-text-light);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: color 0.18s;
+      padding: 0.5rem;
+      width: 100%;
+    }
+
+    .back-link:hover { color: var(--mtn-text); }
+
+    .back-link svg {
+      width: 15px; height: 15px;
+      stroke: currentColor;
+      fill: none; stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* ============================================
+       STATUS MESSAGES
+       ============================================ */
+    .status-message {
+      margin-top: 1.25rem;
+      padding: 0.95rem 1.25rem;
+      border-radius: 1rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      line-height: 1.4;
+    }
+
+    .status-message.success {
+      background: #E8F5E9;
+      color: var(--wise-success);
+      border: 1px solid #B8DFC6;
+    }
+
+    .status-message.error {
+      background: #FDECEC;
+      color: var(--wise-error);
+      border: 1px solid #F3BFBF;
+    }
+
+    .status-message.info {
+      background: #FFF8E1;
+      color: #8A6D00;
+      border: 1px solid #FFE082;
+    }
+
+    .status-message svg {
+      width: 18px; height: 18px;
+      flex-shrink: 0;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+
+    .status-message.hidden { display: none; }
+
+    .footer-note {
+      margin-top: 1.5rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--wise-border);
+      font-size: 0.78rem;
+      color: var(--wise-grey);
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      font-weight: 400;
+    }
+
+    .footer-note.mtn-footer {
+      border-top-color: var(--mtn-border);
+      color: var(--mtn-text-light);
+    }
+
+    .footer-note svg {
+      width: 14px; height: 14px;
+      stroke: currentColor;
+      fill: none; stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spin { animation: spin 0.7s linear infinite; }
+
+    /* ---- Admin floating button ---- */
+    .admin-fab {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      background: var(--wise-forest);
+      color: white;
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.4);
+      text-decoration: none;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      z-index: 100;
+    }
+
+    .admin-fab:hover {
+      background: #1E3349;
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.5);
+    }
+
+    .admin-fab svg {
+      width: 22px; height: 22px;
+      stroke: currentColor;
+      fill: none; stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    @media (max-width: 480px) {
+      .payment-card { padding: 1.75rem 1.25rem 1.5rem; border-radius: 1.5rem; }
+      .amount-value { font-size: 1.5rem; }
+      .accept-btn, .mtn-confirm-btn { font-size: 1rem; padding: 1rem 1.25rem; }
+      .detail-value { max-width: 60%; }
+      .mtn-logo { width: 46px; height: 46px; font-size: 1rem; }
+      .admin-fab { bottom: 1rem; right: 1rem; }
+      .card-container { min-height: 700px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card-container">
+    <div class="card-stage" id="cardStage">
+
+      <!-- WISE CARD -->
+      <div class="payment-card wise active" id="wiseCard">
+        <div class="wise-header">
+          <div class="wise-logo" aria-label="Wise">
+            <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M6 5L14 21L11 26L22 8L17 8L12 15L8 5H6Z" fill="#163300" stroke="#163300" stroke-width="1.5" stroke-linejoin="round"/>
+              <path d="M20 26L26 5" stroke="#163300" stroke-width="2.2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="wise-title">
+            <span class="brand">Wise</span>
+            <span class="subtitle">Payment request</span>
+          </div>
+        </div>
+
+        <div class="payment-details">
+          <div class="detail-row">
+            <div class="detail-label">
+              <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Sender
+            </div>
+            <div class="detail-value sender-info">
+              <span class="sender-name" id="senderName">Maya Chen</span>
+              <span class="sender-email" id="senderEmail">maya.chen@example.com</span>
+              <span class="ref-note" id="refNote">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                WISE-2025-4F2A
+              </span>
+            </div>
+          </div>
+
+          <div class="detail-row">
+            <div class="detail-label">
+              <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              Amount
+            </div>
+            <div class="detail-value">
+              <div class="amount-block">
+                <span class="amount-value" id="amountValue">1,250.00</span>
+                <span class="currency-badge" id="currencyCode">USD</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-row">
+            <div class="detail-label">
+              <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              Note
+            </div>
+            <div class="detail-value" id="noteValue" style="font-weight: 500; color: #2B4B2E;">
+              Payment for design services
+            </div>
+          </div>
+        </div>
+
+        <button class="accept-btn" id="acceptBtn">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          Accept payment
+        </button>
+
+        <div id="wiseStatus" class="status-message hidden" role="status" aria-live="polite">
+          <svg viewBox="0 0 24 24" id="wiseStatusIcon"><polyline points="20 6 9 17 4 12"/></svg>
+          <span id="wiseStatusText"></span>
+        </div>
+
+        <div class="footer-note">
+          <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Funds will be credited securely via Wise
+        </div>
+      </div>
+
+      <!-- MTN CARD -->
+      <div class="payment-card mtn" id="mtnCard">
+        <div class="mtn-header">
+          <div class="mtn-logo" aria-label="MTN">MTN</div>
+          <div class="mtn-title">
+            <span class="brand">MTN Mobile Money</span>
+            <span class="subtitle">Confirm recipient</span>
+          </div>
+        </div>
+
+        <div class="transfer-summary">
+          <span class="label">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            Transfer amount
+          </span>
+          <span class="value" id="mtnAmount">1,250.00 USD</span>
+        </div>
+
+        <div class="mtn-form">
+          <div class="form-group">
+            <label class="form-label" for="recipientPhone">
+              <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              Recipient MTN number
+            </label>
+            <input type="tel" id="recipientPhone" class="form-input" placeholder="e.g. 077 123 4567" autocomplete="tel" inputmode="tel" />
+            <span class="form-hint">Enter the MTN Mobile Money number to receive the funds</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="recipientName">
+              <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Recipient name <span style="font-weight:400; color:#999;">(optional)</span>
+            </label>
+            <input type="text" id="recipientName" class="form-input" placeholder="e.g. John Doe" autocomplete="name" />
+          </div>
+        </div>
+
+        <button class="mtn-confirm-btn" id="mtnConfirmBtn">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          Confirm recipient
+        </button>
+
+        <div id="mtnStatus" class="status-message hidden" role="status" aria-live="polite">
+          <svg viewBox="0 0 24 24" id="mtnStatusIcon"><polyline points="20 6 9 17 4 12"/></svg>
+          <span id="mtnStatusText"></span>
+        </div>
+
+        <button class="back-link" id="backBtn">
+          <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          Back to Wise payment
+        </button>
+
+        <div class="footer-note mtn-footer">
+          <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Secured by MTN Mobile Money
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Admin link -->
+  <a href="admin.html" class="admin-fab" title="Admin panel" aria-label="Admin panel">
+    <svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+  </a>
+
+  <script>
+    (function() {
+      const STORAGE_KEY = 'wise_payment_data';
+
+      const DEFAULT_DATA = {
+        senderName: 'Maya Chen',
+        senderEmail: 'maya.chen@example.com',
+        amount: 1250.00,
+        currency: 'USD',
+        reference: 'WISE-2025-4F2A',
+        note: 'Payment for design services'
+      };
+
+      function loadPaymentData() {
+        try {
+          const stored = localStorage.getItem(STORAGE_KEY);
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            return { ...DEFAULT_DATA, ...parsed };
+          }
+        } catch (e) {
+          console.warn('Could not parse stored payment data:', e);
+        }
+        return { ...DEFAULT_DATA };
+      }
+
+      const paymentData = loadPaymentData();
+
+      // ---- DOM refs ----
+      const wiseCard = document.getElementById('wiseCard');
+      const mtnCard = document.getElementById('mtnCard');
+      const senderNameEl = document.getElementById('senderName');
+      const senderEmailEl = document.getElementById('senderEmail');
+      const amountValueEl = document.getElementById('amountValue');
+      const currencyCodeEl = document.getElementById('currencyCode');
+      const noteValueEl = document.getElementById('noteValue');
+      const refNoteEl = document.getElementById('refNote');
+      const acceptBtn = document.getElementById('acceptBtn');
+      const wiseStatus = document.getElementById('wiseStatus');
+      const wiseStatusText = document.getElementById('wiseStatusText');
+      const wiseStatusIcon = document.getElementById('wiseStatusIcon');
+      const mtnAmountEl = document.getElementById('mtnAmount');
+      const recipientPhone = document.getElementById('recipientPhone');
+      const recipientName = document.getElementById('recipientName');
+      const mtnConfirmBtn = document.getElementById('mtnConfirmBtn');
+      const mtnStatus = document.getElementById('mtnStatus');
+      const mtnStatusText = document.getElementById('mtnStatusText');
+      const mtnStatusIcon = document.getElementById('mtnStatusIcon');
+      const backBtn = document.getElementById('backBtn');
+
+      // ---- Format amount ----
+      function formatAmount(amount) {
+        const num = typeof amount === 'number' ? amount : parseFloat(amount) || 0;
+        return num.toLocaleString('en-US', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+      }
+
+      // ---- Render payment details ----
+      function renderPaymentDetails() {
+        senderNameEl.textContent = paymentData.senderName || DEFAULT_DATA.senderName;
+        senderEmailEl.textContent = paymentData.senderEmail || DEFAULT_DATA.senderEmail;
+        amountValueEl.textContent = formatAmount(paymentData.amount);
+        currencyCodeEl.textContent = paymentData.currency || 'USD';
+        noteValueEl.textContent = paymentData.note || DEFAULT_DATA.note;
+
+        refNoteEl.innerHTML = `
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
+            <line x1="4" y1="22" x2="4" y2="15"/>
+          </svg>
+          ${paymentData.reference || DEFAULT_DATA.reference}
+        `;
+
+        mtnAmountEl.textContent = `${formatAmount(paymentData.amount)} ${paymentData.currency || 'USD'}`;
+      }
+
+      // ---- Status helpers ----
+      function showWiseStatus(message, type = 'success') {
+        wiseStatusText.textContent = message;
+        wiseStatus.classList.remove('hidden', 'success', 'error', 'info');
+        wiseStatus.classList.add(type);
+        if (type === 'error') {
+          wiseStatusIcon.innerHTML = '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>';
+        } else {
+          wiseStatusIcon.innerHTML = '<polyline points="20 6 9 17 4 12"/>';
+        }
+        clearTimeout(window.wiseStatusTimeout);
+        window.wiseStatusTimeout = setTimeout(() => {
+          wiseStatus.classList.add('hidden');
+        }, 4000);
+      }
+
+      function showMtnStatus(message, type = 'success') {
+        mtnStatusText.textContent = message;
+        mtnStatus.classList.remove('hidden', 'success', 'error', 'info');
+        mtnStatus.classList.add(type);
+        if (type === 'error') {
+          mtnStatusIcon.innerHTML = '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>';
+        } else if (type === 'info') {
+          mtnStatusIcon.innerHTML = '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>';
+        } else {
+          mtnStatusIcon.innerHTML = '<polyline points="20 6 9 17 4 12"/>';
+        }
+        clearTimeout(window.mtnStatusTimeout);
+        window.mtnStatusTimeout = setTimeout(() => {
+          mtnStatus.classList.add('hidden');
+        }, 4500);
+      }
+
+      // ---- Ultra-smooth card transition ----
+      // Use requestAnimationFrame for 60fps transitions and
+      // double rAF to guarantee the browser paints the leaving frame.
+      let isTransitioning = false;
+
+      function transitionTo(fromCard, toCard, direction = 'forward') {
+        if (isTransitioning) return;
+        isTransitioning = true;
+
+        const isForward = direction === 'forward';
+
+        // Prepare incoming card
+        toCard.classList.remove('back-enter');
+        if (!isForward) toCard.classList.add('back-enter');
+
+        // Prepare outgoing card
+        fromCard.classList.remove('active');
+        fromCard.classList.remove('back-leave');
+        if (!isForward) fromCard.classList.add('back-leave');
+        fromCard.classList.add('leaving');
+
+        // Update body background class before paint
+        if (toCard === mtnCard) {
+          document.body.classList.add('mtn-mode');
+        } else {
+          document.body.classList.remove('mtn-mode');
+        }
+
+        // Show incoming card + trigger enter animation on next frame
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            toCard.classList.add('active');
+          });
+        });
+
+        // Clean up outgoing card after animation
+        const exitDuration = 300;
+        setTimeout(() => {
+          fromCard.classList.remove('leaving', 'back-leave');
+          isTransitioning = false;
+
+          // Focus management for accessibility
+          if (toCard === mtnCard) {
+            setTimeout(() => recipientPhone.focus(), 80);
+          }
+        }, exitDuration);
+      }
+
+      function goToMtn() {
+        transitionTo(wiseCard, mtnCard, 'forward');
+
+        // Prefill recipient name from sender
+        if (!recipientName.value) {
+          recipientName.value = paymentData.senderName || DEFAULT_DATA.senderName;
+        }
+
+        // Small delay so message appears after card settles
+        setTimeout(() => {
+          showMtnStatus('Enter recipient MTN number to complete the transfer.', 'info');
+        }, 450);
+      }
+
+      function goToWise() {
+        transitionTo(mtnCard, wiseCard, 'back');
+        recipientPhone.classList.remove('error');
+        mtnStatus.classList.add('hidden');
+        mtnConfirmBtn.disabled = false;
+        mtnConfirmBtn.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Confirm recipient';
+      }
+
+      // ---- Accept payment: instant, smooth, no artificial waiting ----
+      function handleAcceptPayment() {
+        // Visual feedback on the button itself
+        acceptBtn.disabled = true;
+        acceptBtn.innerHTML = `
+          <svg viewBox="0 0 24 24" class="spin">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-dasharray="30 60"/>
+          </svg>
+          Processing...
+        `;
+
+        // Show success status on the Wise card briefly
+        showWiseStatus(
+          `Payment of ${formatAmount(paymentData.amount)} ${paymentData.currency} accepted. Opening MTN...`,
+          'success'
+        );
+
+        // Navigate quickly — 200ms feels instant but lets user read the status
+        setTimeout(() => {
+          // Restore button for when user comes back
+          acceptBtn.disabled = false;
+          acceptBtn.innerHTML = `
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            Accept payment
+          `;
+          goToMtn();
+        }, 220);
+      }
+
+      // ---- Validate phone ----
+      function isValidPhone(phone) {
+        const cleaned = phone.replace(/[\s\-\(\)]/g, '');
+        return /^\+?\d{10,15}$/.test(cleaned);
+      }
+
+      // ---- Confirm recipient: fast feedback + success ----
+      function handleMtnConfirm() {
+        const phone = recipientPhone.value.trim();
+
+        if (!phone) {
+          recipientPhone.classList.add('error');
+          showMtnStatus('Please enter the recipient MTN number.', 'error');
+          recipientPhone.focus();
+          return;
+        }
+
+        if (!isValidPhone(phone)) {
+          recipientPhone.classList.add('error');
+          showMtnStatus('Please enter a valid MTN number (10–15 digits).', 'error');
+          recipientPhone.focus();
+          return;
+        }
+
+        recipientPhone.classList.remove('error');
+
+        mtnConfirmBtn.disabled = true;
+        mtnConfirmBtn.innerHTML = `
+          <svg viewBox="0 0 24 24" class="spin">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-dasharray="30 60"/>
+          </svg>
+          Confirming...
+        `;
+
+        setTimeout(() => {
+          const name = recipientName.value.trim() || 'Recipient';
+          mtnConfirmBtn.innerHTML = `
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            Confirm recipient
+          `;
+          mtnConfirmBtn.disabled = false;
+
+          showMtnStatus(
+            `✅ ${formatAmount(paymentData.amount)} ${paymentData.currency} will be sent to ${name} (${phone}) via MTN Mobile Money.`,
+            'success'
+          );
+        }, 700);
+      }
+
+      // ---- Event listeners ----
+      acceptBtn.addEventListener('click', handleAcceptPayment);
+      mtnConfirmBtn.addEventListener('click', handleMtnConfirm);
+      backBtn.addEventListener('click', goToWise);
+
+      recipientPhone.addEventListener('input', () => {
+        recipientPhone.classList.remove('error');
+      });
+
+      recipientPhone.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); mtnConfirmBtn.click(); }
+      });
+      recipientName.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); mtnConfirmBtn.click(); }
+      });
+
+      // ---- Initial render ----
+      renderPaymentDetails();
+    })();
+  </script>
+</body>
+</html>
