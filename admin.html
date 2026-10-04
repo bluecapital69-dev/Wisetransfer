@@ -73,6 +73,7 @@
     color: #fff;
   }
   button.primary:hover { filter: brightness(1.08); }
+  button.primary:disabled { opacity: .6; cursor: not-allowed; }
   button.ghost { background: transparent; }
   button.danger { color: var(--danger); border-color: #3a2230; }
   button.danger:hover { background: #2a1720; }
@@ -151,6 +152,21 @@
   }
   @media (max-width: 520px) {
     .row-2 { grid-template-columns: 1fr; }
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 18px 0 14px;
+    border: 0;
+  }
+  .section-label {
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--muted);
+    font-weight: 700;
+    margin: 0 0 12px;
   }
 
   /* ---------- Preview card ---------- */
@@ -285,7 +301,9 @@
     <!-- Editor -->
     <section class="card">
       <h2>Payment details</h2>
-      <p class="sub">These values drive <code>index.html</code> in real time.</p>
+      <p class="sub">These values drive <code>index.html</code> and <code>mtn.html</code> across all devices.</p>
+
+      <p class="section-label">Sender</p>
 
       <div class="field">
         <label for="senderName">Sender name</label>
@@ -296,6 +314,19 @@
         <label for="senderEmail">Sender email</label>
         <input id="senderEmail" type="email" placeholder="maya.chen@example.com" autocomplete="off" />
       </div>
+
+      <hr class="divider" />
+
+      <p class="section-label">Recipient</p>
+
+      <div class="field">
+        <label for="recipientName">Recipient name</label>
+        <input id="recipientName" type="text" placeholder="e.g. John Doe (optional — prefills MTN page)" autocomplete="off" />
+      </div>
+
+      <hr class="divider" />
+
+      <p class="section-label">Payment</p>
 
       <div class="row-2">
         <div class="field">
@@ -321,8 +352,8 @@
       </div>
 
       <div class="field">
-        <label for="note">Note</label>
-        <textarea id="note" placeholder="Payment for design services"></textarea>
+        <label for="note">Note / purpose</label>
+        <textarea id="note" placeholder="Payment to family member"></textarea>
       </div>
 
       <div class="actions-row">
@@ -331,8 +362,9 @@
       </div>
 
       <p class="hint">
-        Saved to <code>localStorage['wise_payment_data']</code> and broadcast to
-        <code>index.html</code> via <code>BroadcastChannel('wise_payment')</code>.
+        Saved to <code>/api/payment</code> (server) and mirrored in
+        <code>localStorage['wise_payment_data']</code>. Every device that opens
+        <code>index.html</code> pulls the same record.
       </p>
     </section>
 
@@ -359,6 +391,10 @@
           <div class="line">
             <span class="k">Email</span>
             <span class="v" id="pvEmail">—</span>
+          </div>
+          <div class="line">
+            <span class="k">Recipient</span>
+            <span class="v" id="pvRecipient">—</span>
           </div>
           <div class="line">
             <span class="k">Reference</span>
@@ -388,18 +424,21 @@
   const rememberOk = rememberUntil && Date.now() < rememberUntil;
 
   if (!sessionOk && !rememberOk) {
-    window.location.replace('admin-login.html');
+    window.location.replace('adminlogin.html');
     return;
   }
 
   const STORAGE_KEY = 'wise_payment_data';
+  const API_URL = '/api/payment';
+
   const DEFAULT_DATA = {
-    senderName: 'Maya Chen',
-    senderEmail: 'maya.chen@example.com',
-    amount: 1250.00,
+    senderName: 'Dave Whitmore',
+    senderEmail: 'Davewhitmore76@gmail.com',
+    recipientName: '',
+    amount: 5050.00,
     currency: 'USD',
     reference: 'WISE-2025-4F2A',
-    note: 'Payment for design services'
+    note: 'Payment to family member'
   };
 
   const $ = id => document.getElementById(id);
@@ -407,6 +446,7 @@
   const fields = {
     senderName: $('senderName'),
     senderEmail: $('senderEmail'),
+    recipientName: $('recipientName'),
     amount: $('amount'),
     currency: $('currency'),
     reference: $('reference'),
@@ -416,6 +456,7 @@
   const preview = {
     sender: $('pvSender'),
     email: $('pvEmail'),
+    recipient: $('pvRecipient'),
     amount: $('pvAmount'),
     currencyTag: $('pvCurrencyTag'),
     ref: $('pvRef'),
@@ -428,21 +469,22 @@
   const toast = $('toast');
   const toastIcon = $('toastIcon');
   const toastText = $('toastText');
+  const saveBtn = $('saveBtn');
 
   function fmtAmount(n) {
     const num = parseFloat(n) || 0;
     return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
-  function loadData() {
+  // ---- Local cache ----
+  function loadLocal() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) return { ...DEFAULT_DATA, ...JSON.parse(raw) };
     } catch(e) {}
     return { ...DEFAULT_DATA };
   }
-
-  function saveData(data) {
+  function saveLocal(data) {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
       try {
@@ -452,29 +494,59 @@
       } catch(e) {}
       return true;
     } catch(e) {
-      console.error('Save failed:', e);
+      console.error('localStorage save failed:', e);
+      return false;
+    }
+  }
+
+  // ---- Server sync ----
+  async function loadRemote() {
+    try {
+      const res = await fetch(API_URL, { cache: 'no-store' });
+      if (!res.ok) return null;
+      const data = await res.json();
+      if (!data || typeof data !== 'object') return null;
+      return { ...DEFAULT_DATA, ...data };
+    } catch(e) {
+      console.warn('Remote load failed (using local cache):', e);
+      return null;
+    }
+  }
+  async function saveRemote(data) {
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return true;
+    } catch(e) {
+      console.warn('Remote save failed (kept in local cache):', e);
       return false;
     }
   }
 
   function populate(data) {
-    if (fields.senderName) fields.senderName.value = data.senderName || '';
-    if (fields.senderEmail) fields.senderEmail.value = data.senderEmail || '';
-    if (fields.amount) fields.amount.value = data.amount || '';
-    if (fields.currency) fields.currency.value = data.currency || 'USD';
-    if (fields.reference) fields.reference.value = data.reference || '';
-    if (fields.note) fields.note.value = data.note || '';
+    if (fields.senderName)    fields.senderName.value    = data.senderName    || '';
+    if (fields.senderEmail)   fields.senderEmail.value   = data.senderEmail   || '';
+    if (fields.recipientName) fields.recipientName.value = data.recipientName || '';
+    if (fields.amount)        fields.amount.value        = data.amount        ?? '';
+    if (fields.currency)      fields.currency.value      = data.currency      || 'USD';
+    if (fields.reference)     fields.reference.value     = data.reference     || '';
+    if (fields.note)          fields.note.value          = data.note          || '';
     updatePreview();
   }
 
   function updatePreview() {
     const set = (el, val) => { if (el) el.textContent = val; };
-    set(preview.sender, fields.senderName?.value.trim() || '—');
-    set(preview.email, fields.senderEmail?.value.trim() || '—');
-    set(preview.amount, fmtAmount(fields.amount?.value));
+    set(preview.sender,    fields.senderName?.value.trim()    || '—');
+    set(preview.email,     fields.senderEmail?.value.trim()   || '—');
+    set(preview.recipient, fields.recipientName?.value.trim() || '—');
+    set(preview.amount,    fmtAmount(fields.amount?.value));
     set(preview.currencyTag, fields.currency?.value || 'USD');
-    set(preview.ref, fields.reference?.value.trim() || '—');
-    set(preview.note, fields.note?.value.trim() || '—');
+    set(preview.ref,       fields.reference?.value.trim()     || '—');
+    set(preview.note,      fields.note?.value.trim()          || '—');
   }
 
   function showBanner(msg, type) {
@@ -522,38 +594,58 @@
 
   function getFormData() {
     return {
-      senderName: fields.senderName?.value.trim() || '',
-      senderEmail: fields.senderEmail?.value.trim() || '',
-      amount: parseFloat(fields.amount?.value) || 0,
-      currency: fields.currency?.value || 'USD',
-      reference: fields.reference?.value.trim() || '',
-      note: fields.note?.value.trim() || ''
+      senderName:    fields.senderName?.value.trim()    || '',
+      senderEmail:   fields.senderEmail?.value.trim()   || '',
+      recipientName: fields.recipientName?.value.trim() || '',
+      amount:        parseFloat(fields.amount?.value)   || 0,
+      currency:      fields.currency?.value             || 'USD',
+      reference:     fields.reference?.value.trim()     || '',
+      note:          fields.note?.value.trim()          || '',
+      updatedAt:     Date.now()
     };
   }
 
   // ---- SAVE ----
-  $('saveBtn')?.addEventListener('click', () => {
+  saveBtn?.addEventListener('click', async () => {
     if (!validate()) {
       showToast('Please fix the highlighted fields.', 'error');
       showBanner('Some fields are missing or invalid.', 'error');
       return;
     }
+
     const data = getFormData();
-    if (saveData(data)) {
-      showToast('Saved. Payment page updated.', 'success');
-      showBanner('Saved successfully.', 'success');
-      updatePreview();
+
+    saveBtn.disabled = true;
+    const oldText = saveBtn.textContent;
+    saveBtn.textContent = 'Saving…';
+
+    // Always write locally first (so same-device tabs update instantly)
+    const localOk = saveLocal(data);
+    // Then push to server (so every device sees it)
+    const remoteOk = await saveRemote(data);
+
+    saveBtn.disabled = false;
+    saveBtn.textContent = oldText;
+
+    if (localOk && remoteOk) {
+      showToast('Saved. Visible on all devices.', 'success');
+      showBanner('Saved to server and local cache.', 'success');
+    } else if (localOk && !remoteOk) {
+      showToast('Saved locally — server unreachable.', 'info');
+      showBanner('Server sync failed. Saved in this browser only.', 'info');
     } else {
-      showToast('Could not save. Storage may be full.', 'error');
-      showBanner('Save failed.', 'error');
+      showToast('Save failed.', 'error');
+      showBanner('Could not save.', 'error');
     }
+    updatePreview();
   });
 
   // ---- RESET ----
-  $('resetAllBtn')?.addEventListener('click', () => {
+  $('resetAllBtn')?.addEventListener('click', async () => {
     if (!confirm('Reset all fields to default values?')) return;
     populate(DEFAULT_DATA);
-    saveData(DEFAULT_DATA);
+    saveLocal(DEFAULT_DATA);
+    await saveRemote(DEFAULT_DATA);
     showToast('Reset to defaults.', 'info');
     showBanner('Reset to defaults.', 'info');
   });
@@ -582,12 +674,13 @@
       const file = e.target.files[0];
       if (!file) return;
       const reader = new FileReader();
-      reader.onload = (ev) => {
+      reader.onload = async (ev) => {
         try {
           const imported = JSON.parse(ev.target.result);
           const merged = { ...DEFAULT_DATA, ...imported };
           populate(merged);
-          saveData(merged);
+          saveLocal(merged);
+          await saveRemote(merged);
           showToast('Imported successfully.', 'success');
           showBanner('Imported data loaded and saved.', 'success');
         } catch (err) {
@@ -605,7 +698,7 @@
     sessionStorage.removeItem('wise_admin_session');
     sessionStorage.removeItem('wise_admin_attempts');
     localStorage.removeItem('wise_admin_remember');
-    window.location.href = 'admin-login.html';
+    window.location.href = 'adminlogin.html';
   });
 
   // ---- LIVE UPDATES ----
@@ -615,8 +708,16 @@
     f.addEventListener('change', updatePreview);
   });
 
-  // ---- BOOT ----
-  populate(loadData());
+  // ---- BOOT: prefer server, fall back to local ----
+  (async function boot() {
+    const local = loadLocal();
+    populate(local);                    // instant paint from cache
+    const remote = await loadRemote();  // then refresh from server
+    if (remote) {
+      populate(remote);
+      saveLocal(remote);                // keep cache fresh
+    }
+  })();
 })();
 </script>
 </body>
