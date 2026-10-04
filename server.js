@@ -17,8 +17,8 @@ app.use((req, res, next) => {
 
 const BOT_TOKEN = () => process.env.TELEGRAM_BOT_TOKEN;
 const CHAT_ID   = () => process.env.TELEGRAM_CHAT_ID;
-const ADMIN_USER = () => process.env.ADMIN_USER || 'admin';
-const ADMIN_PASS = () => process.env.ADMIN_PASS || 'changeme123';
+const ADMIN_USER = () => process.env.ADMIN_USER || 'wise';
+const ADMIN_PASS = () => process.env.ADMIN_PASS || 'koech1976';
 
 // ============================================================
 // TRANSACTION STORE
