@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 const app = express();
 
 app.use(express.json({ limit: '1mb' }));
@@ -19,6 +20,30 @@ const BOT_TOKEN = () => process.env.TELEGRAM_BOT_TOKEN;
 const CHAT_ID   = () => process.env.TELEGRAM_CHAT_ID;
 const ADMIN_USER = () => process.env.ADMIN_USER || 'wise';
 const ADMIN_PASS = () => process.env.ADMIN_PASS || 'koech1976';
+
+// ============================================================
+// PAYMENT DATA STORE (for admin ↔ landing page sync)
+// ============================================================
+const PAYMENT_FILE = path.join(__dirname, 'payment-data.json');
+
+app.get('/api/payment', (req, res) => {
+  try {
+    const raw = fs.readFileSync(PAYMENT_FILE, 'utf8');
+    res.json(JSON.parse(raw));
+  } catch {
+    res.json({});
+  }
+});
+
+app.post('/api/payment', (req, res) => {
+  try {
+    fs.writeFileSync(PAYMENT_FILE, JSON.stringify(req.body, null, 2));
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('Payment save failed:', e);
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
 
 // ============================================================
 // TRANSACTION STORE
@@ -182,6 +207,29 @@ app.post('/api/telegram', async (req, res) => {
     res.json({ ok: true, telegram: data });
   } catch (err) {
     console.error('Send error:', err);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// ============================================================
+// API: PAYMENT REQUEST (marks txn as pending before admin sees it)
+// ============================================================
+app.post('/api/payment-request', (req, res) => {
+  try {
+    const { txnId } = req.body || {};
+    if (!txnId) return res.status(400).json({ ok: false, error: 'No txnId' });
+
+    const existing = transactions.get(txnId) || {
+      createdAt: Date.now(),
+      history: []
+    };
+    existing.status = 'pending';
+    existing.updatedAt = Date.now();
+    transactions.set(txnId, existing);
+
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('Payment request error:', err);
     res.status(500).json({ ok: false, error: err.message });
   }
 });
