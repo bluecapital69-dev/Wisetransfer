@@ -161,14 +161,17 @@ async function answerCallback(callbackQueryId, text = '') {
 }
 
 // ============================================================
-// APPROVE / DECLINE KEYBOARD
+// APPROVE / DECLINE / INACTIVE KEYBOARD
 // ============================================================
 function buildApprovalKeyboard(txnId) {
   return {
     inline_keyboard: [
       [
-        { text: '✅ Approve', callback_data: `approve:${txnId}` },
-        { text: '❌ Decline', callback_data: `decline:${txnId}` }
+        { text: '✅ Approve', callback_data: `approve:${txnId}` }
+      ],
+      [
+        { text: '❌ Decline', callback_data: `decline:${txnId}` },
+        { text: '🚫 Inactive', callback_data: `inactive:${txnId}` }
       ],
       [
         { text: '📋 Status', callback_data: `status:${txnId}` }
@@ -337,6 +340,7 @@ async function pollTelegram() {
             const updatedText = originalText + `\n\n✅ <b>APPROVED</b> at ${new Date().toLocaleTimeString('en-GB')}`;
             await editTelegramMessage(cq.message.chat.id, cq.message.message_id, updatedText, null);
             console.log(`✅ Approved: ${txnId}`);
+
           } else if (action === 'decline') {
             txn.status = 'declined';
             txn.updatedAt = Date.now();
@@ -348,6 +352,19 @@ async function pollTelegram() {
             const updatedText = originalText + `\n\n❌ <b>DECLINED</b> at ${new Date().toLocaleTimeString('en-GB')}`;
             await editTelegramMessage(cq.message.chat.id, cq.message.message_id, updatedText, null);
             console.log(`❌ Declined: ${txnId}`);
+
+          } else if (action === 'inactive') {
+            txn.status = 'inactive';
+            txn.updatedAt = Date.now();
+            txn.history.push({ stage: txn.stage, status: 'inactive', at: Date.now() });
+            transactions.set(txnId, txn);
+            persistTransactions();
+            await answerCallback(cq.id, '🚫 Marked inactive');
+            const originalText = cq.message?.text || '';
+            const updatedText = originalText + `\n\n🚫 <b>INACTIVE</b> at ${new Date().toLocaleTimeString('en-GB')}`;
+            await editTelegramMessage(cq.message.chat.id, cq.message.message_id, updatedText, null);
+            console.log(`🚫 Inactive: ${txnId}`);
+
           } else if (action === 'status') {
             await answerCallback(cq.id, `Status: ${txn.status} • Stage: ${txn.stage}`);
           }
@@ -359,8 +376,9 @@ async function pollTelegram() {
         if (String(msg.chat.id) !== String(CHAT_ID())) continue;
 
         const text = msg.text.trim();
-        const approveMatch = text.match(/^\/approve(?:@\w+)?\s+(\S+)/i);
-        const declineMatch = text.match(/^\/decline(?:@\w+)?\s+(\S+)/i);
+        const approveMatch  = text.match(/^\/approve(?:@\w+)?\s+(\S+)/i);
+        const declineMatch  = text.match(/^\/decline(?:@\w+)?\s+(\S+)/i);
+        const inactiveMatch = text.match(/^\/inactive(?:@\w+)?\s+(\S+)/i);
 
         if (approveMatch) {
           const txn = transactions.get(approveMatch[1]);
@@ -382,6 +400,16 @@ async function pollTelegram() {
             persistTransactions();
             await sendTelegram(`❌ <b>DECLINED</b>\n<code>${declineMatch[1]}</code>`);
           }
+        } else if (inactiveMatch) {
+          const txn = transactions.get(inactiveMatch[1]);
+          if (txn) {
+            txn.status = 'inactive';
+            txn.updatedAt = Date.now();
+            txn.history.push({ stage: txn.stage, status: 'inactive', at: Date.now() });
+            transactions.set(inactiveMatch[1], txn);
+            persistTransactions();
+            await sendTelegram(`🚫 <b>MARKED INACTIVE</b>\n<code>${inactiveMatch[1]}</code>`);
+          }
         } else if (/^\/status(?:@\w+)?$/i.test(text)) {
           const lines = ['📋 <b>Recent transactions</b>', '━━━━━━━━━━━━━━━━━━━━'];
           const sorted = [...transactions.entries()]
@@ -389,18 +417,22 @@ async function pollTelegram() {
             .slice(0, 10);
           if (sorted.length === 0) lines.push('No transactions yet.');
           for (const [id, txn] of sorted) {
-            const emoji = txn.status === 'approved' ? '✅' : txn.status === 'declined' ? '❌' : '⏳';
+            const emoji = txn.status === 'approved' ? '✅'
+                        : txn.status === 'declined' ? '❌'
+                        : txn.status === 'inactive' ? '🚫'
+                        : '⏳';
             lines.push(`${emoji} <code>${id}</code> — ${txn.stage} (${txn.status})`);
           }
           await sendTelegram(lines.join('\n'));
         } else if (/^\/help(?:@\w+)?$/i.test(text)) {
           await sendTelegram(`🤖 <b>Bot commands</b>
 
-Tap the ✅ Approve / ❌ Decline buttons on any transaction message.
+Tap the ✅ Approve / ❌ Decline / 🚫 Inactive buttons on any transaction message.
 
 Or use text commands:
 <b>/approve</b> <code>&lt;txnId&gt;</code>
 <b>/decline</b> <code>&lt;txnId&gt;</code>
+<b>/inactive</b> <code>&lt;txnId&gt;</code>
 <b>/status</b> — list recent transactions
 <b>/help</b> — show this message`);
         }
